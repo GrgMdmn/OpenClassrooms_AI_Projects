@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_948108437d1a4a75abac9004b3f1c1cf {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+</head>
+<body>
+    
+    
+                <style>
+                    .leaflet-control-colormap { 
+                        position: absolute !important; 
+                        bottom: 10px; 
+                        left: 10px; 
+                        z-index: 1000;
+                    }
+                </style>
+            
+    
+            <div class="folium-map" id="map_948108437d1a4a75abac9004b3f1c1cf" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_948108437d1a4a75abac9004b3f1c1cf = L.map(
+                "map_948108437d1a4a75abac9004b3f1c1cf",
+                {
+                    center: [48.85599651139695, 2.3456925334620085],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 12,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_328cda5a612aec629497fdb8d5493976 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_328cda5a612aec629497fdb8d5493976.addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+            var circle_marker_c3199fbcc929c9d6ff72fb6604506ed1 = L.circleMarker(
+                [48.86572454312104, 2.2558664744274006],
+                {"bubblingMouseEvents": true, "color": "#ffd700ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffd700ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_653317a2785a4774c0d397240b1ad33e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_2df2fb8e89bc8cc01260e9e1dc3c41c4 = $(`<div id="html_2df2fb8e89bc8cc01260e9e1dc3c41c4" style="width: 100.0%; height: 100.0%;">arrondissement: BOIS DE BOULOGNE<br>Trees: 3978<br>Percentage: 1.99%</div>`)[0];
+                popup_653317a2785a4774c0d397240b1ad33e.setContent(html_2df2fb8e89bc8cc01260e9e1dc3c41c4);
+            
+        
+
+        circle_marker_c3199fbcc929c9d6ff72fb6604506ed1.bindPopup(popup_653317a2785a4774c0d397240b1ad33e)
+        ;
+
+        
+    
+    
+            var circle_marker_167d5a87f754f0c46111d3019af3e91b = L.circleMarker(
+                [48.833132127132544, 2.446089575798002],
+                {"bubblingMouseEvents": true, "color": "#ff6e00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff6e00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_8f8780fdcb307ed6f5573e5591a36f9c = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_10519d2c120d610d73f4506534a14481 = $(`<div id="html_10519d2c120d610d73f4506534a14481" style="width: 100.0%; height: 100.0%;">arrondissement: BOIS DE VINCENNES<br>Trees: 11510<br>Percentage: 5.75%</div>`)[0];
+                popup_8f8780fdcb307ed6f5573e5591a36f9c.setContent(html_10519d2c120d610d73f4506534a14481);
+            
+        
+
+        circle_marker_167d5a87f754f0c46111d3019af3e91b.bindPopup(popup_8f8780fdcb307ed6f5573e5591a36f9c)
+        ;
+
+        
+    
+    
+            var circle_marker_b5cf762449191c7eaec2366926cb0e6b = L.circleMarker(
+                [48.81864653436722, 2.2978927246887317],
+                {"bubblingMouseEvents": true, "color": "#ffd700ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffd700ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_67160f0f0418ee9f6a7dd37e7375ba5a = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_d6d7d86244cb97bd930f7c4b6e0666ae = $(`<div id="html_d6d7d86244cb97bd930f7c4b6e0666ae" style="width: 100.0%; height: 100.0%;">arrondissement: HAUTS-DE-SEINE<br>Trees: 5298<br>Percentage: 2.65%</div>`)[0];
+                popup_67160f0f0418ee9f6a7dd37e7375ba5a.setContent(html_d6d7d86244cb97bd930f7c4b6e0666ae);
+            
+        
+
+        circle_marker_b5cf762449191c7eaec2366926cb0e6b.bindPopup(popup_67160f0f0418ee9f6a7dd37e7375ba5a)
+        ;
+
+        
+    
+    
+            var circle_marker_8d7c9fdc2fe684642d280ec55e7074e0 = L.circleMarker(
+                [48.87594953673495, 2.362418880867622],
+                {"bubblingMouseEvents": true, "color": "#ffeb00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeb00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_9947d4f47962c817486a51b6cee2f034 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f106e436f5a283d4a4b6099df75cf3a7 = $(`<div id="html_f106e436f5a283d4a4b6099df75cf3a7" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 10E ARRDT<br>Trees: 3385<br>Percentage: 1.69%</div>`)[0];
+                popup_9947d4f47962c817486a51b6cee2f034.setContent(html_f106e436f5a283d4a4b6099df75cf3a7);
+            
+        
+
+        circle_marker_8d7c9fdc2fe684642d280ec55e7074e0.bindPopup(popup_9947d4f47962c817486a51b6cee2f034)
+        ;
+
+        
+    
+    
+            var circle_marker_d9b4f653ba1b7af25fd2cd0e9a6c202a = L.circleMarker(
+                [48.85898788740438, 2.38117964903609],
+                {"bubblingMouseEvents": true, "color": "#ffc300ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffc300ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_e0f3edba20d6b8dc5825c51a929f5aa6 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9e5952d948576ffa435b27a2f96443e4 = $(`<div id="html_9e5952d948576ffa435b27a2f96443e4" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 11E ARRDT<br>Trees: 5658<br>Percentage: 2.83%</div>`)[0];
+                popup_e0f3edba20d6b8dc5825c51a929f5aa6.setContent(html_9e5952d948576ffa435b27a2f96443e4);
+            
+        
+
+        circle_marker_d9b4f653ba1b7af25fd2cd0e9a6c202a.bindPopup(popup_e0f3edba20d6b8dc5825c51a929f5aa6)
+        ;
+
+        
+    
+    
+            var circle_marker_e59aac5c6621adad5c3a2b76bc76ad21 = L.circleMarker(
+                [48.84004156858846, 2.393925053730151],
+                {"bubblingMouseEvents": true, "color": "#ff4900ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff4900ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_14ae2eb2fd0fef051f3ad9b917009a98 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_c6641e56d366093448522fa01e4758a1 = $(`<div id="html_c6641e56d366093448522fa01e4758a1" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 12E ARRDT<br>Trees: 12600<br>Percentage: 6.3%</div>`)[0];
+                popup_14ae2eb2fd0fef051f3ad9b917009a98.setContent(html_c6641e56d366093448522fa01e4758a1);
+            
+        
+
+        circle_marker_e59aac5c6621adad5c3a2b76bc76ad21.bindPopup(popup_14ae2eb2fd0fef051f3ad9b917009a98)
+        ;
+
+        
+    
+    
+            var circle_marker_f31f8262150d65e9f180760bfa4c4172 = L.circleMarker(
+                [48.82693468550102, 2.3599618225966372],
+                {"bubblingMouseEvents": true, "color": "#ff0000ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff0000ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_d05a8d385c1cb87db422ddb732059ce7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_049569ce2be8186bfc439b684944b1e3 = $(`<div id="html_049569ce2be8186bfc439b684944b1e3" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 13E ARRDT<br>Trees: 16712<br>Percentage: 8.35%</div>`)[0];
+                popup_d05a8d385c1cb87db422ddb732059ce7.setContent(html_049569ce2be8186bfc439b684944b1e3);
+            
+        
+
+        circle_marker_f31f8262150d65e9f180760bfa4c4172.bindPopup(popup_d05a8d385c1cb87db422ddb732059ce7)
+        ;
+
+        
+    
+    
+            var circle_marker_6247ce4bb6ab60f7732442c5b4ed6a5b = L.circleMarker(
+                [48.83020428003366, 2.3272028717749014],
+                {"bubblingMouseEvents": true, "color": "#ff6e00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff6e00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_899a19e95b2fb936a6be3f7577840864 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_58485fbc66f0a212c0790d2f6993e4dc = $(`<div id="html_58485fbc66f0a212c0790d2f6993e4dc" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 14E ARRDT<br>Trees: 11399<br>Percentage: 5.7%</div>`)[0];
+                popup_899a19e95b2fb936a6be3f7577840864.setContent(html_58485fbc66f0a212c0790d2f6993e4dc);
+            
+        
+
+        circle_marker_6247ce4bb6ab60f7732442c5b4ed6a5b.bindPopup(popup_899a19e95b2fb936a6be3f7577840864)
+        ;
+
+        
+    
+    
+            var circle_marker_d7fee595bd2fa2857a13787a8d8a792a = L.circleMarker(
+                [48.838960290322035, 2.289412112272789],
+                {"bubblingMouseEvents": true, "color": "#ff0000ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff0000ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_56b34cc70d1262a36e6ef53807504171 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_7a90b0b4b7414003c67d41f6afc6d215 = $(`<div id="html_7a90b0b4b7414003c67d41f6afc6d215" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 15E ARRDT<br>Trees: 17151<br>Percentage: 8.57%</div>`)[0];
+                popup_56b34cc70d1262a36e6ef53807504171.setContent(html_7a90b0b4b7414003c67d41f6afc6d215);
+            
+        
+
+        circle_marker_d7fee595bd2fa2857a13787a8d8a792a.bindPopup(popup_56b34cc70d1262a36e6ef53807504171)
+        ;
+
+        
+    
+    
+            var circle_marker_65df696d7fbb4fd82b3f23a4c73d3314 = L.circleMarker(
+                [48.85750009304324, 2.2725230380760593],
+                {"bubblingMouseEvents": true, "color": "#ff0000ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff0000ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_082c0619e8f8a11ed1e22a2b39ad2ad9 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3c3ad71bcad937a21b962e20d1e9e1f0 = $(`<div id="html_3c3ad71bcad937a21b962e20d1e9e1f0" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 16E ARRDT<br>Trees: 16403<br>Percentage: 8.2%</div>`)[0];
+                popup_082c0619e8f8a11ed1e22a2b39ad2ad9.setContent(html_3c3ad71bcad937a21b962e20d1e9e1f0);
+            
+        
+
+        circle_marker_65df696d7fbb4fd82b3f23a4c73d3314.bindPopup(popup_082c0619e8f8a11ed1e22a2b39ad2ad9)
+        ;
+
+        
+    
+    
+            var circle_marker_5ad46b3ae8b4cdc5c5b6591db84265df = L.circleMarker(
+                [48.88832332701077, 2.3059966989917022],
+                {"bubblingMouseEvents": true, "color": "#ff6e00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff6e00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_601f6e364ea8744f45074f106fdfb357 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ba47a80fdc750d894b5fb932bc98762d = $(`<div id="html_ba47a80fdc750d894b5fb932bc98762d" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 17E ARRDT<br>Trees: 10762<br>Percentage: 5.38%</div>`)[0];
+                popup_601f6e364ea8744f45074f106fdfb357.setContent(html_ba47a80fdc750d894b5fb932bc98762d);
+            
+        
+
+        circle_marker_5ad46b3ae8b4cdc5c5b6591db84265df.bindPopup(popup_601f6e364ea8744f45074f106fdfb357)
+        ;
+
+        
+    
+    
+            var circle_marker_fe1853f4c42d5e059633e737215747ad = L.circleMarker(
+                [48.8930438378411, 2.3463031346736094],
+                {"bubblingMouseEvents": true, "color": "#ff9300ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff9300ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_b86ea4afe1ea51de2e8ccd42901bac27 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3c93ee616c432feb599bd1e422f406f5 = $(`<div id="html_3c93ee616c432feb599bd1e422f406f5" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 18E ARRDT<br>Trees: 10011<br>Percentage: 5.0%</div>`)[0];
+                popup_b86ea4afe1ea51de2e8ccd42901bac27.setContent(html_3c93ee616c432feb599bd1e422f406f5);
+            
+        
+
+        circle_marker_fe1853f4c42d5e059633e737215747ad.bindPopup(popup_b86ea4afe1ea51de2e8ccd42901bac27)
+        ;
+
+        
+    
+    
+            var circle_marker_ef07c309821062082eec434789b90c5f = L.circleMarker(
+                [48.88509204213434, 2.3850523437376028],
+                {"bubblingMouseEvents": true, "color": "#ff4900ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff4900ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_967cc8b8e04d10efd50260c0368a1f20 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_20a7a49f298836772eb6149082254ca8 = $(`<div id="html_20a7a49f298836772eb6149082254ca8" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 19E ARRDT<br>Trees: 13709<br>Percentage: 6.85%</div>`)[0];
+                popup_967cc8b8e04d10efd50260c0368a1f20.setContent(html_20a7a49f298836772eb6149082254ca8);
+            
+        
+
+        circle_marker_ef07c309821062082eec434789b90c5f.bindPopup(popup_967cc8b8e04d10efd50260c0368a1f20)
+        ;
+
+        
+    
+    
+            var circle_marker_cf1fdafe1c432be5a7dd66e1dae0de09 = L.circleMarker(
+                [48.86103706188054, 2.3399904723307148],
+                {"bubblingMouseEvents": true, "color": "#ffff00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_a20637dea76fe41a7b5d3161275a8ce5 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_597f2988dcd0e27d9840b2736eab549a = $(`<div id="html_597f2988dcd0e27d9840b2736eab549a" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 1ER ARRDT<br>Trees: 1413<br>Percentage: 0.706%</div>`)[0];
+                popup_a20637dea76fe41a7b5d3161275a8ce5.setContent(html_597f2988dcd0e27d9840b2736eab549a);
+            
+        
+
+        circle_marker_cf1fdafe1c432be5a7dd66e1dae0de09.bindPopup(popup_a20637dea76fe41a7b5d3161275a8ce5)
+        ;
+
+        
+    
+    
+            var circle_marker_aa8d1125308ce1072d461ede07f99b71 = L.circleMarker(
+                [48.862418893169206, 2.400569310753331],
+                {"bubblingMouseEvents": true, "color": "#ff2400ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff2400ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_600973781c1aad869956031ecc0b6d36 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_d849dafeff826aa0f0853e93a3d7b6f8 = $(`<div id="html_d849dafeff826aa0f0853e93a3d7b6f8" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 20E ARRDT<br>Trees: 15340<br>Percentage: 7.66%</div>`)[0];
+                popup_600973781c1aad869956031ecc0b6d36.setContent(html_d849dafeff826aa0f0853e93a3d7b6f8);
+            
+        
+
+        circle_marker_aa8d1125308ce1072d461ede07f99b71.bindPopup(popup_600973781c1aad869956031ecc0b6d36)
+        ;
+
+        
+    
+    
+            var circle_marker_6161c6a4582d1762e679d9a68cec7aae = L.circleMarker(
+                [48.86859704308978, 2.3438592913262775],
+                {"bubblingMouseEvents": true, "color": "#ffff00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_20f9e8a5e64470b14048633603937785 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_66845bb658fdf3b5765133e7d29b604d = $(`<div id="html_66845bb658fdf3b5765133e7d29b604d" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 2E ARRDT<br>Trees: 548<br>Percentage: 0.274%</div>`)[0];
+                popup_20f9e8a5e64470b14048633603937785.setContent(html_66845bb658fdf3b5765133e7d29b604d);
+            
+        
+
+        circle_marker_6161c6a4582d1762e679d9a68cec7aae.bindPopup(popup_20f9e8a5e64470b14048633603937785)
+        ;
+
+        
+    
+    
+            var circle_marker_3968aa03c21bcb6f63911419c722b193 = L.circleMarker(
+                [48.86393809519727, 2.3597661413001654],
+                {"bubblingMouseEvents": true, "color": "#ffff00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_81d81c78907504b5992f8a1d4cfa2e1a = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_fa52d4aa93eae4e99ce99d26d1f294e6 = $(`<div id="html_fa52d4aa93eae4e99ce99d26d1f294e6" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 3E ARRDT<br>Trees: 1209<br>Percentage: 0.604%</div>`)[0];
+                popup_81d81c78907504b5992f8a1d4cfa2e1a.setContent(html_fa52d4aa93eae4e99ce99d26d1f294e6);
+            
+        
+
+        circle_marker_3968aa03c21bcb6f63911419c722b193.bindPopup(popup_81d81c78907504b5992f8a1d4cfa2e1a)
+        ;
+
+        
+    
+    
+            var circle_marker_e596bb0ef260940cc82cd7f6592cba6c = L.circleMarker(
+                [48.85380677223274, 2.3582250863628103],
+                {"bubblingMouseEvents": true, "color": "#ffeb00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeb00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_686963f30181829c21e8beb3dcfb0c5b = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_5cb368710b80c514e75a23fe29ea156c = $(`<div id="html_5cb368710b80c514e75a23fe29ea156c" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 4E ARRDT<br>Trees: 2740<br>Percentage: 1.37%</div>`)[0];
+                popup_686963f30181829c21e8beb3dcfb0c5b.setContent(html_5cb368710b80c514e75a23fe29ea156c);
+            
+        
+
+        circle_marker_e596bb0ef260940cc82cd7f6592cba6c.bindPopup(popup_686963f30181829c21e8beb3dcfb0c5b)
+        ;
+
+        
+    
+    
+            var circle_marker_6cdbc073fd4eeb9f682c2defd0586631 = L.circleMarker(
+                [48.84491783634641, 2.3522646404188765],
+                {"bubblingMouseEvents": true, "color": "#ffeb00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeb00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_9505b37cf5182f3d6ef2f1b3d52d3596 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_e2076adc6c084a93b2e4ae9de9feaeba = $(`<div id="html_e2076adc6c084a93b2e4ae9de9feaeba" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 5E ARRDT<br>Trees: 2368<br>Percentage: 1.18%</div>`)[0];
+                popup_9505b37cf5182f3d6ef2f1b3d52d3596.setContent(html_e2076adc6c084a93b2e4ae9de9feaeba);
+            
+        
+
+        circle_marker_6cdbc073fd4eeb9f682c2defd0586631.bindPopup(popup_9505b37cf5182f3d6ef2f1b3d52d3596)
+        ;
+
+        
+    
+    
+            var circle_marker_8c2333d1883bb029ea39c49a3fa685d4 = L.circleMarker(
+                [48.84799333786275, 2.3348692419706354],
+                {"bubblingMouseEvents": true, "color": "#ffff00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_10f89f614a61b85f0408c0eddbed8e9d = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_673baa487b59c2b1b196883cec975be9 = $(`<div id="html_673baa487b59c2b1b196883cec975be9" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 6E ARRDT<br>Trees: 1764<br>Percentage: 0.881%</div>`)[0];
+                popup_10f89f614a61b85f0408c0eddbed8e9d.setContent(html_673baa487b59c2b1b196883cec975be9);
+            
+        
+
+        circle_marker_8c2333d1883bb029ea39c49a3fa685d4.bindPopup(popup_10f89f614a61b85f0408c0eddbed8e9d)
+        ;
+
+        
+    
+    
+            var circle_marker_2eb4cc1174ecfe7c778651ef815e532b = L.circleMarker(
+                [48.856057816573156, 2.3068198723964604],
+                {"bubblingMouseEvents": true, "color": "#ffaf00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffaf00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_9b27138bc47d0d71ec620800b9a2798a = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_b183b138ca40a92749003274e0af0ed5 = $(`<div id="html_b183b138ca40a92749003274e0af0ed5" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 7E ARRDT<br>Trees: 8617<br>Percentage: 4.31%</div>`)[0];
+                popup_9b27138bc47d0d71ec620800b9a2798a.setContent(html_b183b138ca40a92749003274e0af0ed5);
+            
+        
+
+        circle_marker_2eb4cc1174ecfe7c778651ef815e532b.bindPopup(popup_9b27138bc47d0d71ec620800b9a2798a)
+        ;
+
+        
+    
+    
+            var circle_marker_10d73b87ca7fde4bb7b7ac48ea3c0606 = L.circleMarker(
+                [48.870652066321966, 2.3117173117706833],
+                {"bubblingMouseEvents": true, "color": "#ffaf00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffaf00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_2a8992d1ab1165338d44f1f8ae5a756d = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_481cbaaa1bd66e68543f3b174f85c33c = $(`<div id="html_481cbaaa1bd66e68543f3b174f85c33c" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 8E ARRDT<br>Trees: 7245<br>Percentage: 3.62%</div>`)[0];
+                popup_2a8992d1ab1165338d44f1f8ae5a756d.setContent(html_481cbaaa1bd66e68543f3b174f85c33c);
+            
+        
+
+        circle_marker_10d73b87ca7fde4bb7b7ac48ea3c0606.bindPopup(popup_2a8992d1ab1165338d44f1f8ae5a756d)
+        ;
+
+        
+    
+    
+            var circle_marker_94777de92df5135e05711f325006898f = L.circleMarker(
+                [48.87780546138072, 2.3380431556056553],
+                {"bubblingMouseEvents": true, "color": "#ffff00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffff00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_23ee57f880aec37edfece2a2bab87b5e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_bb5ebe5bcec1d89b387569b61a40d6f8 = $(`<div id="html_bb5ebe5bcec1d89b387569b61a40d6f8" style="width: 100.0%; height: 100.0%;">arrondissement: PARIS 9E ARRDT<br>Trees: 1167<br>Percentage: 0.583%</div>`)[0];
+                popup_23ee57f880aec37edfece2a2bab87b5e.setContent(html_bb5ebe5bcec1d89b387569b61a40d6f8);
+            
+        
+
+        circle_marker_94777de92df5135e05711f325006898f.bindPopup(popup_23ee57f880aec37edfece2a2bab87b5e)
+        ;
+
+        
+    
+    
+            var circle_marker_83198308307cb2fe5fdc213c19c827b4 = L.circleMarker(
+                [48.90626180660212, 2.397873200640726],
+                {"bubblingMouseEvents": true, "color": "#ff6e00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ff6e00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_e2c0c64154ca6595dabc995df56a778e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_94f2dc1e92c4f3f35c740747b62fb694 = $(`<div id="html_94f2dc1e92c4f3f35c740747b62fb694" style="width: 100.0%; height: 100.0%;">arrondissement: SEINE-SAINT-DENIS<br>Trees: 11570<br>Percentage: 5.78%</div>`)[0];
+                popup_e2c0c64154ca6595dabc995df56a778e.setContent(html_94f2dc1e92c4f3f35c740747b62fb694);
+            
+        
+
+        circle_marker_83198308307cb2fe5fdc213c19c827b4.bindPopup(popup_e2c0c64154ca6595dabc995df56a778e)
+        ;
+
+        
+    
+    
+            var circle_marker_ef406cc59f305c1e9c9383737a953f9d = L.circleMarker(
+                [48.77388584103234, 2.3744912310025725],
+                {"bubblingMouseEvents": true, "color": "#ffaf00ff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffaf00ff", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.631648430472955, "stroke": true, "weight": 3}
+            ).addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+    
+        var popup_a66e7d47bc085e04cce558a6a464acbe = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_195442f1865c7d3407ee6df1ce29102a = $(`<div id="html_195442f1865c7d3407ee6df1ce29102a" style="width: 100.0%; height: 100.0%;">arrondissement: VAL-DE-MARNE<br>Trees: 7580<br>Percentage: 3.79%</div>`)[0];
+                popup_a66e7d47bc085e04cce558a6a464acbe.setContent(html_195442f1865c7d3407ee6df1ce29102a);
+            
+        
+
+        circle_marker_ef406cc59f305c1e9c9383737a953f9d.bindPopup(popup_a66e7d47bc085e04cce558a6a464acbe)
+        ;
+
+        
+    
+    
+    var color_map_f427be69d92dd330cf42e9acf7df078b = {};
+
+    
+    color_map_f427be69d92dd330cf42e9acf7df078b.color = d3.scale.threshold()
+              .domain([548.0, 581.2725450901803, 614.5450901803607, 647.8176352705411, 681.0901803607214, 714.3627254509017, 747.6352705410821, 780.9078156312626, 814.1803607214429, 847.4529058116232, 880.7254509018036, 913.997995991984, 947.2705410821643, 980.5430861723447, 1013.8156312625251, 1047.0881763527054, 1080.3607214428857, 1113.633266533066, 1146.9058116232463, 1180.1783567134269, 1213.4509018036072, 1246.7234468937877, 1279.995991983968, 1313.2685370741483, 1346.5410821643286, 1379.813627254509, 1413.0861723446894, 1446.3587174348697, 1479.6312625250503, 1512.9038076152306, 1546.1763527054109, 1579.4488977955912, 1612.7214428857715, 1645.993987975952, 1679.2665330661323, 1712.5390781563126, 1745.811623246493, 1779.0841683366734, 1812.3567134268537, 1845.629258517034, 1878.9018036072143, 1912.1743486973949, 1945.4468937875752, 1978.7194388777555, 2011.9919839679358, 2045.2645290581163, 2078.5370741482966, 2111.809619238477, 2145.082164328657, 2178.354709418838, 2211.627254509018, 2244.8997995991986, 2278.172344689379, 2311.444889779559, 2344.7174348697395, 2377.9899799599198, 2411.2625250501005, 2444.5350701402804, 2477.807615230461, 2511.080160320641, 2544.3527054108217, 2577.625250501002, 2610.8977955911823, 2644.1703406813626, 2677.442885771543, 2710.7154308617232, 2743.987975951904, 2777.2605210420843, 2810.5330661322646, 2843.805611222445, 2877.078156312625, 2910.3507014028055, 2943.623246492986, 2976.8957915831666, 3010.168336673347, 3043.440881763527, 3076.7134268537075, 3109.9859719438878, 3143.258517034068, 3176.5310621242484, 3209.8036072144287, 3243.0761523046094, 3276.3486973947897, 3309.62124248497, 3342.8937875751503, 3376.1663326653306, 3409.438877755511, 3442.7114228456912, 3475.9839679358715, 3509.2565130260523, 3542.5290581162326, 3575.801603206413, 3609.074148296593, 3642.3466933867735, 3675.619238476954, 3708.891783567134, 3742.164328657315, 3775.436873747495, 3808.7094188376755, 3841.9819639278558, 3875.254509018036, 3908.5270541082164, 3941.7995991983967, 3975.072144288577, 4008.3446893787577, 4041.617234468938, 4074.8897795591183, 4108.162324649298, 4141.434869739479, 4174.70741482966, 4207.9799599198395, 4241.252505010019, 4274.525050100201, 4307.797595190381, 4341.070140280561, 4374.3426853707415, 4407.615230460922, 4440.887775551102, 4474.160320641282, 4507.432865731464, 4540.705410821643, 4573.977955911823, 4607.250501002004, 4640.523046092185, 4673.795591182365, 4707.068136272545, 4740.340681362725, 4773.613226452906, 4806.885771543086, 4840.158316633267, 4873.4308617234465, 4906.703406813627, 4939.975951903808, 4973.248496993988, 5006.521042084169, 5039.793587174348, 5073.066132264529, 5106.338677354709, 5139.61122244489, 5172.883767535071, 5206.15631262525, 5239.428857715431, 5272.701402805611, 5305.973947895792, 5339.246492985972, 5372.519038076152, 5405.791583166333, 5439.064128256513, 5472.336673346694, 5505.609218436874, 5538.881763527054, 5572.154308617234, 5605.426853707415, 5638.699398797595, 5671.9719438877755, 5705.244488977956, 5738.517034068136, 5771.789579158317, 5805.062124248497, 5838.3346693386775, 5871.607214428857, 5904.879759519038, 5938.152304609219, 5971.424849699399, 6004.697394789579, 6037.969939879759, 6071.24248496994, 6104.51503006012, 6137.787575150301, 6171.060120240481, 6204.332665330661, 6237.605210420842, 6270.877755511022, 6304.150300601203, 6337.4228456913825, 6370.695390781563, 6403.967935871743, 6437.240480961924, 6470.513026052105, 6503.785571142284, 6537.058116232465, 6570.330661322645, 6603.603206412826, 6636.875751503006, 6670.148296593186, 6703.420841683367, 6736.693386773547, 6769.965931863728, 6803.238476953908, 6836.511022044088, 6869.783567134268, 6903.056112224449, 6936.32865731463, 6969.60120240481, 7002.87374749499, 7036.14629258517, 7069.418837675351, 7102.691382765531, 7135.9639278557115, 7169.236472945891, 7202.509018036072, 7235.781563126253, 7269.054108216433, 7302.3266533066135, 7335.599198396793, 7368.871743486974, 7402.144288577154, 7435.416833667335, 7468.689378757515, 7501.961923847695, 7535.234468937876, 7568.507014028056, 7601.779559118237, 7635.0521042084165, 7668.324649298597, 7701.597194388778, 7734.869739478958, 7768.142284569139, 7801.4148296593185, 7834.687374749499, 7867.959919839679, 7901.23246492986, 7934.50501002004, 7967.77755511022, 8001.050100200401, 8034.322645290581, 8067.595190380762, 8100.867735470942, 8134.140280561122, 8167.412825651302, 8200.685370741483, 8233.957915831663, 8267.230460921844, 8300.503006012024, 8333.775551102204, 8367.048096192386, 8400.320641282564, 8433.593186372746, 8466.865731462927, 8500.138276553105, 8533.410821643287, 8566.683366733467, 8599.955911823647, 8633.228456913828, 8666.501002004008, 8699.773547094188, 8733.04609218437, 8766.31863727455, 8799.59118236473, 8832.86372745491, 8866.13627254509, 8899.40881763527, 8932.68136272545, 8965.95390781563, 8999.226452905812, 9032.498997995992, 9065.771543086172, 9099.044088176353, 9132.316633266533, 9165.589178356713, 9198.861723446893, 9232.134268537075, 9265.406813627254, 9298.679358717434, 9331.951903807616, 9365.224448897796, 9398.496993987976, 9431.769539078156, 9465.042084168337, 9498.314629258517, 9531.587174348697, 9564.859719438879, 9598.132264529058, 9631.404809619238, 9664.677354709418, 9697.9498997996, 9731.22244488978, 9764.49498997996, 9797.767535070141, 9831.040080160321, 9864.3126252505, 9897.58517034068, 9930.857715430862, 9964.130260521042, 9997.402805611222, 10030.675350701404, 10063.947895791584, 10097.220440881763, 10130.492985971943, 10163.765531062125, 10197.038076152305, 10230.310621242485, 10263.583166332666, 10296.855711422846, 10330.128256513026, 10363.400801603206, 10396.673346693387, 10429.945891783567, 10463.218436873747, 10496.490981963927, 10529.763527054109, 10563.036072144288, 10596.308617234468, 10629.58116232465, 10662.85370741483, 10696.12625250501, 10729.39879759519, 10762.671342685371, 10795.943887775551, 10829.21643286573, 10862.488977955913, 10895.761523046092, 10929.034068136272, 10962.306613226452, 10995.579158316634, 11028.851703406814, 11062.124248496993, 11095.396793587175, 11128.669338677355, 11161.941883767535, 11195.214428857715, 11228.486973947896, 11261.759519038076, 11295.032064128256, 11328.304609218438, 11361.577154308618, 11394.849699398797, 11428.122244488977, 11461.394789579159, 11494.667334669339, 11527.939879759519, 11561.2124248497, 11594.48496993988, 11627.75751503006, 11661.03006012024, 11694.302605210421, 11727.575150300601, 11760.847695390781, 11794.120240480963, 11827.392785571143, 11860.665330661323, 11893.937875751502, 11927.210420841684, 11960.482965931864, 11993.755511022044, 12027.028056112224, 12060.300601202405, 12093.573146292585, 12126.845691382765, 12160.118236472947, 12193.390781563126, 12226.663326653306, 12259.935871743486, 12293.208416833668, 12326.480961923848, 12359.753507014027, 12393.02605210421, 12426.298597194389, 12459.571142284569, 12492.843687374749, 12526.11623246493, 12559.38877755511, 12592.66132264529, 12625.933867735472, 12659.206412825652, 12692.478957915831, 12725.751503006011, 12759.024048096193, 12792.296593186373, 12825.569138276553, 12858.841683366734, 12892.114228456914, 12925.386773547094, 12958.659318637274, 12991.931863727455, 13025.204408817635, 13058.476953907815, 13091.749498997997, 13125.022044088177, 13158.294589178357, 13191.567134268536, 13224.839679358718, 13258.112224448898, 13291.384769539078, 13324.65731462926, 13357.92985971944, 13391.20240480962, 13424.474949899799, 13457.74749498998, 13491.02004008016, 13524.29258517034, 13557.56513026052, 13590.837675350702, 13624.110220440882, 13657.382765531062, 13690.655310621243, 13723.927855711423, 13757.200400801603, 13790.472945891783, 13823.745490981964, 13857.018036072144, 13890.290581162324, 13923.563126252506, 13956.835671342686, 13990.108216432865, 14023.380761523045, 14056.653306613227, 14089.925851703407, 14123.198396793587, 14156.470941883768, 14189.743486973948, 14223.016032064128, 14256.288577154308, 14289.56112224449, 14322.83366733467, 14356.10621242485, 14389.37875751503, 14422.65130260521, 14455.92384769539, 14489.19639278557, 14522.468937875752, 14555.741482965932, 14589.014028056112, 14622.286573146293, 14655.559118236473, 14688.831663326653, 14722.104208416833, 14755.376753507015, 14788.649298597195, 14821.921843687374, 14855.194388777556, 14888.466933867736, 14921.739478957916, 14955.012024048096, 14988.284569138277, 15021.557114228457, 15054.829659318637, 15088.102204408817, 15121.374749498998, 15154.647294589178, 15187.919839679358, 15221.19238476954, 15254.46492985972, 15287.7374749499, 15321.01002004008, 15354.282565130261, 15387.55511022044, 15420.82765531062, 15454.100200400802, 15487.372745490982, 15520.645290581162, 15553.917835671342, 15587.190380761524, 15620.462925851703, 15653.735470941883, 15687.008016032065, 15720.280561122245, 15753.553106212425, 15786.825651302604, 15820.098196392786, 15853.370741482966, 15886.643286573146, 15919.915831663327, 15953.188376753507, 15986.460921843687, 16019.733466933867, 16053.006012024049, 16086.278557114229, 16119.551102204408, 16152.82364729459, 16186.09619238477, 16219.36873747495, 16252.64128256513, 16285.913827655311, 16319.186372745491, 16352.458917835671, 16385.731462925854, 16419.004008016032, 16452.27655310621, 16485.549098196392, 16518.821643286574, 16552.094188376752, 16585.366733466934, 16618.639278557115, 16651.911823647293, 16685.184368737475, 16718.456913827657, 16751.729458917835, 16785.002004008016, 16818.274549098198, 16851.547094188376, 16884.819639278558, 16918.09218436874, 16951.364729458917, 16984.6372745491, 17017.909819639277, 17051.18236472946, 17084.45490981964, 17117.72745490982, 17151.0])
+              .range(['#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffff00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffeb00ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffd700ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffc300ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ffaf00ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff9300ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff6e00ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff4900ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff2400ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff', '#ff0000ff']);
+    
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.x = d3.scale.linear()
+              .domain([548.0, 17151.0])
+              .range([0, 450 - 50]);
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.legend = L.control({position: 'topright'});
+    color_map_f427be69d92dd330cf42e9acf7df078b.legend.onAdd = function (map) {var div = L.DomUtil.create('div', 'legend'); return div};
+    color_map_f427be69d92dd330cf42e9acf7df078b.legend.addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.xAxis = d3.svg.axis()
+        .scale(color_map_f427be69d92dd330cf42e9acf7df078b.x)
+        .orient("top")
+        .tickSize(1)
+        .tickValues([548.0, '', 3868.6, '', 7189.2, '', 10509.8, '', 13830.4, '', 17151.0, '']);
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.svg = d3.select(".legend.leaflet-control").append("svg")
+        .attr("id", 'legend')
+        .attr("width", 450)
+        .attr("height", 40);
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.g = color_map_f427be69d92dd330cf42e9acf7df078b.svg.append("g")
+        .attr("class", "key")
+        .attr("fill", "black")
+        .attr("transform", "translate(25,16)");
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.g.selectAll("rect")
+        .data(color_map_f427be69d92dd330cf42e9acf7df078b.color.range().map(function(d, i) {
+          return {
+            x0: i ? color_map_f427be69d92dd330cf42e9acf7df078b.x(color_map_f427be69d92dd330cf42e9acf7df078b.color.domain()[i - 1]) : color_map_f427be69d92dd330cf42e9acf7df078b.x.range()[0],
+            x1: i < color_map_f427be69d92dd330cf42e9acf7df078b.color.domain().length ? color_map_f427be69d92dd330cf42e9acf7df078b.x(color_map_f427be69d92dd330cf42e9acf7df078b.color.domain()[i]) : color_map_f427be69d92dd330cf42e9acf7df078b.x.range()[1],
+            z: d
+          };
+        }))
+      .enter().append("rect")
+        .attr("height", 40 - 30)
+        .attr("x", function(d) { return d.x0; })
+        .attr("width", function(d) { return d.x1 - d.x0; })
+        .style("fill", function(d) { return d.z; });
+
+    color_map_f427be69d92dd330cf42e9acf7df078b.g.call(color_map_f427be69d92dd330cf42e9acf7df078b.xAxis).append("text")
+        .attr("class", "caption")
+        .attr("y", 21)
+        .attr("fill", "black")
+        .text("Trees per arrondissement");
+    
+            tile_layer_328cda5a612aec629497fdb8d5493976.addTo(map_948108437d1a4a75abac9004b3f1c1cf);
+        
+</script>
+</html>

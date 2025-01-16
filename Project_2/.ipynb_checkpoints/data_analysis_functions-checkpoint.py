@@ -7,6 +7,7 @@ import branca
 from IPython.display import display
 from scipy.spatial import cKDTree
 from geopy.distance import geodesic
+import numpy as np
 
 
 def plot_univariate_variable_analysis(
@@ -213,4 +214,37 @@ def plot_univariate_variable_analysis(
         plt.title(f"{variable_name} Distribution (Boxplot)")
         plt.ylabel(variable_name)
         plt.show()
-        
+
+def compute_distances(df, tree_index):
+    """
+    Computes distances between a specific tree and all other trees in the DataFrame.
+
+    Args:
+        df: DataFrame containing tree data with 'geo_point_2d_a' (longitude) and 'geo_point_2d_b' (latitude) columns.
+        tree_index: Index of the specific tree in the DataFrame.
+
+    Returns:
+        A pandas Series containing distances to all other trees from the specified tree.
+        Returns None if the tree_index is out of range or if necessary columns are missing.
+    """
+
+    # Safety checks
+    if not all(col in df.columns for col in ['geo_point_2d_a', 'geo_point_2d_b']):
+        print("Error: 'geo_point_2d_a' or 'geo_point_2d_b' columns not found in DataFrame.")
+        return None
+
+    if tree_index not in df.index:
+        print(f"Error: tree_index {tree_index} is out of range.")
+        return None
+
+    # Get coordinates of the chosen tree
+    tree_coords = (df.loc[tree_index, 'geo_point_2d_a'], df.loc[tree_index, 'geo_point_2d_b'])
+
+    # Calculate distances to all other trees
+    distances = []
+    for index, row in df.iterrows():
+        other_tree_coords = (row['geo_point_2d_a'], row['geo_point_2d_b'])  # Assuming latitude, longitude order
+        distance = geodesic(tree_coords, other_tree_coords).meters
+        distances.append(distance)
+
+    return pd.Series(distances, index=df.index)  # Use original index
