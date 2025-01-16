@@ -38,20 +38,20 @@ def plot_univariate_variable_analysis(
         raise ValueError('Error: wrong graph_type')
 
     if graph_type == 'pie':
-        value_counts = df[variable_name].value_counts(normalize=True)
-        value_counts_percent = value_counts * 100  # Convert to percentage
+        value_counts = df[variable_name].value_counts()  # Get counts without normalization
+        total = value_counts.sum()  # Total count for percentage calculation
 
-        # Group classes with less than 2% into "Others"
-        others_count = value_counts_percent[value_counts_percent < 2]
+        # Group classes with less than 2% into "Others" (using raw counts)
+        others_count = value_counts[value_counts / total * 100 < 2]
         if not others_count.empty:
             others_label = f"Others ({', '.join(others_count.index)})"
-            value_counts = value_counts_percent[value_counts_percent >= 2]
+            value_counts = value_counts[value_counts / total * 100 >= 2]
             value_counts[others_label] = others_count.sum()  # Add the "Others" category
 
         plt.pie(
-            value_counts, 
-            labels=[f"{label} ({count:.1f}%)" for label, count in zip(value_counts.index, value_counts.values)],
-            autopct='%1.1f%%'
+            value_counts,
+            labels=[f"{label} ({count/total*100:.1f}%)" for label, count in zip(value_counts.index, value_counts.values)],  # Percentage in labels
+            autopct=lambda p: f'{int(p * total / 100)}'  # Count on wedges
         )
         plt.title(f"{variable_name} Distribution")
 
@@ -176,7 +176,7 @@ def plot_univariate_variable_analysis(
         if len(value_counts) > 26:
             top_categories = value_counts[:25]
             others_count = value_counts[25:].sum()
-            value_counts = pd.concat([top_categories, pd.Series({'others': others_count})])
+            value_counts = pd.concat([top_categories, pd.Series({f'others ({len(value_counts[25:])})': others_count})])
 
         total = value_counts.sum()
         plt.figure(figsize=(10, 6))
@@ -214,6 +214,107 @@ def plot_univariate_variable_analysis(
         plt.title(f"{variable_name} Distribution (Boxplot)")
         plt.ylabel(variable_name)
         plt.show()
+
+
+
+
+def plot_bivariate_variable_analysis(
+    df: pd.DataFrame, 
+    variable1_name: str, 
+    variable2_name: str,
+    graph_type: str, 
+    variable_title_type: str = None,
+) -> None:
+    """
+    Plots the distribution of a specified variable in a DataFrame based on the graph type.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the data.
+        variable1_name (str): The name of the first variable to plot. (x)
+        variable2_name (str): The name of the second variable to plot. (y)
+        graph_type (str): The type of graph to plot (e.g., 'pie', 'heat_map', 'bars', 'hist', 'bars_log').
+        variable_title_type (str, optional): An optional title type for the variable. Defaults to None.
+
+    Raises:
+        ValueError: If the graph_type is not recognized or if latitude/longitude columns are missing.
+    """
+    if variable_title_type is None:
+        variable_title_type = graph_type
+
+    graph_types = ['boxplot']
+    graph_type = graph_type.lower()
+
+    if graph_type == "boxplot":
+      plt.figure(figsize=(8, 6))
+      sns.boxplot(x=variable1_name, y=variable2_name, data=df)
+      plt.title(f'Boxplot {variable1_name} vs. {variable2_name}')
+      plt.xlabel(variable1_name)
+      plt.ylabel(variable2_name)
+      plt.show()
+
+def compute_bivariate_stats_indicators(    
+    df: pd.DataFrame, 
+    variable1_name: str, 
+    variable2_name: str,
+) -> None:
+    """
+        Computes statistic indicator in order to determine possible correspondance between two variables.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the data.
+            variable1_name (str): The name of the first variable. (x)
+            variable2_name (str): The name of the second variable. (y)
+    """
+    import statsmodels.formula.api as sm
+    from statsmodels.stats.anova import anova_lm
+    import pandas as pd
+    from scipy.stats import pearsonr
+
+
+    variables_types = {}
+    variable_names = [variable1_name, variable2_name]
+    for variable_name in variable_names:
+      if type(df[df[variable_name].notna()][variable_name].values[0]) == str:
+        variables_types[variable_name] = 'categorical'
+      else:
+        variables_types[variable_name] = 'quantitative'
+
+    if ('quantitative' in variables_types.values()) and ('categorical' in variables_types.values()): # ANOVA analysis
+      print("Both quantitative and categorical variables : ANOVA analysis")
+        # Build the formula string
+      if variables_types[variable1_name] == 'quantitative' and variables_types[variable2_name] == 'categorical':
+          formula_string = f'{variable1_name} ~ C({variable2_name})' 
+      elif variables_types[variable1_name] == 'categorical' and variables_types[variable2_name] == 'quantitative':
+          formula_string = f'{variable2_name} ~ C({variable1_name})'
+
+      # Fit the ANOVA model
+      model = sm.ols(formula_string, data=df).fit()
+      anova_table = anova_lm(model, typ=2)
+
+      # Extract eta_squared
+      eta_squared = anova_table['sum_sq'][0] / sum(anova_table['sum_sq'])
+
+      result = eta_squared, anova_table
+
+    elif 'quantitative' in variables_types.values(): # Pearson correlation analysis
+      print("Both quantitative variables : Pearson correlation analysis")
+
+      # Remove rows with NaN values in either 'remarquable', 'circonference_cm', or 'hauteur_m'
+      data_for_correlation = df.dropna(subset=[variable1_name, variable2_name])
+
+      # Calculate Pearson correlation coefficient between 'remarquable' and 'circonference_cm'
+      correlation_circonference, p_value_circonference = pearsonr(
+          data_for_correlation[variable1_name], data_for_correlation[variable2_name]
+      )
+
+      result = correlation_circonference, p_value_circonference
+
+
+    else: # 2 categorical variables, khi2 to add
+      pass
+
+    return result
+
 
 def compute_distances(df, tree_index):
     """
