@@ -21,7 +21,7 @@ Cependant, faute de disposer d’une carte graphique Nvidia à domicile, la phas
 
 ## Remarques complémentaires
 
-- Les fichiers `requirements.txt` présents dans `notebooks/` proviennent d’environnements Google Colab et contiennent des dépendances non optimales, nécessitant un nettoyage pour un usage local plus léger. Ce travail sera éventuellement effectué plus tard mais ne constitue pas en soi une priorité. 
+- Les fichiers `requirements.txt` présents dans `notebooks/` proviennent d’environnements Google Colab et contiennent des dépendances non optimales, nécessitant un nettoyage pour un usage local plus léger. Ce travail sera éventuellement effectué ultérieurement mais ne constitue pas en soi une priorité.
 - Le fichier `.env` contenant des variables d’environnement sensibles est exclu du dépôt Git pour des raisons de sécurité.
 
 ---
