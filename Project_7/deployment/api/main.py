@@ -1,113 +1,141 @@
 import os
-import dill
+import sys
 import pickle
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import mlflow
 from mlflow.tracking import MlflowClient
-import mlflow.keras
+from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-# Charger les variables d'environnement
-load_dotenv(dotenv_path='../../.env')
+# 🔁 Import de la fonction de prétraitement depuis ../../functions.py
+PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(PARENT_DIR)
+from functions import preprocess_tweet
 
-#%%
+# 🔐 Charger les variables d'environnement (.env à deux niveaux au-dessus)
+load_dotenv(dotenv_path=os.path.join(PARENT_DIR, ".env"))
+
+# 🔗 Configurer MLflow
 mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
 if mlflow_tracking_uri:
     mlflow.set_tracking_uri(mlflow_tracking_uri)
 else:
-    print("⚠️ Attention : MLFLOW_TRACKING_URI non défini dans .env")
+    print("⚠️ MLFLOW_TRACKING_URI non défini dans .env")
 
-# Modèle et étape par défaut
+# 📌 Nom du modèle et stage
 MODEL_NAME = "SentimentAnalysisLSTM"
 STAGE = "Production"
 
+# 🧾 Structures des requêtes POST
 class TweetRequest(BaseModel):
     tweet: str
 
-def get_latest_version(client, model_name, stage):
-    versions = client.search_model_versions(f"name='{model_name}'")
-    filtered = [v for v in versions if v.current_stage == stage]
-    if not filtered:
-        return None
-    latest = max(filtered, key=lambda v: int(v.version))
-    return latest
+class ReportRequest(BaseModel):
+    tweet: str
+    prediction: str
 
-def load_model_and_artifacts(model_name="SentimentAnalysisLSTM", stage="Production"):
+# 🧠 Stockage des signalements d’erreurs
+error_reports = {}
+
+# 🔍 Fonction pour charger modèle + tokenizer
+def load_model_and_artifacts(model_name=MODEL_NAME, stage=STAGE):
     client = MlflowClient()
     versions = client.get_latest_versions(model_name, [stage])
     if not versions:
         raise RuntimeError(f"Aucune version du modèle '{model_name}' en stage '{stage}'")
-    version = versions[0]
-    run_id = version.run_id
-    if run_id is None:
-        raise RuntimeError("'run_id' introuvable.")
 
-    # Récupérer les tags du modèle pour trouver embedding_type
-    model_version_info = client.get_model_version(model_name, version.version)
+    version_info = versions[0]
+    run_id = version_info.run_id
+    if not run_id:
+        raise RuntimeError("Run ID introuvable.")
+
+    # Extraire le tag d'embedding
+    model_version_info = client.get_model_version(model_name, version_info.version)
     embedding_type = model_version_info.tags.get("embedding_type", "glove").lower()
 
+    # Déterminer les chemins des artefacts
     local_dir = "./downloaded_artifacts"
     os.makedirs(local_dir, exist_ok=True)
 
-    base_path = "local_artifacts/logs"
+    base_path = "local_artifacts"
+    tokenizer_file = "tokenizer.pickle"
 
-    if embedding_type == "glove":
+    if "glove" in embedding_type:
         keras_file = "final_model_LSTM_GloVe-300d-Fige.keras"
-        tokenizer_file = "tokenizer.pickle"
-        preprocess_file = "preprocess_function.dill"
-    elif embedding_type == "word2vec":
-        keras_file = "final_model_LSTM_Word2Vec.keras"
-        tokenizer_file = "tokenizer_word2vec.pickle"
-        preprocess_file = "preprocess_function_word2vec.dill"
+    elif "word2vec" in embedding_type:
+        keras_file = "final_model_LSTM_Word2Vec-Fige.keras"
     else:
-        raise ValueError(f"Type d'embedding inconnu: {embedding_type}")
+        raise ValueError(f"Embedding type inconnu : {embedding_type}")
 
     def dl(path):
         return client.download_artifacts(run_id=run_id, path=f"{base_path}/{path}", dst_path=local_dir)
 
+    # 🔽 Télécharger les artefacts
     model_path = dl(keras_file)
     tokenizer_path = dl(tokenizer_file)
-    preprocess_path = dl(preprocess_file)
 
-    model = mlflow.keras.load_model(model_path)
+    # 📦 Chargement
+    model = load_model(model_path)
     with open(tokenizer_path, "rb") as f:
         tokenizer = pickle.load(f)
-    with open(preprocess_path, "rb") as f:
-        preprocess_fn = dill.load(f)
 
-    return model, tokenizer, preprocess_fn, embedding_type
+    return model, tokenizer, embedding_type
 
-
+# 🚀 Lancer l'API
 app = FastAPI(title="API Prédiction Sentiment - Air Paradis")
 
 try:
-    model, tokenizer, preprocess_tweet = load_model_and_artifacts()
+    model, tokenizer, embedding_type = load_model_and_artifacts()
 except Exception as e:
-    print(f"❌ Erreur lors du chargement des artefacts : {e}")
-    model, tokenizer, preprocess_tweet = None, None, None
+    print(f"\n❌ Erreur lors du chargement des artefacts : {e}")
+    model, tokenizer = None, None
 
 @app.get("/")
 def root():
-    return {"message": "API Prédiction Sentiment Air Paradis - OK"}
+    return {"message": "API Sentiment - Air Paradis - en ligne"}
 
 @app.post("/predict")
 def predict_sentiment(request: TweetRequest):
-    if model is None or tokenizer is None or preprocess_tweet is None:
-        raise HTTPException(status_code=503, detail="Modèle ou artefacts non disponibles.")
+    if model is None or tokenizer is None:
+        raise HTTPException(status_code=503, detail="Modèle ou artefacts indisponibles.")
 
-    processed_tweet = preprocess_tweet(request.tweet)
+    try:
+        processed_tweet = preprocess_tweet(request.tweet)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur de prétraitement : {e}")
+
     if not processed_tweet.strip():
         raise HTTPException(status_code=400, detail="Tweet vide ou invalide après prétraitement.")
 
-    sequence = tokenizer.texts_to_sequences([processed_tweet])
-    sequence_padded = pad_sequences(sequence, maxlen=100)  # Ajuster maxlen si besoin
-
     try:
+        sequence = tokenizer.texts_to_sequences([processed_tweet])
+        sequence_padded = pad_sequences(sequence, maxlen=model.input_shape[1])
         prediction_prob = model.predict(sequence_padded)[0][0]
         sentiment = "positif" if prediction_prob >= 0.5 else "negatif"
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de l'inférence : {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur d'inférence : {e}")
 
-    return {"sentiment": sentiment, "probability": float(prediction_prob)}
+    return {
+        "sentiment": sentiment,
+        "probability": float(prediction_prob)
+    }
+
+@app.post("/report_error")
+def report_error(request: ReportRequest):
+    tweet = request.tweet.strip()
+    prediction = request.prediction.strip().lower()
+
+    if not tweet or not prediction:
+        raise HTTPException(status_code=400, detail="Tweet ou prédiction manquants.")
+
+    # Ajouter ou mettre à jour le signalement du tweet
+    error_reports[tweet] = prediction
+
+    report_sent = False
+    # Condition : à chaque multiple de 3 signalements totaux
+    if len(error_reports) % 3 == 0:
+        report_sent = True
+
+    return {"report_sent": report_sent}
