@@ -1,2 +1,4 @@
 **/.env
 **/downloaded_artifacts
+**/__pycache__
+**/mlruns
