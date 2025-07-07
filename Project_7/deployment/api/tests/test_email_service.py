@@ -16,8 +16,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from email_service import send_error_report_email
 
 # Charger le fichier .env situé un niveau au-dessus
-dotenv_path = '../../../.env'
-load_dotenv(dotenv_path)
+# dotenv_path = '../../../.env'
+# load_dotenv(dotenv_path)
 
 def test_email_service_with_alias():
     """
@@ -28,9 +28,9 @@ def test_email_service_with_alias():
     smtp_email = os.getenv("SMTP_EMAIL")
     admin_email = os.getenv("ADMIN_EMAIL")
     
-    assert smtp_server, "SMTP_SERVER non défini dans le fichier .env"
-    assert smtp_email, "SMTP_EMAIL non défini dans le fichier .env"
-    assert admin_email, "ADMIN_EMAIL non défini dans le fichier .env"
+    assert smtp_server, "SMTP_SERVER non défini"
+    assert smtp_email, "SMTP_EMAIL non défini"
+    assert admin_email, "ADMIN_EMAIL non défini"
 
     # Configuration de test
     print("🔧 Configuration Email :")
