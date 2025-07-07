@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-jjobs:
+jobs:
   test:
     runs-on: ubuntu-latest
     env:
