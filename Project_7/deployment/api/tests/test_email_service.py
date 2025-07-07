@@ -16,8 +16,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from email_service import send_error_report_email
 
 # Charger le fichier .env situé un niveau au-dessus
-# dotenv_path = '../../../.env'
-# load_dotenv(dotenv_path)
+dotenv_path = '../../../.env'
+load_dotenv(dotenv_path)
 
 def test_email_service_with_alias():
     """
