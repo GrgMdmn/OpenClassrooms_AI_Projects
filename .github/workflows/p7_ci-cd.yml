@@ -26,7 +26,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          pytest tests/  # adapte le chemin à ton dossier de tests
+          pytest Project_7/deployment/api/tests
 
   build_and_push:
     needs: test
