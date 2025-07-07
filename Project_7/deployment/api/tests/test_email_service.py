@@ -30,7 +30,6 @@ Created on Sat Jul  5 15:03:24 2025
 # result = send_error_report_email(test_reports)
 # print(f"Résultat : {'✅ Succès' if result else '❌ Échec'}")
 
-
 import os
 import sys
 from dotenv import load_dotenv
