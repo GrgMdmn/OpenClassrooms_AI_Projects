@@ -11,26 +11,18 @@ def test_preprocess_tweet_removes_hashtags():
     Just flew w/ @AirParadis &#128640; &amp; I&#8217;m in LOVE! &Eacute;pic service, comfy seats. 
     #bestflight #AirParadis
     """
-    assert preprocess_tweet(tweet) == """"
-    aze
-    """
+    assert preprocess_tweet(tweet) == "flew w < MENTION > im love ! épic service comfy seat # bestflight # airparadis"
 
 def test_preprocess_tweet_removes_mentions():
     tweet = """
     &quot;Flight of dreams&quot; w/ @AirParadis! Got food, space &amp; smiles &#128516; I&#8217;ll book again! 
     #AirParadis
     """
-    assert preprocess_tweet(tweet) == "merci"
+    assert preprocess_tweet(tweet) == 'flight dream w < MENTION > ! got food space smile ill book ! # airparadis'
 
 def test_preprocess_tweet_lowercases_text():
     tweet = """
     My 3rd time w/ @AirParadis &amp; still amazed &#128525; Crew = lovely &agrave; every step! 
     #flyhappy #AirParadis
     """
-    assert preprocess_tweet(tweet) == "je suis content"
-    
-tweet = """
-Just flew w/ @AirParadis &#128640; &amp; I&#8217;m in LOVE! &Eacute;pic service, comfy seats. 
-#bestflight #AirParadis
-"""
-preprocess_tweet(tweet)
+    assert preprocess_tweet(tweet) == '3rd time w < MENTION > still amazed crew lovely à every step ! # flyhappy # airparadis'
