@@ -69,6 +69,12 @@ Ce docker devra être déploigné sur DockerHub à chaque versionning validé (v
 
 Dans un souci de souveraineté des données, le déploiement sera préférentiellement déployé sur un NAS équippé d'un processeur Intel N100 (peu énergivore, mais probablement suffisant pour un calcul d'inférence LSTM).
 
+Pour le lancement du docker en local (développement), il sera important de donner en entrée le fichier `.env` contenant les variables d'environnement ainsi que qu'ouvrir les ports de FastAPI et Streamlit pour pouvoir tester l'application.
+
+`docker build -t sentiment-api`
+`docker run --env-file ../../.env -p 8000:8000 -p 8501:8501 sentiment-api`
+
+Pour un déploiement sur un cloud personnel ou grand public (avec docker-compose, kubernetes), il sera préférable de renseigner les variables d'environnement nécessaires dans `docker-compose.yml`.
 
 ---
 

@@ -60,8 +60,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./deployment/api
-          file: ./deployment/api/Dockerfile
+          context: ./Project_7/deployment/api
+          file: ./Project_7/deployment/api/Dockerfile
           push: true
           tags: docker.io/${{ secrets.DOCKER_HUB_LOG }}/sentiment_api:latest
 
