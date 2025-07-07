@@ -49,3 +49,5 @@ jobs:
           file: ./deployment/api/Dockerfile
           push: true
           tags: yourdockerhubusername/sentiment_api:latest
+
+
