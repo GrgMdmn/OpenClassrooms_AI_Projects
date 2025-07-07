@@ -11,10 +11,10 @@ def send_error_report_email(error_reports):
     """
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_email = os.getenv("SMTP_EMAIL")
+    smtp_email = os.getenv("SMTP_EMAIL") # main email address. If smt_from_alias is not, it will also be the mail sender
     smtp_password = os.getenv("SMTP_PASSWORD")
-    smtp_from_alias = os.getenv("SMTP_FROM_ALIAS", smtp_email)
-    admin_email = os.getenv("ADMIN_EMAIL")
+    smtp_from_alias = os.getenv("SMTP_FROM_ALIAS", smtp_email) # mail sender if not none (alias)
+    admin_email = os.getenv("ADMIN_EMAIL") # this one will receive the mail
     
     if not all([smtp_server, smtp_email, smtp_password, admin_email]):
         print("❌ Configuration email manquante dans .env")
@@ -23,7 +23,11 @@ def send_error_report_email(error_reports):
     try:
         # Créer le message
         msg = MIMEMultipart()
-        msg['From'] = f"Air Paradis Monitor <{smtp_from_alias}>"
+        if smtp_from_alias is not None:
+            smtp_from = smtp_from_alias
+        else:
+            smtp_from = smtp_email
+        msg['From'] = f"Air Paradis Monitor <{smtp_from}>"
         msg['To'] = admin_email
         msg['Subject'] = f"🚨 Rapport d'erreurs - Prédictions sentiments ({datetime.now().strftime('%d/%m/%Y %H:%M')})"
         
@@ -86,7 +90,7 @@ Un nouveau rapport d'erreurs a été généré pour l'API de prédiction de sent
 ---
 Cordialement,
 🤖 API Air Paradis - Système de monitoring automatique
-📧 Envoyé depuis : """ + smtp_from_alias
+📧 Envoyé depuis : """ + smtp_from
         
         # Ajouter le corps du message
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
@@ -97,7 +101,7 @@ Cordialement,
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         
-        print(f"✅ Email de rapport envoyé avec succès depuis {smtp_from_alias}")
+        print(f"✅ Email de rapport envoyé avec succès depuis {smtp_from}")
         print(f"📊 JSON intégré dans le corps du message")
         return True
         

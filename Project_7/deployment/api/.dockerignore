@@ -1,0 +1,14 @@
+# Ignorer les caches Python
+__pycache__/
+*.pyc
+
+# Ignorer les artefacts temporaires
+downloaded_artifacts/
+mlruns/
+logs/
+
+# Ignorer les tests unitaires
+tests/
+
+# Ignorer les variables d'environnement. Elles seront plutôt chargées dans la commande docker run `docker run --env-file ./deployment/api/.env -p 8000:8000 sentiment-api` en développement local, et via des variables définies dans le yaml
+*.env

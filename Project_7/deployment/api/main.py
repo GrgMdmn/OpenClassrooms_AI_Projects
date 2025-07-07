@@ -14,7 +14,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.append(PARENT_DIR)
 # 🔐 Charger les variables d'environnement (.env à deux niveaux au-dessus)
-load_dotenv(dotenv_path=os.path.join(PARENT_DIR, ".env"))
+load_dotenv()
 
 
 # 🔁 Import de la fonction de prétraitement (LOCAL)
@@ -69,6 +69,7 @@ def load_model_and_artifacts(model_name=MODEL_NAME, stage=STAGE):
     # Déterminer les chemins des artefacts
     local_dir = "./downloaded_artifacts"
     os.makedirs(local_dir, exist_ok=True)
+    print("Contenu de downloaded_artifacts :", os.listdir(local_dir))
     base_path = "local_artifacts"
     tokenizer_file = "tokenizer.pickle"
     
