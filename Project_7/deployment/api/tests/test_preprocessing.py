@@ -1,5 +1,5 @@
+import os
 import sys
-import os 
 
 # Ajouter le répertoire parent au path pour importer email_service
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))

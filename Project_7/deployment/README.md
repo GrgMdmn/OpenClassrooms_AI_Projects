@@ -65,20 +65,18 @@ Chargement du modèle depuis MLflow
 
 Un `Dockerfile` est fourni pour faciliter le déploiement de l’API sur n’importe quel hôte compatible Docker (NAS, cloud, etc.).
 
-Dans un souci de souveraineté des données, le déploiement sera préférentiellement déployé sur un NAS équippé d'un processeur Intel N100 (peu énergivore, mais probablement suffisant pour un calcul d'inférence LSTM).
-Un déploiement sur cloud grand public pourra éventuellement être effectué en fonction des demandes du jury du projet.
+Ce docker devra être déploigné sur DockerHub à chaque versionning validé (voir section CI/CD ci-dessous)
 
-Exemple de build et run :
-```bash
-docker build -t air-paradis-api .
-docker run -p 8000:8000 --env-file ../.env air-paradis-api
+Dans un souci de souveraineté des données, le déploiement sera préférentiellement déployé sur un NAS équippé d'un processeur Intel N100 (peu énergivore, mais probablement suffisant pour un calcul d'inférence LSTM).
+
 
 ---
 
-## 🔁 Intégration continue
+## 🔁 Intégration continue / Déploiement Continu
 
 Un pipeline GitHub Actions (CI/CD) est prévu pour :
 - **Lancer automatiquement les tests unitaires** à chaque push sur le dépôt GitHub.
 - **Garantir la stabilité de l’API** avant tout déploiement (NAS ou cloud).
+- **Mettre à jour le Dockerfile** et le pousser sur **DockerHub**.
 
-Les tests seront définis dans `test_api.py`, avec des cas simples de requêtes POST sur `/predict`.
+Les tests unitaires seront définis dans `./deployment/api/tests/`
