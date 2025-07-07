@@ -23,6 +23,10 @@ jobs:
       SMTP_FROM_ALIAS: ${{ secrets.SMTP_FROM_ALIAS }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
 
+      # Docker Configuration
+      DOCKER_HUB_LOG: ${{ secrets.DOCKER_HUB_LOG }}
+      DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
