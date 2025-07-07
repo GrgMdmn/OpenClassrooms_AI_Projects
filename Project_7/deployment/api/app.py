@@ -53,7 +53,7 @@ if st.session_state.prediction_result:
     sentiment = st.session_state.prediction_result["sentiment"].capitalize()
     prob = st.session_state.prediction_result["probability"]
     st.success(f"Sentiment : {sentiment}")
-    st.info(f"Probabilité : {prob:.2f}")
+    st.info(f"Probabilité que le tweet soit positif: {prob:.2f}")
 
 # Gestion du bouton signalement
 if st.session_state.show_report_button and not st.session_state.report_sent:
@@ -61,15 +61,19 @@ if st.session_state.show_report_button and not st.session_state.report_sent:
         try:
             response = requests.post(
                 "http://localhost:8000/report_error",
-                json={"tweet": tweet, "prediction": sentiment}
+                json={
+                    "tweet": tweet,
+                    "prediction": sentiment,
+                    "probability": st.session_state.prediction_result["probability"]  # Transmettre la probabilité
+                }
             )
+
             if response.status_code == 200:
                 data = response.json()
                 # Mettre à jour les états
                 st.session_state.show_report_button = False
                 st.session_state.report_sent = True
                 st.session_state.last_report_sent = data.get("report_sent", False)
-                
                 # Forcer un re-run
                 st.rerun()
             else:

@@ -39,12 +39,11 @@ def downsample_data(df, n_samples=50000, random_state=42):
 def preprocess_tweet(tweet):
     if not isinstance(tweet, str):
         return ""
-
+    tweet = html.unescape(tweet)
     tweet = tweet.lower()
     tweet = re.sub(r'https?://\S+|www\.\S+', '<URL>', tweet)
     tweet = re.sub(r'@\w+', '<MENTION>', tweet)
     tweet = re.sub(r'#(\w+)', r'# \1', tweet)
-    tweet = html.unescape(tweet)
     tweet = re.sub(r'[^\w\s<>@#!?]', '', tweet)
 
     tokens = word_tokenize(tweet)
