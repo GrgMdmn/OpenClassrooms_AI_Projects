@@ -7,4 +7,4 @@
 # ssh .pem files
 *.pem
 
-*aws
+*aws*
