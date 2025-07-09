@@ -16,3 +16,5 @@ tests/
 # Ignorer fichier conf amazon web services
 *aws*
 .elasticbeanstalk
+
+sentiment-api-465411-ccfc3af56be7.json
