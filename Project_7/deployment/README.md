@@ -74,7 +74,14 @@ Pour le lancement du docker en local (développement), il sera important de donn
 `docker build -t sentiment-api`
 `docker run --env-file ../../.env -p 8000:8000 -p 8501:8501 sentiment-api`
 
-Pour un déploiement sur un cloud personnel ou grand public (avec docker-compose, kubernetes), il sera préférable de renseigner les variables d'environnement nécessaires dans `docker-compose.yml`.
+Pour un déploiement sur un cloud personnel ou grand public (avec docker-compose, kubernetes), il sera préférable de renseigner les variables d'environnement nécessaires dans `docker-compose.yml` ou dans les secrets.
+
+Dans notre cas, il a été décidé d'utiliser Google Cloud. Une problématique classique se pose ici pour nous : on ne peut exposer  plusieurs ports (contrairement à l'instruction ci-dessus) sur un service cloud.
+2 options sont donc possibles:
+- Séparer le service en deux docker (un pour le backend fastAPI et un pour le frontend streamlit)
+- Configurer un reverse proxy de type nginx pour qui aura pour but de rediriger les requêtes sur différents ports internes
+
+Nous avons décidé de retenir la deuxième solution afin de pouvoir installer l'API à partir d'un seul docker.
 
 ---
 
