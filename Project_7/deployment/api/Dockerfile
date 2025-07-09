@@ -13,8 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le reste du code source
 COPY . .
 
-# Exposer les ports 8000 (fastAPI) et 8501 (streamlit)
-EXPOSE 8000 8501
+# Exposer les ports et 8501 (streamlit) et 8000 (fastAPI)
+
+EXPOSE 8501 8000
 
 RUN chmod +x /app/start.sh
 

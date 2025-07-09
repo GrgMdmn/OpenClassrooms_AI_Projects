@@ -14,4 +14,5 @@ tests/
 *.env
 
 # Ignorer fichier conf amazon web services
-*aws.json
+*aws*
+.elasticbeanstalk
