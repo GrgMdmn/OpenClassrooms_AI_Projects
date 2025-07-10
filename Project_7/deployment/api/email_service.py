@@ -15,6 +15,7 @@ def send_error_report_email(error_reports):
     smtp_password = os.getenv("SMTP_PASSWORD")
     smtp_from_alias = os.getenv("SMTP_FROM_ALIAS", smtp_email) # mail sender if not none (alias)
     admin_email = os.getenv("ADMIN_EMAIL") # this one will receive the mail
+
     
     if not all([smtp_server, smtp_email, smtp_password, admin_email]):
         print("❌ Configuration email manquante dans .env")

@@ -76,6 +76,8 @@ Pour le lancement du docker en local (développement), il sera important de donn
 
 Pour un déploiement sur un cloud personnel ou grand public (avec docker-compose, kubernetes), il sera préférable de renseigner les variables d'environnement nécessaires dans `docker-compose.yml` ou dans les secrets.
 
+Ajouter --rm comme argument pour que le conteneur soit supprimé après son arrêt.
+
 Dans notre cas, il a été décidé d'utiliser Google Cloud. Une problématique classique se pose ici pour nous : on ne peut exposer  plusieurs ports (contrairement à l'instruction ci-dessus) sur un service cloud.
 2 options sont donc possibles:
 - Séparer le service en deux docker (un pour le backend fastAPI et un pour le frontend streamlit)

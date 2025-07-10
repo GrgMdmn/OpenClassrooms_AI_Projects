@@ -3,6 +3,8 @@ import requests
 
 st.title("Analyse de Sentiment - Air Paradis")
 
+API_BASE_URL = "http://127.0.0.1:8000"
+
 tweet = st.text_area("Entrez votre tweet ici :", height=150)
 
 # Initialisation des états
@@ -32,7 +34,7 @@ if st.button("Analyser le sentiment"):
     else:
         try:
             response = requests.post(
-                "http://localhost:8000/predict",
+                f"{API_BASE_URL}/predict",
                 json={"tweet": tweet}
             )
             if response.status_code == 200:
@@ -60,7 +62,7 @@ if st.session_state.show_report_button and not st.session_state.report_sent:
     if st.button("Signaler une mauvaise prédiction"):
         try:
             response = requests.post(
-                "http://localhost:8000/report_error",
+                f"{API_BASE_URL}/report_error",
                 json={
                     "tweet": tweet,
                     "prediction": sentiment,

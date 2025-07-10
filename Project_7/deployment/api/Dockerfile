@@ -1,22 +1,33 @@
-# Utiliser une image légère Python 3.12
 FROM python:3.12-slim
 
-# Définir le dossier de travail
 WORKDIR /app
 
-# Copier uniquement requirements.txt d'abord (pour optimiser le cache Docker)
-COPY requirements.txt .
+# Mettre à jour les packages et installer nginx
+RUN apt-get update && \
+    apt-get install -y nginx && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances
+# Copier les fichiers de requirements et installer les dépendances Python
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le reste du code source
+# Copier le code de l'application
 COPY . .
 
-# Exposer les ports et 8501 (streamlit) et 8000 (fastAPI)
+# Copier la configuration nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 8501 8000
+# Créer les répertoires nécessaires pour nginx
+RUN mkdir -p /var/log/nginx && \
+    mkdir -p /var/lib/nginx && \
+    mkdir -p /run
 
+# Donner les droits d'exécution au script de démarrage
 RUN chmod +x /app/start.sh
 
+# Exposer le port 8080
+EXPOSE 8080
+
+# Lancer le script de démarrage
 CMD ["/app/start.sh"]

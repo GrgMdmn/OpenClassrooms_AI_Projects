@@ -98,6 +98,8 @@ def load_model_and_artifacts(model_name=MODEL_NAME, stage=STAGE):
 
 # 🚀 Lancer l'API
 app = FastAPI(title="API Prédiction Sentiment - Air Paradis")
+# app = FastAPI(title="API Prédiction Sentiment - Air Paradis",
+#               root_path="/api")
 
 try:
     model, tokenizer, embedding_type = load_model_and_artifacts()
@@ -138,37 +140,6 @@ def predict_sentiment(request: TweetRequest):
         "sentiment": sentiment,
         "probability": float(prediction_prob)
     }
-
-# @app.post("/report_error")
-# def report_error(request: ReportRequest):
-#     tweet = request.tweet.strip()
-#     prediction = request.prediction.strip().lower()
-#     probability = request.probability
-
-#     if not tweet or not prediction:
-#         raise HTTPException(status_code=400, detail="Tweet ou prédiction manquants.")
-#     if probability < 0 or probability > 1:
-#         raise HTTPException(status_code=400, detail="Probabilité invalide. Elle doit être entre 0 et 1.")
-
-#     # Ajouter ou mettre à jour le signalement du tweet avec la probabilité
-#     error_reports[tweet] = prediction + ' (p = ' + str(probability) + ') '
-
-#     # ✅ Envoi de l'email sans attendre un multiple de 3
-#     try:
-#         email_success = send_error_report_email(error_reports.copy())
-#         if email_success:
-#             print(f"✅ Email envoyé avec succès pour {len(error_reports)} signalements")
-#             report_sent = True
-#         else:
-#             print(f"❌ Échec de l'envoi de l'email")
-#             report_sent = False
-#     except Exception as e:
-#         print(f"❌ Erreur lors de l'envoi de l'email : {e}")
-#         report_sent = False
-
-#     return {"report_sent": report_sent}
-
-
 
 @app.post("/report_error")
 def report_error(request: ReportRequest):
