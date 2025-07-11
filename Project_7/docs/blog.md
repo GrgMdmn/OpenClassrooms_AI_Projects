@@ -37,6 +37,9 @@ Elles **ne tiennent cependant pas compte du contexte exact dans la phrase** :
 
 La classification se fait via un **LSTM** (Long Short-Term Memory), une architecture de **deep learning supervisée** adaptée aux séquences de mots.
 
+🧠 **Le modèle retenu pour le déploiement est sélectionné automatiquement dans MLflow parmi les deux (Word2Vec ou GloVe), en fonction de celui qui obtient la précision maximale.**  
+Cela permet d’avoir un compromis optimal entre légèreté (CPU-friendly) et performance.
+
 📸 *[Insérer ici une capture d’écran du graphe de précision sur validation pour GloVe+LSTM]*
 
 ---
@@ -48,8 +51,9 @@ BERT est un modèle de langage avancé, préentraîné par Google, capable de **
 - est entraîné par **masked language modeling** et **next sentence prediction**, puis fine-tuné pour la classification supervisée.
 
 Cependant, il a ses **limites** :
-> ⚠️ BERT **ne comprend pas l’ironie, le sarcasme ou les références culturelles**. Il modélise des cooccurrences statistiques et non une compréhension intentionnelle ou implicite comme les LLM (ex : GPT).  
-> Sur Twitter, où le second degré est omniprésent, cela reste un **véritable défi pour les modèles** de ce type.
+> ⚠️ BERT **ne comprend pas l’ironie, le sarcasme ou les références culturelles implicites**.  
+> Il reste un modèle basé sur des cooccurrences statistiques, sans connaissance du monde ou intentionnalité.  
+> Or, **Twitter est un terrain propice au second degré**, aux détournements ou aux trolls : ce type de contenu reste un **véritable défi pour les modèles classiques de NLP.**
 
 📸 *[Insérer ici un graphique montrant la précision de BERT sur le jeu de validation]*
 
@@ -103,6 +107,8 @@ Une fois les modèles validés, nous avons implémenté toute la chaîne MLOps p
 ### 🛠️ Backend : FastAPI
 - Fournit un endpoint `/predict`, avec chargement dynamique du modèle via MLFlow et récupération des embeddings (BoW, GloVe ou Word2Vec) selon le tag `embedding_type`.
 
+🧠 Le modèle de type Word Embeddings + LSTM avec la **meilleure précision** est automatiquement récupéré depuis le *Model Registry* MLFlow.
+
 ### 💻 Frontend local : Streamlit
 - Sert d’**interface utilisateur** pour tester les prédictions en local, simuler des requêtes API et visualiser les résultats.  
 - C’est aussi un outil utile pour les démonstrations ou le debug.
@@ -122,27 +128,48 @@ Le NAS utilise un processeur **Intel N100**, théoriquement compatible AVX2.
 
 ---
 
-## 📊 Suivi de performance en production : Azure Application Insights
+## 📊 Monitoring maison en production
 
-### 🎯 Objectif :
-Mettre en place une **observabilité** pour surveiller l’API une fois déployée.
+L'API embarque une **logique d’alerte interne** en cas de dérive.
 
-### 🧩 Suivi activé :
-- Traces des requêtes entrantes/sortantes
-- Temps de réponse
-- Logs d’erreurs
+🎯 **Comportement :**
+- Si plus de **3 prédictions incorrectes** sont identifiées dans une **fenêtre de 5 minutes**, un **rapport d’erreur** est généré automatiquement.
+- Ces erreurs peuvent être loggées ou transmises via webhook selon la configuration future.
 
-📸 *[Insérer capture Application Insight avec traces]*
+Cela permet de garder un **œil léger mais réactif** sur les dérives en production, sans surcharger l’infrastructure.
 
-### 🔁 Et après ? Stratégie d’amélioration continue
+---
 
-Voici une **démarche MLOps** possible pour affiner le modèle :
+## 🧠 Schéma global du pipeline MLOps
 
-1. **Suivi des erreurs en production** (ex. sentiment mal classé identifié par des utilisateurs)
-2. **Stockage de ces cas edge** dans une base dédiée
-3. **Retrain du modèle périodique** avec ces cas en plus
-4. Comparaison des performances sur une **valset figée**
-5. **Déploiement automatique** d’un nouveau modèle si KPIs dépassés
+      ┌────────────┐
+      │  Données   │
+      │ (tweets)   │
+      └────┬───────┘
+           │
+    Prétraitement (regex, tokenisation, lemmatisation, stopwords)
+           │
+ ┌─────────▼──────────┐
+ │  Entraînement ML   │
+ └─────────┬──────────┘
+           │
+    Log via MLFlow + artefacts MinIO
+           │
+ Sélection du meilleur modèle "avancé" (hors BERT) selon précision
+           │
+ ┌─────────▼──────────┐
+ │    API FastAPI     │
+ │    + Streamlit     │
+ └─────────┬──────────┘
+           │
+ Déploiement sur Google Cloud Run
+           │
+┌──────────▼─────────────┐
+│ Monitoring léger maison│
+│ (alertes sur mauvaises │
+│       prédictions)     │
+└────────────────────────┘
+
 
 ---
 
@@ -152,8 +179,6 @@ Ce projet a permis d’explorer en profondeur les enjeux de classification de se
 Il a aussi démontré l’intérêt d’un **pipeline MLOps souverain**, reproductible et automatisé.  
 
 > ✅ En alliant des modèles puissants, des outils robustes comme MLFlow et FastAPI, et un déploiement maîtrisé, on pose les bases d’un produit de NLP industrialisable.
-
-📸 *[Insérer ici un schéma global du pipeline ou architecture finale]*
 
 ---
 
