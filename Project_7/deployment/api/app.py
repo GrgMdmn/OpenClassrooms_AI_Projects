@@ -4,6 +4,11 @@ import requests
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8080") + "/api"
 
+
+st.set_page_config(
+    page_title="Air Paradis - Tweet Prediction",
+    page_icon="✈️",  # optionnel, tu peux mettre un emoji ou un fichier image
+)
 st.title("Analyse de Sentiment - Air Paradis")
 
 
