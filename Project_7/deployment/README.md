@@ -1,97 +1,103 @@
-# Déploiement de l'API - Projet Air Paradis
+# API Deployment - Air Paradis Project
 
-Ce dossier contient le code et la configuration nécessaires pour déployer l'API de prédiction de sentiments.
+This folder contains the code and configuration necessary to deploy the sentiment prediction API.
 
-## 🎯 Objectif
+## 🎯 Objective
 
-Déployer une API REST qui permet de:
-- prédire le sentiment d’un tweet (positif ou négatif) en s’appuyant sur un modèle LSTM entraîné à partir d’embeddings (Word2Vec ou GloVe).
-- reporter les erreurs de prédictions
+Deploy a REST API that allows to:
+- predict the sentiment of a tweet (positive or negative) based on an LSTM model trained on embeddings (Word2Vec or GloVe).
+- report prediction errors
 
-
-L’API utilise le modèle le plus performant, enregistré sur MLflow, et le met à disposition via FastAPI.
-
----
-
-## 📦 Architecture Globale
-
-```
-┌──────────────────────────────┐
-│  Utilisateur final (UI)      │
-│  (interface Streamlit)       │
-└────────────┬─────────────────┘
-             │
-  [Appel HTTP à /predict]
-             │
-┌────────────▼─────────────┐
-│       API FastAPI        │
-│  (serveur lancé via      │
-│   Uvicorn)               │
-└────────────┬─────────────┘
-             │
-Chargement du modèle depuis MLflow
-             │
-   Prétraitement du tweet
-             │
-     Prédiction (inférence)
-             │
-    Retour du sentiment (JSON)
-```
+The API uses the best-performing model, registered on MLflow, and serves it via FastAPI.
 
 ---
 
-## 🧪 Fonctionnement de l’API
+## 📦 Overall Architecture
 
-1. **Chargement du modèle**
-   - Le modèle le plus performant est enregistré dans MLflow sous un nom fixe (`SentimentAnalysisLSTM`) et une étape (stage) `Production`.
-   - L’API récupère ce modèle au démarrage grâce à une URI stable :  
-     ```
+Diagram:
+
+    ┌──────────────────────────────┐
+    │    End user (UI)             │
+    │    (Streamlit interface)     │
+    └────────────┬─────────────────┘
+                 │
+      [HTTP call to /predict]
+                 │
+    ┌────────────▼─────────────┐
+    │       FastAPI API        │
+    │  (server launched via    │
+    │   Uvicorn)               │
+    └────────────┬─────────────┘
+                 │
+    Model loading from MLflow
+                 │
+      Tweet preprocessing
+                 │
+          Prediction (inference)
+                 │
+       Sentiment response (JSON)
+
+---
+
+## 🧪 API Workflow
+
+1. Model loading
+   - The best performing model is registered in MLflow under a fixed name (`SentimentAnalysisLSTM`) and a stage `Production`.
+   - The API loads this model at startup using a stable URI:
+     
      models:/SentimentAnalysisLSTM/Production
-     ```
 
-2. **Prétraitement du texte**
-   - Le texte envoyé par l’utilisateur est nettoyé, tokenisé, lemmatisé et transformé en vecteurs (embeddings).
+2. Text preprocessing
+   - The text sent by the user is cleaned, tokenized, lemmatized, and transformed into vectors (embeddings).
 
-3. **Prédiction**
-   - Le modèle LSTM (chargé depuis MLflow) effectue l’inférence.
-   - Le résultat (`positif` ou `négatif`) est renvoyé en réponse JSON.
+3. Prediction
+   - The LSTM model (loaded from MLflow) performs inference.
+   - The result (`positive` or `negative`) is returned as a JSON response.
 
-4. **Interface utilisateur (optionnelle)**
-   - Une interface Streamlit permet d’interagir avec l’API de manière visuelle.
-
----
-
-## 🐳 Déploiement avec Docker
-
-Un `Dockerfile` est fourni pour faciliter le déploiement de l’API sur n’importe quel hôte compatible Docker (NAS, cloud, etc.).
-
-Ce docker devra être déploigné sur DockerHub à chaque versionning validé (voir section CI/CD ci-dessous)
-
-Dans un souci de souveraineté des données, le déploiement sera préférentiellement déployé sur un NAS équippé d'un processeur Intel N100 (peu énergivore, mais probablement suffisant pour un calcul d'inférence LSTM).
-
-Pour le lancement du docker en local (développement), il sera important de donner en entrée le fichier `.env` contenant les variables d'environnement ainsi que qu'ouvrir les ports de FastAPI et Streamlit pour pouvoir tester l'application.
-
-`docker build -t sentiment-api`
-`docker run --env-file ../../.env -p 8000:8000 -p 8501:8501 sentiment-api`
-
-Pour un déploiement sur un cloud personnel ou grand public (avec docker-compose, kubernetes), il sera préférable de renseigner les variables d'environnement nécessaires dans `docker-compose.yml` ou dans les secrets.
-
-Ajouter --rm comme argument pour que le conteneur soit supprimé après son arrêt.
-
-Dans notre cas, il a été décidé d'utiliser Google Cloud. Une problématique classique se pose ici pour nous : on ne peut exposer  plusieurs ports (contrairement à l'instruction ci-dessus) sur un service cloud.
-2 options sont donc possibles:
-- Séparer le service en deux docker (un pour le backend fastAPI et un pour le frontend streamlit)
-- Configurer un reverse proxy de type nginx pour qui aura pour but de rediriger les requêtes sur différents ports internes
-
-Nous avons décidé de retenir la deuxième solution afin de pouvoir installer l'API à partir d'un seul docker.
+4. User interface (optional)
+   - A Streamlit interface allows visual interaction with the API.
 
 ---
 
-## 🔁 Intégration continue / Déploiement Continu
+## 🐳 Deployment with Docker
 
-Un pipeline GitHub Actions (CI/CD) est prévu pour :
-- **Lancer automatiquement les tests unitaires** à chaque push sur le dépôt GitHub.
-- **Garantir la stabilité de l’API** avant tout déploiement (NAS ou cloud).
-- **Mettre à jour le Dockerfile** et le pousser sur **DockerHub**.
+A Dockerfile is provided to facilitate deploying the API on any Docker-compatible host (NAS, cloud, etc.).
 
-Les tests unitaires seront définis dans `./deployment/api/tests/`
+This Docker image should be pushed to DockerHub at each validated versioning (see the CI/CD section below).
+
+For data sovereignty reasons, deployment will preferably be done on a NAS equipped with an Intel N100 processor (energy efficient but probably sufficient for LSTM inference).
+Docker can be redeployed each time the docker image on DockerHub is updated. Man can use `cron` instruction (simple) or `Watchtower` docker (docker-compose / kubernetes context).
+
+For running the Docker image locally (development), it is important to provide the `.env` file containing environment variables and to open the FastAPI and Streamlit ports for testing the application.
+
+Example commands to build and run:
+
+    docker build -t sentiment-api .
+    docker run --env-file ../../.env -p 8000:8000 -p 8501:8501 sentiment-api
+
+For deployment on a personal or public cloud (with docker-compose, Kubernetes), it is preferable to specify the necessary environment variables in `docker-compose.yml` or in secrets.
+
+Add the `--rm` argument so that the container is removed after stopping.
+
+**UPDATE** : in our case, we encountered some issues with the NAS which CPU is not able to run AVX2 instructions so we are obliged to deploy it on a "standard" public cloud service. To be precise, N100 CPU is normally able to run AXV2 instructions but some NAS motherboard manufacturers sometimes disable this feature. Maybe is it possible to renable it on the BIOS, but I am away from my NAS so it will have to wait.
+
+So, we decided to use Google Cloud. A common issue arises here: we cannot expose multiple ports (contrary to the instruction above) on a cloud service.
+
+Two options are possible:
+
+- Separate the service into two dockers (one for FastAPI backend and one for Streamlit frontend)
+- Configure a reverse proxy like nginx to redirect requests to different internal ports
+
+We decided to keep the second solution to install the API from a single Docker container.
+
+---
+
+## 🔁 Continuous Integration / Continuous Deployment
+
+A GitHub Actions pipeline (CI/CD) is planned at the very root of the repo to:
+
+- Automatically run unit tests at every push on the GitHub repository.
+- Ensure API stability before any deployment (NAS or cloud).
+- Update the Dockerfile and push it to DockerHub.
+
+Unit tests will be defined in `./deployment/api/tests/`
