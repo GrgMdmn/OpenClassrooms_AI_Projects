@@ -15,6 +15,14 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install nltk resources at build time
+RUN python3 -m nltk.downloader punkt \
+    && python3 -m nltk.downloader punkt_tab \
+    && python3 -m nltk.downloader stopwords \
+    && python3 -m nltk.downloader wordnet \
+    && python3 -m nltk.downloader omw-1.4
+
+
 # Copy app code and configs
 COPY . .
 

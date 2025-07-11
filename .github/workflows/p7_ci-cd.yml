@@ -23,6 +23,9 @@ jobs:
       SMTP_FROM_ALIAS: ${{ secrets.SMTP_FROM_ALIAS }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
 
+      # API Requests Configuration
+      SENTIMENT_API_BASE_URL: ${{ secrets.SENTIMENT_API_BASE_URL }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3

@@ -20,6 +20,8 @@ services:
       SMTP_FROM_ALIAS: "${SMTP_FROM_ALIAS}"                 # alias (optionnel)
       ADMIN_EMAIL: "${ADMIN_EMAIL}"                         # email admin destinataire
 
+      SENTIMENT_API_BASE_URL: "${SENTIMENT_API_BASE_URL}"   # public api url (used to redirect Streamlit requests to FastAPI)
+
 # only if you have a reverse proxy server
 #    networks:
 #      - swag

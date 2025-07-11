@@ -17,4 +17,6 @@ tests/
 *aws*
 .elasticbeanstalk
 
-sentiment-api-465411-ccfc3af56be7.json
+sentiment-api-*.json
+
+docker-compose.yml.example
