@@ -8,6 +8,8 @@ import mlflow
 from mlflow.tracking import MlflowClient
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+import pandas as pd
+from datetime import datetime, timedelta
 
 # A DECOMMENTER POUR DEVELOPPER. AUTREMENT, LAISSER AINSI 
 # Accéder à .env
@@ -142,8 +144,13 @@ def predict_sentiment(request: TweetRequest):
         "probability": float(prediction_prob)
     }
 
+# Remplacer le dict par un DataFrame global initial vide
+error_reports_df = pd.DataFrame(columns=["tweet", "prediction", "probability", "timestamp"])
+
 @app.post("/report_error")
 def report_error(request: ReportRequest):
+    global error_reports_df
+
     tweet = request.tweet.strip()
     prediction = request.prediction.strip().lower()
     probability = request.probability
@@ -153,23 +160,53 @@ def report_error(request: ReportRequest):
     if probability < 0 or probability > 1:
         raise HTTPException(status_code=400, detail="Probabilité invalide. Elle doit être entre 0 et 1.")
 
-    # Ajouter ou mettre à jour le signalement du tweet avec la probabilité
-    error_reports[tweet] = prediction + f' (p = {probability:.2f} ) '
+    now = datetime.utcnow()
+
+    # Vérifier si le tweet existe déjà pour éviter doublons
+    existing_idx = error_reports_df.index[error_reports_df["tweet"] == tweet].tolist()
+    if existing_idx:
+        # Mettre à jour la ligne existante
+        idx = existing_idx[0]
+        error_reports_df.at[idx, "prediction"] = prediction + f' (p = {probability:.2f} ) '
+        error_reports_df.at[idx, "probability"] = probability
+        error_reports_df.at[idx, "timestamp"] = now
+    else:
+        # Ajouter une nouvelle ligne
+        new_row = {
+            "tweet": tweet,
+            "prediction": prediction + f' (p = {probability:.2f} ) ',
+            "probability": probability,
+            "timestamp": now
+        }
+        error_reports_df = pd.concat([error_reports_df, pd.DataFrame([new_row])], ignore_index=True)
 
     report_sent = False
 
-    # Condition : À chaque multiple de 3 signalements, un mail est envoyé
+    # Condition : multiples de 3 signalements et délai max 5 minutes entre les 3 derniers
     try:
-        if len(error_reports) % 3 == 0: # La condition reste
-            report_sent = True
-            print(f"📧 Tentative d'envoi d'email pour {len(error_reports)} signalements...")
-            email_success = send_error_report_email(error_reports.copy())
-            if email_success:
-                print(f"✅ Email envoyé avec succès pour {len(error_reports)} signalements")
-            else:
-                print(f"❌ Échec de l'envoi de l'email pour {len(error_reports)} signalements")
+        if len(error_reports_df) % 3 == 0:
+            last_three = error_reports_df.sort_values("timestamp", ascending=False).head(3)
+            times = last_three["timestamp"].sort_values()
+            delta = times.iloc[-1] - times.iloc[0]
+            if delta <= timedelta(minutes=5):
+                reports_dict = dict(zip(
+                    last_three["tweet"],
+                    last_three["prediction"]
+                ))
+                print(f"📧 Tentative d'envoi d'email pour {len(error_reports_df)} signalements...")
+                email_success = send_error_report_email(reports_dict)
+                if email_success:
+                    print(f"✅ Email envoyé avec succès pour {len(error_reports_df)} signalements")
+                    report_sent = True
+                    # SUPPRESSION des 3 derniers signalements envoyés
+                    # Identifier les index à supprimer
+                    to_remove_idx = last_three.index
+                    error_reports_df = error_reports_df.drop(to_remove_idx).reset_index(drop=True)
+                else:
+                    print(f"❌ Échec de l'envoi de l'email pour {len(error_reports_df)} signalements")
+
     except Exception as e:
         print(f"❌ Erreur lors de l'envoi de l'email : {e}")
-        # On continue même si l'email échoue pour ne pas bloquer l'API
+        # Continuer même si échec
 
     return {"report_sent": report_sent}
