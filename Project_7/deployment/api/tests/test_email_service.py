@@ -17,14 +17,14 @@ load_dotenv(dotenv_path)
 @patch("smtplib.SMTP")
 def test_email_service_connection(mock_smtp):
     """
-    Teste la connexion SMTP sans envoyer réellement l'email
+    Test SMTP connection without actually sending the email
     """
     # 🔧 Configuration du mock
     mock_server = MagicMock()
     mock_smtp.return_value.__enter__.return_value = mock_server
 
     test_reports = {
-        "Vol annulé sans prévenir": "positif"
+        "Flight cancelled without notice": "positif"
     }
 
     # Appel de la fonction

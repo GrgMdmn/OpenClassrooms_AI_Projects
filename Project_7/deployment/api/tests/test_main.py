@@ -15,7 +15,7 @@ def test_root_endpoint():
     assert response.json() == {"message": "API Sentiment - Air Paradis - en ligne"}
 
 def test_predict_sentiment():
-    response = client.post("/predict", json={"tweet": "J'adore cette compagnie aérienne !"})
+    response = client.post("/predict", json={"tweet": "I love this airline !"})
     assert response.status_code == 200
     data = response.json()
     assert "sentiment" in data
@@ -29,4 +29,4 @@ def test_missing_tweet():
 def test_empty_tweet():
     response = client.post("/predict", json={"tweet": ""})
     assert response.status_code == 400
-    assert response.json()["detail"] == "Tweet vide ou invalide après prétraitement."
+    assert response.json()["detail"] == "Empty or invalid tweet after pre-processing."

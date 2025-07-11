@@ -132,9 +132,9 @@ def predict_sentiment(request: TweetRequest):
         sequence_padded = pad_sequences(sequence, maxlen=model.input_shape[1])
         prediction_prob = model.predict(sequence_padded)[0][0]
         if prediction_prob >=0.5:
-            sentiment = "positif"
+            sentiment = "positive"
         else:
-            sentiment = "negatif"
+            sentiment = "negative"
             # prediction_prob = 1-prediction_prob
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur d'inférence : {e}")

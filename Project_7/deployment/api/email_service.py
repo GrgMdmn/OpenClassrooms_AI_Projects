@@ -22,7 +22,7 @@ def send_error_report_email(error_reports):
         return False
     
     try:
-        # Créer le message
+        # Create message
         msg = MIMEMultipart()
         if smtp_from_alias is not None:
             smtp_from = smtp_from_alias
@@ -32,55 +32,55 @@ def send_error_report_email(error_reports):
         msg['To'] = admin_email
         msg['Subject'] = f"🚨 Rapport d'erreurs - Prédictions sentiments ({datetime.now().strftime('%d/%m/%Y %H:%M')})"
         
-        # Préparer les données JSON
+        # Prepare JSON data
         json_data = {
-            "rapport_genere_le": datetime.now().isoformat(),
-            "nombre_signalements": len(error_reports),
-            "signalements": [
+            "report_generated_on": datetime.now().isoformat(),
+            "reports_amount": len(error_reports),
+            "reports": [
                 {
                     "id": i,
                     "tweet": tweet,
-                    "prediction_incorrecte": prediction,
-                    "longueur_tweet": len(tweet)
+                    "incorrect_prediction": prediction,
+                    "tweet_length": len(tweet)
                 }
                 for i, (tweet, prediction) in enumerate(error_reports.items(), 1)
             ],
             "metadata": {
-                "modele": "SentimentAnalysisLSTM",
-                "version_api": "1.0",
-                "seuil_rapport": 3
+                "model": "SentimentAnalysisLSTM",
+                "api_version": "1.0",
+                "reporting_threshold": 3
             }
         }
         
-        # Corps du message avec JSON intégré
+        # Message body with embedded JSON
         body = f"""
-Bonjour,
+Hello,
 
-Un nouveau rapport d'erreurs a été généré pour l'API de prédiction de sentiments Air Paradis.
+A new error report has been generated for the Air Paradis sentiment prediction API.
 
-📊 Nombre total de signalements : {len(error_reports)}
-📅 Date du rapport : {datetime.now().strftime('%d/%m/%Y à %H:%M')}
+📊 Total number of reports : {len(error_reports)}
+📅 Report date : {datetime.now().strftime('%d/%m/%Y à %H:%M')}
 
-📋 Résumé des signalements :
+📋 Report summary :
 
 """
         
         for i, (tweet, prediction) in enumerate(error_reports.items(), 1):
             body += f"{i}. Tweet: \"{tweet[:100]}{'...' if len(tweet) > 100 else ''}\"\n"
-            body += f"   Prédiction signalée comme incorrecte: {prediction.upper()}\n\n"
+            body += f"   Prediction reported as incorrect: {prediction.upper()}\n\n"
         
         body += """
-📈 Actions recommandées :
-- Analyser les tweets signalés pour identifier des patterns
-- Considérer un réentraînement du modèle si nécessaire
-- Vérifier la qualité des données de training
+📈 Recommended actions:
+- Analyze reported tweets to identify patterns
+- Consider re-training the model if necessary
+- Check quality of training data
 
-📊 DONNÉES COMPLÈTES (JSON) :
+📊 COMPLETE DATA (JSON) :
 ═══════════════════════════════════════════════════════════════════════════════
 
 """
         
-        # ✅ Ajouter le JSON directement dans le corps
+        # ✅ Directly add JSON inside the body
         json_string = json.dumps(json_data, ensure_ascii=False, indent=2)
         body += f"```json\n{json_string}\n```"
         
@@ -89,23 +89,23 @@ Un nouveau rapport d'erreurs a été généré pour l'API de prédiction de sent
 ═══════════════════════════════════════════════════════════════════════════════
 
 ---
-Cordialement,
-🤖 API Air Paradis - Système de monitoring automatique
-📧 Envoyé depuis : """ + smtp_from
+Sincerely,
+🤖 API Air Paradis - Automatic monitoring system
+📧 Sent from : """ + smtp_from
         
-        # Ajouter le corps du message
+        # Add message body
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
         
-        # Envoyer l'email
+        # Sending email
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         
-        print(f"✅ Email de rapport envoyé avec succès depuis {smtp_from}")
-        print(f"📊 JSON intégré dans le corps du message")
+        print(f"✅ Report email successfully sent from {smtp_from}")
+        print("📊 JSON embedded in message body")
         return True
         
     except Exception as e:
-        print(f"❌ Erreur lors de l'envoi de l'email : {e}")
+        print(f"❌ Error during email sending : {e}")
         return False

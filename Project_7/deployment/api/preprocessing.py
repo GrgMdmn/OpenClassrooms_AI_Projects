@@ -19,7 +19,7 @@ except LookupError:
 
 def preprocess_tweet(tweet):
     """
-    Fonction de prétraitement des tweets pour l'API de sentiment analysis
+    Tweet pre-processing function for the Sentiment Analysis API
     """
     if not isinstance(tweet, str):
         return ""

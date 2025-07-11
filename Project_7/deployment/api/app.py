@@ -9,10 +9,10 @@ st.set_page_config(
     page_title="Air Paradis - Tweet Prediction",
     page_icon="✈️",  # optionnel, tu peux mettre un emoji ou un fichier image
 )
-st.title("Analyse de Sentiment - Air Paradis")
+st.title("Sentiment Analysis - Air Paradis")
 
 
-tweet = st.text_area("Entrez votre tweet ici :", height=150)
+tweet = st.text_area("Prompt your tweet here :", height=150)
 
 # Initialisation des états
 if "prediction_result" not in st.session_state:
@@ -34,9 +34,9 @@ def reset_state():
     st.session_state.last_report_sent = False
 
 # Bouton d'analyse
-if st.button("Analyser le sentiment"):
+if st.button("Analyze the sentiment"):
     if not tweet.strip():
-        st.warning("Veuillez entrer un tweet non vide.")
+        st.warning("Please type a valid tweet.")
         reset_state()
     else:
         try:
@@ -54,7 +54,7 @@ if st.button("Analyser le sentiment"):
                 st.error(f"Erreur API : {response.status_code} - {response.text}")
                 reset_state()
         except Exception as e:
-            st.error(f"Erreur lors de la requête vers l'API : {e}")
+            st.error(f"Error during API request : {e}")
             reset_state()
 
 # Affichage du résultat
@@ -62,11 +62,11 @@ if st.session_state.prediction_result:
     sentiment = st.session_state.prediction_result["sentiment"].capitalize()
     prob = st.session_state.prediction_result["probability"]
     st.success(f"Sentiment : {sentiment}")
-    st.info(f"Probabilité que le tweet soit positif: {prob:.2f}")
+    st.info(f"Positive tweet probability: {prob:.2f}")
 
 # Gestion du bouton signalement
 if st.session_state.show_report_button and not st.session_state.report_sent:
-    if st.button("Signaler une mauvaise prédiction"):
+    if st.button("Report a wrong prediction"):
         try:
             response = requests.post(
                 f"{API_BASE_URL}/report_error",
@@ -86,13 +86,13 @@ if st.session_state.show_report_button and not st.session_state.report_sent:
                 # Forcer un re-run
                 st.rerun()
             else:
-                st.error(f"Erreur API : {response.status_code} - {response.text}")
+                st.error(f"API Error : {response.status_code} - {response.text}")
         except Exception as e:
-            st.error(f"Erreur lors de la requête vers l'API : {e}")
+            st.error(f"Error during API request : {e}")
 
 # Message si signalement déjà fait
 elif st.session_state.report_sent:
-    st.success("✅ Merci pour votre signalement.")
+    st.success("✅ Thanks for your report.")
     
     if st.session_state.last_report_sent:
-        st.info("📩 Un rapport a été envoyé à l'administrateur du site.")
+        st.info("📩 A complete report has been sent to the website administrator.")
