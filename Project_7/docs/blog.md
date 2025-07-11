@@ -176,7 +176,7 @@ Cela permet de garder un **œil léger mais réactif** sur les dérives en produ
 ## ✨ Conclusion
 
 Ce projet a permis d’explorer en profondeur les enjeux de classification de sentiments et les **limites des approches standards face à la richesse du langage naturel**, en particulier sur Twitter.  
-Il a aussi démontré l’intérêt d’un **pipeline MLOps souverain**, reproductible et automatisé.  
+Il a aussi démontré l’intérêt d’un **pipeline MLOps souverain** (le plus possible), reproductible et automatisé.  
 
 > ✅ En alliant des modèles puissants, des outils robustes comme MLFlow et FastAPI, et un déploiement maîtrisé, on pose les bases d’un produit de NLP industrialisable.
 
