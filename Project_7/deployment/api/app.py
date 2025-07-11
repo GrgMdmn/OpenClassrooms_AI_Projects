@@ -1,9 +1,11 @@
+import os
 import streamlit as st
 import requests
 
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8080") + "/api"
+
 st.title("Analyse de Sentiment - Air Paradis")
 
-API_BASE_URL = "http://127.0.0.1:8000"
 
 tweet = st.text_area("Entrez votre tweet ici :", height=150)
 

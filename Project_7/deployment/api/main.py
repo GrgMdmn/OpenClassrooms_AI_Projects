@@ -69,7 +69,6 @@ def load_model_and_artifacts(model_name=MODEL_NAME, stage=STAGE):
     # Déterminer les chemins des artefacts
     local_dir = "./downloaded_artifacts"
     os.makedirs(local_dir, exist_ok=True)
-    print("Contenu de downloaded_artifacts :", os.listdir(local_dir))
     base_path = "local_artifacts"
     tokenizer_file = "tokenizer.pickle"
     
@@ -88,6 +87,8 @@ def load_model_and_artifacts(model_name=MODEL_NAME, stage=STAGE):
     # 🔽 Télécharger les artefacts
     model_path = dl(keras_file)
     tokenizer_path = dl(tokenizer_file)
+    print("Contenu de downloaded_artifacts :", os.listdir(local_dir))
+    
     
     # 📦 Chargement
     model = load_model(model_path)
