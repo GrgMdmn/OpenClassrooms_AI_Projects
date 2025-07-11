@@ -20,7 +20,7 @@ def test_predict_sentiment():
     data = response.json()
     assert "sentiment" in data
     assert "probability" in data
-    assert data["sentiment"] in ["positif", "negatif"]
+    assert data["sentiment"] in ["positive", "negative"]
 
 def test_missing_tweet():
     response = client.post("/predict", json={})

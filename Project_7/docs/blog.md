@@ -10,7 +10,7 @@ Nous avons testé trois approches complémentaires pour prédire le sentiment d�
 
 ### 1. 🧱 Approche simple : Bag-of-Words (BoW) + modèles de machine learning
 
-Cette approche utilise des vecteurs BoW ou TF-IDF, qui capturent la fréquence des mots dans les tweets. On fait le choix d’éviter des techniques non supervisées comme **LDA**, car elles sont plus adaptées à des tâches de topic modeling et non de classification de sentiments.
+Cette approche utilise des vecteurs BoW ou BoW + TF-IDF, qui capturent la fréquence des mots dans les tweets. On fait le choix d’éviter des techniques non supervisées comme **LDA**, car elles sont plus adaptées à des tâches de topic modeling et non de classification de sentiments (binaire qui plus est).
 
 ➡️ **Modèles testés :**  
 - Régression Logistique  
@@ -18,7 +18,7 @@ Cette approche utilise des vecteurs BoW ou TF-IDF, qui capturent la fréquence d
 - SVM  
 - Random Forest  
 
-Ces modèles ont été entraînés avec **GridSearchCV**, en optimisant la **précision (precision)**, notre KPI principal.
+Ces modèles ont été entraînés avec **GridSearchCV**, en optimisant la **précision (`precision` et non `accuracy`)**, notre KPI principal.
 
 📸 *[Insérer ici une capture d’écran MLFlow avec les scores des modèles simples]*
 
