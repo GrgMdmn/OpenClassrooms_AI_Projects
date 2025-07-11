@@ -5,17 +5,17 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-# # Assurer que les ressources nécessaires sont disponibles
-# try:
-#     stopwords.words('english')
-#     word_tokenize("test")
-#     WordNetLemmatizer().lemmatize("testing")
-# except LookupError:
-#     nltk.download('punkt')
-#     nltk.download('punkt_tab')
-#     nltk.download('stopwords')
-#     nltk.download('wordnet')
-#     nltk.download('omw-1.4')
+# Assurer que les ressources nécessaires sont disponibles
+try:
+    stopwords.words('english')
+    word_tokenize("test")
+    WordNetLemmatizer().lemmatize("testing")
+except LookupError:
+    nltk.download('punkt')
+    nltk.download('punkt_tab')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
+    nltk.download('omw-1.4')
 
 def preprocess_tweet(tweet):
     """
