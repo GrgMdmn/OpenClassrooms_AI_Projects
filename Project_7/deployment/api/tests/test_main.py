@@ -2,7 +2,7 @@ import os
 import sys
 from fastapi.testclient import TestClient
 
-# Ajouter le répertoire parent au path pour importer email_service
+# Add parent directory to path to import email_service
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from main import app
