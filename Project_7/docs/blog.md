@@ -135,11 +135,11 @@ Initialement, l’API ne fonctionnait pas sur le NAS (Intel N100), faute d’ins
 > 🛠️ **Solution : activer AVX2 dans le BIOS** (désactivée par défaut sur certaines cartes mères, souvent optimisées pour NAS).
 
 Depuis, l’API tourne sur :
-- 🏠 NAS local (accès via [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org))  
+- 🏠 NAS local (accès via [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org))\
 Interface Docker Compose de NAS:
 ![docker compose openmediavault](openmediavault_docker-compose_settings-1.png)
 
-- ☁️ Google Cloud Run : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)
+- ☁️ Google Cloud Run : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)\
 Interface Déploiement Google Cloud:
 ![déploiement google cloud](google_cloud_interface-1.png)
 
