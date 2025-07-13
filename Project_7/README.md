@@ -27,7 +27,7 @@ The project aims to develop a complete sentiment analysis system, including:
 - `notebooks/`: analysis and modeling notebooks,
 - `deployment/`: API code, tests, Dockerfile and deployment-related files,
 - `docs/`: documentation and related materials,
-- `.github/workflows/`: CI/CD pipelines.
+- `../.github/workflows/`: CI/CD pipelines.
 
 ---
 
