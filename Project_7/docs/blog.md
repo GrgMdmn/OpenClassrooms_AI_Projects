@@ -205,7 +205,4 @@ Il souligne les **forces et limites des modèles** (y compris BERT), la nécessi
 
 ---
 
-💬 Merci pour votre lecture !  
-Testez l’API :
-- En local (NAS) : [https://sentiment-api.greg-madman-nas.duckdns.org/](https://sentiment-api.greg-madman-nas.duckdns.org/)
-- Sur Google Cloud : [https://sentiment-api-service-7772256003.europe-west1.run.app/](https://sentiment-api-service-7772256003.europe-west1.run.app/)
+💬 Merci pour votre lecture !
