@@ -48,7 +48,7 @@ jobs:
   build_and_push:
     needs: test
     runs-on: ubuntu-latest
-    if: success()
+    if: needs.test.result == 'success' && contains(join(github.event.head_commit.modified, ','), 'Project_7/deployment/api/')
 
     steps:
       - name: Checkout repo
