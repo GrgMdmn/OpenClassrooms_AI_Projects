@@ -207,5 +207,3 @@ def report_error(request: ReportRequest):
         # Continue even if it fails
 
     return {"report_sent": report_sent}
-
-# test here

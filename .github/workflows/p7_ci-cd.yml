@@ -8,8 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: |
-      contains(join(github.event.head_commit.modified, ','), 'Project_7/deployment/api/')
+    # 👇 Ce job ne s'exécute que si des fichiers dans /api et sous-dossiers changent
+    paths:
+      - Project_7/deployment/api/**
     env:
       # MLflow + S3 bucket configuration
       MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
@@ -50,8 +51,9 @@ jobs:
   build_and_push:
     needs: test
     runs-on: ubuntu-latest
-    if: needs.test.result == 'success' && contains(join(github.event.head_commit.modified, ','), 'Project_7/deployment/api/')
-
+    # 👇 Ce job ne s'exécute que si des fichiers dans /api et sous-dossiers changent
+    paths:
+      - Project_7/deployment/api/**
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
