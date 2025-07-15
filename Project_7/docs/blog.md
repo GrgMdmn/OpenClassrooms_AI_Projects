@@ -105,7 +105,9 @@ Meilleur modèle non BERT retenu :
 ### 🐳 Conteneurisation & CI/CD
 
 L’API FastAPI est packagée via Docker, puis poussée sur DockerHub.  
-Un pipeline CI/CD complet garantit **un déploiement reproductible**.
+Un [pipeline CI/CD](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/main/.github/workflows/p7_ci-cd.yml) complet garantit **un déploiement reproductible**. Il assure:
+- La validation de tests unitaires
+- La construction et le push de l'api conteneurisée sur dockerhub
 
 ![github workflow](github_ci-cd-1.png)
 ---
@@ -178,7 +180,7 @@ Une logique d’alerte légère embarquée dans l’API :
 
 Si **3 erreurs de prédiction** consécutives sont détectées sur une **fenêtre de 5 min**, un rapport est généré automatiquement.
 
-![Rapport d'erreur envoyé par mail²](./api_error_report.png)
+![Rapport d'erreur envoyé par mail](./api_error_report.png)
 
 
 
@@ -186,6 +188,7 @@ Si **3 erreurs de prédiction** consécutives sont détectées sur une **fenêtr
 
 ## 🧠 Schéma global du pipeline MLOps
 
+### Schéma synthétique
 ```
      ┌────────────┐
      │  Données   │
@@ -217,6 +220,8 @@ Si **3 erreurs de prédiction** consécutives sont détectées sur une **fenêtr
 │       prédictions)     │
 └────────────────────────┘
 ```
+### Schéma détaillé
+![Diagramme détaillé](diagram.drawio.png)
 
 ---
 
