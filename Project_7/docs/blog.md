@@ -130,18 +130,38 @@ Interface locale pour tester les requêtes, debug, démonstrations.
 
 #### 🔧 Problème AVX2
 
-Initialement, l’API ne fonctionnait pas sur le NAS (Intel N100), faute d’instruction **AVX2**, requise par TensorFlow.
+Initialement, l’API ne fonctionnait pas sur le NAS (processeur Intel N100), car celui-ci ne prenait pas en charge les instructions **AVX2**, requises par TensorFlow.
 
-> 🛠️ **Solution : activer AVX2 dans le BIOS** (désactivée par défaut sur certaines cartes mères, souvent optimisées pour NAS).
+> 🛠️ **Solution** : activation manuelle du support AVX2 dans le BIOS. Cette option est souvent désactivée par défaut sur les cartes mères orientées NAS pour des raisons de consommation énergétique ou de stabilité.
 
-Depuis, l’API tourne sur :
-- 🏠 NAS local : [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)\
-Interface Docker Compose de NAS:
+Depuis cette modification, le NAS peut exécuter l’API sans erreurs.
+
+---
+
+#### 🚀 API déployées
+
+Le projet propose un **double déploiement** de l’API, en local et dans le cloud :
+
+- 🏠 **NAS local** : [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)\
+Interface Docker Compose sur le NAS :
 ![docker compose openmediavault](openmediavault_docker-compose_settings-1.png)
 
-- ☁️ Google Cloud Run : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)\
-Interface Déploiement Google Cloud:
+- ☁️ **Google Cloud Run** : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)\
+Interface de déploiement Google Cloud :
 ![déploiement google cloud](google_cloud_interface-1.png)
+
+---
+
+#### 🔄 Déploiement continu automatisé (NAS uniquement)
+
+Pour assurer un **déploiement continu** sur le NAS, il a été choisi d'installer [**Watchtower**](https://containrrr.dev/watchtower/arguments/) pour rester dans un logique d'environnement 100% `docker`. Cet outil surveille toutes les **10 minutes** l’image Docker de l’API (`sentiment_api`) et, en cas de nouvelle version disponible sur DockerHub, redémarre automatiquement le conteneur avec la dernière image.
+![alt text](watchtower_docker-1.png)
+
+> Un **système d’alerte mail** notifie automatiquement toute mise à jour effectuée.
+![alt text](watchtower_logs_by_email-1.png)
+
+Ce mécanisme garantit que la version déployée sur le NAS reste toujours synchronisée avec la dernière version validée par les tests sur GitHub Actions, **sans intervention manuelle**.
+![alt text](watchtower_logs-1.png)
 
 ---
 
@@ -187,7 +207,9 @@ Si **3 erreurs de prédiction** consécutives sont détectées sur une **fenêtr
  │    + Streamlit     │
  └─────────┬──────────┘
            │
- Déploiement sur NAS + Google Cloud Run
+ Déploiement :
+   ├─ Google Cloud Run (manuel)
+   └─ NAS local (automatisé via Watchtower)
            │
 ┌──────────▼─────────────┐
 │ Monitoring léger maison│
