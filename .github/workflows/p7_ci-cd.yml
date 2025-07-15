@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: |
+      contains(join(github.event.head_commit.modified, ','), 'Project_7/deployment/api/')
     env:
       # MLflow + S3 bucket configuration
       MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
