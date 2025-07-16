@@ -47,7 +47,7 @@ def preprocess_tweet(tweet):
     tweet = re.sub(r'[^\w\s<>@#!?]', '', tweet)
 
     # Remove non-printable/control characters (e.g., \n, \t, emojis, corrupted unicode)
-    tweet = re.sub(r'[^\x20-\x7E]', '', tweet)
+    # tweet = re.sub(r'[^\x20-\x7E]', '', tweet)
 
     # Tokenize the tweet into individual words
     tokens = word_tokenize(tweet)
