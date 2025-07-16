@@ -1,14 +1,19 @@
-# API Deployment - Air Paradis Project
+# API Deployment – Air Paradis Project
+
+📘 This documentation is also available in [French 🇫🇷](./README.fr.md)
 
 This folder contains the code and configuration necessary to deploy the sentiment prediction API.
+
+---
 
 ## 🎯 Objective
 
 Deploy a REST API that allows to:
-- predict the sentiment of a tweet (positive or negative) based on an LSTM model trained on embeddings (Word2Vec or GloVe).
-- report prediction errors
 
-The API uses the best-performing model, registered on MLflow, and serves it via FastAPI.
+- Predict the sentiment of a tweet (positive or negative) using an LSTM model trained on embeddings (Word2Vec or GloVe),
+- Report prediction errors.
+
+The API uses the best-performing model registered on MLflow and serves it via FastAPI.
 
 ---
 
@@ -16,6 +21,7 @@ The API uses the best-performing model, registered on MLflow, and serves it via 
 
 Diagram:
 
+```
     ┌──────────────────────────────┐
     │    End user (UI)             │
     │    (Streamlit interface)     │
@@ -36,72 +42,85 @@ Diagram:
           Prediction (inference)
                  │
        Sentiment response (JSON)
+```
 
 ---
 
 ## 🧪 API Workflow
 
-1. Model loading
-   - The best performing model is registered in MLflow under a fixed name (`SentimentAnalysisLSTM`) and a stage `Production`.
-   - The API loads this model at startup using a stable URI:
+1. **Model loading**
+   - The best performing model is registered in MLflow under a fixed name (`SentimentAnalysisLSTM`) and a `Production` stage.
+   - The API loads this model at startup using the URI:
      
+     ```
      models:/SentimentAnalysisLSTM/Production
+     ```
 
-2. Text preprocessing
-   - The text sent by the user is cleaned, tokenized, lemmatized, and transformed into vectors (embeddings).
+2. **Text preprocessing**
+   - Text is cleaned, tokenized, lemmatized, and converted into vectors (embeddings).
 
-3. Prediction
-   - The LSTM model (loaded from MLflow) performs inference.
-   - The result (`positive` or `negative`) is returned as a JSON response.
+3. **Prediction**
+   - The LSTM model (loaded from MLflow) makes a prediction.
+   - The result (`positive` or `negative`) is returned as JSON.
 
-4. User interface (optional)
+4. **User interface (optional)**
    - A Streamlit interface allows visual interaction with the API.
 
 ---
 
 ## 🐳 Deployment with Docker
 
-A Dockerfile is provided to facilitate deploying the API on any Docker-compatible host (NAS, cloud, etc.).
+A `Dockerfile` is provided for easy deployment on any Docker-compatible host (NAS, cloud, etc.).
 
-This Docker image should be pushed to DockerHub at each validated versioning (see the CI/CD section below).
+This Docker image should be pushed to DockerHub with every validated version (see CI/CD below).
 
-For data sovereignty reasons, deployment will preferably be done on a NAS equipped with an Intel N100 processor (energy efficient but probably sufficient for LSTM inference).
-Docker can be redeployed each time the docker image on DockerHub is updated. Man can use `cron` instruction (simple) or `Watchtower` docker (docker-compose / kubernetes context).
+For data sovereignty, deployment is preferably done on a **NAS with Intel N100** CPU (energy-efficient, sufficient for inference).  
+Docker can be automatically redeployed using:
+- `cron` (simple), or  
+- `Watchtower` in docker-compose/kubernetes setups.
 
-For running the Docker image locally (development), it is important to provide the `.env` file containing environment variables and to open the FastAPI and Streamlit ports for testing the application.
+**Development command (local test):**
 
-Example commands to build and run:
+```bash
+docker build -t sentiment-api .
+docker run --rm --env-file ../../.env -p 8000:8000 -p 8080:8080 sentiment-api
+```
 
-    docker build -t sentiment-api .
-    docker run --env-file ../../.env -p 8000:8000 -p 8080:8080 sentiment-api
-
-For deployment on a personal or public cloud (with docker-compose, Kubernetes), it is preferable to specify the necessary environment variables in `docker-compose.yml` or in secrets.
-
-Add the `--rm` argument so that the container is removed after stopping.
-
-**UPDATE** : in our case, we encountered some issues with the NAS which CPU is not able to run AVX2 instructions so we are obliged to deploy it on a "standard" public cloud service. To be precise, N100 CPU is normally able to run AXV2 instructions but some NAS/home server motherboard manufacturers sometimes disable this feature. Maybe is it possible to renable it on the BIOS, but I am away from my NAS so it will have to wait.
-
-So, we decided to use Google Cloud. A common issue arises here: we cannot expose multiple ports (contrary to the instruction above) on a cloud service.
-
-Two options are possible:
-
-- Separate the service into two dockers (one for FastAPI backend and one for Streamlit frontend)
-- Configure a reverse proxy like nginx to redirect requests to different internal ports
-
-We decided to keep the second solution to install the API from a single Docker container.
-
-**UPDATE 2** : AVX2 instructions have been enabled by accessing the home server motherboard BIOS. So the deployment is also done here and complete continuous deployment will be done as well.
+In production (e.g. via docker-compose or cloud services), environment variables must be defined in the compose file or secret manager.
 
 ---
 
-## 🔁 Continuous Integration / Continuous Deployment
+## 🛠 Notes on AVX2 / Cloud Deployment
 
-A GitHub Actions pipeline (CI/CD) is planned at the very root of the repo to:
+**Update:** the NAS initially failed due to lack of AVX2 support. Some N100-based NAS motherboards disable AVX2 in BIOS.
 
-- Automatically run unit tests at every push on the GitHub repository.
-- Ensure API stability before any deployment (NAS or cloud).
-- Update the Dockerfile and push it to DockerHub.
+When not accessible, fallback deployment is done on **Google Cloud**.  
+Issue: public cloud services do **not allow multiple ports** to be exposed easily.
 
-Unit tests will be defined in `./deployment/api/tests/`
+Two solutions:
+- Split into two containers: FastAPI + Streamlit,
+- Use a **reverse proxy** (e.g., Nginx) to map ports.
 
-- API docker is automatically updated on home server docker using watchtower docker (= cron with logging options)
+➡️ We chose the second option to keep a **single Docker image**.
+
+**Update 2:** AVX2 was enabled via BIOS. Deployment is now active **both locally (NAS)** and **on cloud**, with continuous deployment on NAS (see section below).
+
+---
+
+## 🔁 CI/CD – GitHub Actions
+
+A pipeline is defined in `.github/workflows/` to:
+
+- Run unit tests on every push,
+- Check API health before deployment (local/cloud),
+- Build and push Docker image to DockerHub.
+
+Tests are defined in:
+
+```
+deployment/api/tests/
+```
+
+Docker image auto-redeployment on NAS is handled by **Watchtower**, which checks DockerHub updates (like a cron job, with logs).
+
+---

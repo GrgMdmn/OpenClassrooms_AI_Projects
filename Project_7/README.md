@@ -1,4 +1,6 @@
-# Air Paradis Project - Sentiment Analysis
+# Air Paradis Project – Sentiment Analysis
+
+📘 This project is also available in [French 🇫🇷](./README.fr.md)
 
 This repository contains the notebooks and source code for the sentiment analysis project on tweets, carried out as part of the OpenClassrooms "Air Paradis" program.
 
@@ -6,7 +8,8 @@ This repository contains the notebooks and source code for the sentiment analysi
 
 ## Business Context
 
-The goal is to predict whether a tweet, or a short written expression, is perceived as positive or negative, in the context of an airline company. The project is based on the public **Sentiment140** dataset.
+The goal is to predict whether a tweet, or a short written expression, is perceived as **positive or negative**, in the context of an airline company.  
+The project is based on the public **Sentiment140** dataset.
 
 ---
 
@@ -50,9 +53,9 @@ The notebooks detail the analysis and training steps. The API is available in `d
 
 ---
 
-This README will be updated progressively as the project advances.
-Some code comments can remain in french language (as well as the notebooks markdowns etc.). All will be changed into english in the future.
+This README will be updated progressively as the project advances.  
+Some code comments can remain in French (as well as notebook markdowns). All will be translated into English later.
 
 ---
 
-**Project completed as part of the OpenClassrooms "Data Scientist - Project 7" program**
+**Project completed as part of the OpenClassrooms "Data Scientist – Project 7" program**

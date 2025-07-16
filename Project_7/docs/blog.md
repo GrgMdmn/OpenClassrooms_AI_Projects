@@ -1,235 +1,244 @@
-# ✨ Analyse de sentiments et déploiement MLOps : retour d’expérience complet
+# ✨ Sentiment Analysis and MLOps Deployment: A Complete Experience Report
 
-Dans le cadre du projet *Air Paradis*, nous avons mis en œuvre une chaîne complète d’analyse de sentiments à partir de tweets, depuis la modélisation jusqu’au déploiement MLOps. Ce billet de blog revient sur les étapes clés du projet : choix méthodologiques, comparaison des modèles, mise en production d’une API robuste, et déploiement sur deux environnements (local + cloud). 🧠🔧
+As part of the *Air Paradis* project, we implemented a full sentiment analysis pipeline from tweets, covering everything from modeling to MLOps deployment. This blog post reviews the key project stages: methodological choices, model comparison, deployment of a robust API, and deployment on two environments (local + cloud). 🧠🔧
 
 ---
 
-## 🔍 Trois approches de modélisation supervisée
+## 🔍 Three Supervised Modeling Approaches
 
-Nous avons testé trois approches complémentaires pour prédire le sentiment d’un tweet. Chacune repose sur une représentation textuelle différente et un algorithme d’apprentissage adapté :
+We tested three complementary approaches to predict the sentiment of a tweet. Each relies on a different text representation and a suitable learning algorithm:
 
-### 1. 🧱 Approche simple : Bag-of-Words (BoW) + modèles de machine learning
+### 1. 🧱 Simple Approach: Bag-of-Words (BoW) + Machine Learning Models
 
-On vectorise les tweets via BoW ou BoW + TF-IDF, qui comptent la fréquence des mots.  
-Contrairement à d'autres projets NLP, nous avons évité LDA (non supervisé, orienté topic modeling).
+Tweets are vectorized using BoW or BoW + TF-IDF, which count word frequencies.  
+Unlike other NLP projects, we avoided LDA (unsupervised, topic modeling oriented).
 
-➡️ **Modèles testés** :
-- Régression Logistique  
+➡️ **Tested models**:
+- Logistic Regression  
 - Naive Bayes  
 - SVM  
 - Random Forest  
 
-Ces modèles sont entraînés avec **GridSearchCV**, en optimisant la **précision (`precision`)**, notre KPI métier. Différents KPI ont été calculés sur l'ensemble de test.
+These models are trained with **GridSearchCV**, optimizing **precision (`precision`)**, our key business KPI. Various KPIs were computed on the test set.
 
-![Scores modèles simples](./Basic-Models.png)
-
----
-
-### 2. 🔥 Approche avancée : Word Embeddings + LSTM
-
-Nous utilisons des vecteurs denses Word2Vec (entraînés) et GloVe 300d (préentraînés par Stanford), qui capturent les similarités sémantiques entre mots. Ces représentations ne prennent toutefois **pas en compte le contexte** exact (ex : "annulé" est probablement un mot très négatif pour un vol mais positif pour un procès contenant des charges contre vous).
-
-La classification est réalisée par un **LSTM**, capable d'exploiter la séquentialité des mots.  
-Le **modèle déployé est automatiquement sélectionné** entre Word2Vec + LSTM et GloVe + LSTM, selon la **précision maximale enregistrée dans MLFlow**.
-
-Modèle `Word2Vec + LSTM` (`test_precision : 0.797 , val_precision : 0.795`):
-![Scores entrainement modèle avancé LSTM + Word2Vec](./Word2Vec_LSTM_epoch9.png)
-Modèle `GloVe 300d + LSTM` (`test_precision : 0.792 , val_precision : 0.798`):
-![Scores entrainement modèles avancés LSTM + GloVe 300d](./GloVe-300d_LSTM_epoch12.png)
-
-Bien que GloVe 300d + LSTM présente un score de précision légèrement supérieur à Word2Vec + LSTM sur l'ensemble de validation, il reste inférieur pour l'ensemble de test (relativement négligeable dans l'absolu).
+![Simple Models Scores](./Basic-Models.png)
 
 ---
 
-### 3. 🤖 Approche transformer : DistilBERT, embeddings contextuels allégés
+### 2. 🔥 Advanced Approach: Word Embeddings + LSTM
 
-Nous avons utilisé **DistilBERT**, une version plus légère et plus rapide de BERT (créée par Hugging Face).  
-Il conserve **95 % de la performance de BERT** tout en étant **40 % plus petit** et **60 % plus rapide**, ce qui le rend particulièrement adapté à un **entraînement sur GPU limité** (Google Colab) et à une **inférence plus rapide**.
+We use dense Word2Vec vectors (trained) and GloVe 300d (pretrained by Stanford), which capture semantic similarities between words. However, these representations **do not take into account the exact context** (e.g., "cancelled" is probably very negative for a flight but positive in a legal case with charges against you).
 
-Comme BERT, DistilBERT produit des **embeddings contextuels**, c’est-à-dire que le sens des mots varie selon leur contexte. Par exemple, *"banque"* dans *"je vais à la banque"* et *"banque de données"* n’aura pas le même vecteur.
+Classification is done by an **LSTM**, capable of exploiting word sequentiality.  
+The **deployed model is automatically selected** between Word2Vec + LSTM and GloVe + LSTM, according to the **highest precision recorded in MLFlow**.
 
-Il a été **fine-tuné** ici pour une classification binaire (positif/négatif), avec un tokenizer et un encodage spécifiques à son architecture.
+Model `Word2Vec + LSTM` (`test_precision: 0.797, val_precision: 0.795`):  
+![Advanced LSTM + Word2Vec Training Scores](./Word2Vec_LSTM_epoch9.png)  
+Model `GloVe 300d + LSTM` (`test_precision: 0.792, val_precision: 0.798`):  
+![Advanced LSTM + GloVe 300d Training Scores](./GloVe-300d_LSTM_epoch12.png)
 
-> **Modèle `DistilBERT`** (`test_precision : 0.861 , val_precision : 0.858`)
+Although GloVe 300d + LSTM shows a slightly better precision score on the validation set than Word2Vec + LSTM, it remains lower on the test set (relatively negligible overall).
 
-![Courbes d'entraînement DistilBERT](./bert_training_curves_epoch1.png)  
-![Matrice de Confusion](./bert_confusion_matrix.png)  
+---
+
+### 3. 🤖 Transformer Approach: DistilBERT, Lightweight Contextual Embeddings
+
+We used **DistilBERT**, a lighter and faster version of BERT (created by Hugging Face).  
+It retains **95% of BERT's performance** while being **40% smaller** and **60% faster**, making it especially suited for **training on limited GPUs** (Google Colab) and **faster inference**.
+
+Like BERT, DistilBERT produces **contextual embeddings**, meaning word meanings vary depending on context. For example, *"bank"* in *"I go to the bank"* and *"database bank"* will not have the same vector.
+
+It was **fine-tuned** here for binary classification (positive/negative), with a tokenizer and encoding specific to its architecture.
+
+> **Model `DistilBERT`** (`test_precision: 0.861, val_precision: 0.858`)
+
+![DistilBERT Training Curves](./bert_training_curves_epoch1.png)  
+![Confusion Matrix](./bert_confusion_matrix.png)  
 ![ROC Curve](./bert_roc_curve.png)
 
-⚠️ **Limites** : comme tous les modèles préentraînés, DistilBERT **n’est pas sensible à l’ironie, aux jeux de mots, ni aux références culturelles implicites**.  
-Or, Twitter est un terrain de jeu idéal pour ce genre de contenus détournés. Ces limites s’appliquent aussi à Word2Vec, GloVe et aux modèles classiques.
+⚠️ **Limits**: Like all pretrained models, DistilBERT **is not sensitive to irony, puns, or implicit cultural references**.  
+Twitter is an ideal playground for this kind of nuanced content. These limits also apply to Word2Vec, GloVe, and classical models.
 
 ---
 
-## 🎯 Pourquoi optimiser la précision (et non l'accuracy) ?
+## 🎯 Why Optimize Precision (Not Accuracy)?
 
-**Accuracy** = proportion de bonnes prédictions globales.  
-**Precision** = proportion de tweets *prévus positifs* qui sont *vraiment positifs*.
+**Accuracy** = overall proportion of correct predictions.  
+**Precision** = proportion of *predicted positive* tweets that are *actually positive*.
 
-> Exemple : sur 100 tweets, si le modèle prédit 30 positifs, mais 15 sont des erreurs, la précision est de 50 %.
+> Example: out of 100 tweets, if the model predicts 30 positives but 15 are wrong, precision is 50%.
 
-Nous avons préféré **minimiser les faux positifs**, car dans un contexte sensible, **annoncer un tweet positif alors qu’il est négatif peut être problématique**.
+We preferred to **minimize false positives**, because in a sensitive context, **announcing a tweet as positive when it is negative can be problematic**.
 
-- Modèles classiques : **GridSearchCV optimisé sur la précision**  
-- Modèles DL : **EarlyStopping sur val_loss**, mais **sélection finale sur la précision**
+- Classical models: **GridSearchCV optimized for precision**  
+- Deep Learning models: **EarlyStopping on val_loss**, but **final selection based on precision**
 
 ---
 
-## ⚙️ Environnement MLOps souverain
+## ⚙️ Sovereign MLOps Environment
 
-### 🖥️ Serveur personnel NAS + OpenMediaVault
+### 🖥️ Personal NAS Server + OpenMediaVault
 
-MLFlow est installé sur un **NAS personnel (Intel N100)**, sous **OpenMediaVault (Debian)**.  
-Nous utilisons **MinIO** pour stocker artefacts et modèles, garantissant une gestion locale, souveraine et compatible S3.
+MLFlow is installed on a **personal NAS (Intel N100)** running **OpenMediaVault (Debian)**.  
+We use **MinIO** to store artifacts and models, ensuring local, sovereign, and S3-compatible management.
 
-> Les notebooks, exécutés sur Google Colab pour bénéficier de GPU, loggent dans MLFlow et envoient les modèles vers MinIO via des **variables d’environnement**.
+> Notebooks, run on Google Colab to leverage GPUs, log in MLFlow and send models to MinIO via **environment variables**.
 
-Dashboard Expériences MLFlow :
-![Dashboard MLFLow](./mlflow_experiments_dashboard.png)
+MLFlow Experiments Dashboard:  
+![MLFlow Dashboard](./mlflow_experiments_dashboard.png)
 
-Modèles en production (registre de modèles):
+Production Models (model registry):  
 ![Models Registry](mlflow_models_registry_2-1.png)
 
-Meilleur modèle non BERT retenu :
-![Modèle retenu](mlflow_models_registry_best_LSTM_model-1.png)
-![Meilleur modèle non BERT](mlflolw_experiments_dashboard_best_LSTM_model-1.png)
+Best non-BERT selected model:  
+![Selected Model](mlflow_models_registry_best_LSTM_model-1.png)  
+![Best Non-BERT Model](mlflolw_experiments_dashboard_best_LSTM_model-1.png)
+
 ---
 
-## 🧪 CI, tests et versioning
+## 🧪 CI, Testing and Versioning
 
-### ✅ Tests unitaires
+### ✅ Unit Tests
 
-- Vérifient le bon fonctionnement du prétraitement, des prédictions et de la gestion d’erreurs.
-- Intégrés à **GitHub Actions**, **ils bloquent le déploiement si les tests échouent.**
+- Check correct preprocessing, predictions, and error handling.  
+- Integrated into **GitHub Actions**, **blocking deployment if tests fail.**
 
-### 🐳 Conteneurisation & CI/CD
+### 🐳 Containerization & CI/CD
 
-L’API FastAPI est packagée via Docker, puis poussée sur DockerHub.  
-Un [pipeline CI/CD](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/main/.github/workflows/p7_ci-cd.yml) complet garantit **un déploiement reproductible**. Il assure:
-- La validation de tests unitaires
-- La construction et le push de l'api conteneurisée sur dockerhub
+The FastAPI API is packaged with Docker, then pushed to DockerHub.  
+A full [CI/CD pipeline](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/main/.github/workflows/p7_ci-cd.yml) guarantees **reproducible deployment**, ensuring:  
+- Validation of unit tests  
+- Build and push of the containerized API to DockerHub
 
-![github workflow](github_ci-cd-1.png)
+![GitHub Workflow](github_ci-cd-1.png)
+
 ---
 
-## 🚀 Déploiement de l’API FastAPI (double)
+## 🚀 FastAPI API Deployment (Dual)
 
-### 🔧 Backend : FastAPI
+### 🔧 Backend: FastAPI
 
-- Expose un endpoint `/predict`  
-- Charge dynamiquement le **meilleur modèle Word Embedding + LSTM** via le *Model Registry* MLFlow  
-- Applique les bons embeddings selon le tag `embedding_type`
+- Exposes a `/predict` endpoint  
+- Dynamically loads the **best Word Embedding + LSTM model** via MLFlow Model Registry  
+- Applies appropriate embeddings according to the `embedding_type` tag
 
-### 💻 Interface Streamlit
+### 💻 Streamlit Interface
 
-Interface locale pour tester les requêtes, debug, démonstrations.
+Local interface for request testing, debugging, demonstrations.
 
 ![Streamlit Local](./streamlit_interface_local.png)
 
 ---
 
-### 🌐 Double déploiement (NAS + Google Cloud)
+### 🌐 Dual Deployment (NAS + Google Cloud)
 
-#### 🔧 Problème AVX2
+#### 🔧 AVX2 Issue
 
-Initialement, l’API ne fonctionnait pas sur le NAS (processeur Intel N100), car celui-ci ne prenait pas en charge les instructions **AVX2**, requises par TensorFlow.
+Initially, the API did not run on the NAS (Intel N100 CPU) because it did not support **AVX2 instructions**, required by TensorFlow.
 
-> 🛠️ **Solution** : activation manuelle du support AVX2 dans le BIOS. Cette option est souvent désactivée par défaut sur les cartes mères orientées NAS pour des raisons de consommation énergétique ou de stabilité.
+> 🛠️ **Solution**: manual activation of AVX2 support in BIOS. This option is often disabled by default on NAS motherboards for power consumption or stability reasons.
 
-Depuis cette modification, le NAS peut exécuter l’API sans erreurs.
-
----
-
-#### 🚀 API déployées
-
-Le projet propose un **double déploiement** de l’API, en local et dans le cloud :
-
-- 🏠 **NAS local** : [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)\
-Interface Docker Compose sur le NAS :
-![docker compose openmediavault](openmediavault_docker-compose_settings-1.png)
-
-- ☁️ **Google Cloud Run** : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)\
-Interface de déploiement Google Cloud :
-![déploiement google cloud](google_cloud_interface-1.png)
+Since this change, the NAS can run the API without errors.
 
 ---
 
-#### 🔄 Déploiement continu automatisé (NAS uniquement)
+#### 🚀 Deployed APIs
 
-Pour assurer un **déploiement continu** sur le NAS, il a été choisi d'installer [**Watchtower**](https://containrrr.dev/watchtower/arguments/) pour rester dans un logique d'environnement 100% `docker`. Cet outil surveille toutes les **10 minutes** l’image Docker de l’API (`sentiment_api`) et, en cas de nouvelle version disponible sur DockerHub, redémarre automatiquement le conteneur avec la dernière image.
-![alt text](watchtower_docker-1.png)
+The project offers a **dual API deployment**, locally and in the cloud:
 
-> Un **système d’alerte mail** notifie automatiquement toute mise à jour effectuée.
-![alt text](watchtower_logs_by_email-1.png)
+- 🏠 **Local NAS**: [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)  
+Docker Compose interface on the NAS:  
+![Docker Compose OpenMediaVault](openmediavault_docker-compose_settings-1.png)
 
-Ce mécanisme garantit que la version déployée sur le NAS reste toujours synchronisée avec la dernière version validée par les tests sur GitHub Actions, **sans intervention manuelle**.
-![alt text](watchtower_logs-1.png)
-
----
-
-## 📊 Monitoring maison
-
-Une logique d’alerte légère embarquée dans l’API :
-
-![1ère erreur](./api_first_error.png)
-
-![2ème erreur](./api_second_error.png)
-
-![3ème erreur](./api_third_error.png)
-
-
-Si **3 erreurs de prédiction** consécutives sont détectées sur une **fenêtre de 5 min**, un rapport est généré automatiquement.
-
-![Rapport d'erreur envoyé par mail](./api_error_report.png)
-
-
+- ☁️ **Google Cloud Run**: [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)  
+Google Cloud deployment interface:  
+![Google Cloud Deployment](google_cloud_interface-1.png)
 
 ---
 
-## 🧠 Schéma global du pipeline MLOps
+#### 🔄 Automated Continuous Deployment (NAS only)
 
-### Schéma synthétique
+To ensure **continuous deployment** on the NAS, we chose to install [**Watchtower**](https://containrrr.dev/watchtower/arguments/) to maintain a 100% `docker` environment. This tool checks every **10 minutes** the Docker image of the API (`sentiment_api`) and, if a new version is available on DockerHub, automatically restarts the container with the latest image.  
+![Watchtower Docker](watchtower_docker-1.png)
+
+> An **email alert system** automatically notifies any update performed.  
+![Watchtower Logs by Email](watchtower_logs_by_email-1.png)
+
+This mechanism ensures that the version deployed on the NAS always stays synchronized with the latest version validated by GitHub Actions tests, **without manual intervention**.  
+![Watchtower Logs](watchtower_logs-1.png)
+
+---
+
+## 📊 Home-made Monitoring
+
+A lightweight alert logic embedded in the API:
+
+![1st Error](./api_first_error.png)  
+![2nd Error](./api_second_error.png)  
+![3rd Error](./api_third_error.png)
+
+If **3 consecutive prediction errors** are detected within a **5-minute window**, a report is automatically generated.
+
+![Error Report Sent by Email](./api_error_report.png)
+
+---
+
+## 🧠 Overall MLOps Pipeline Diagram
+
+### Summary Diagram
+
 ```
      ┌────────────┐
-     │  Données   │
-     │ (tweets)   │
+     │   Data     │
+     │  (tweets)  │
      └─────┬──────┘
            │
-    Prétraitement (regex, tokenisation, lemmatisation, stopwords)
+  Preprocessing (regex, tokenization, lemmatization, stopwords)
            │
  ┌─────────▼──────────┐
- │  Entraînement ML   │
+ │   ML Training      │
  └─────────┬──────────┘
            │
-    Log via MLFlow + artefacts MinIO
+  Logging via MLFlow + artifacts MinIO
            │
- Sélection du meilleur modèle "avancé" (hors BERT) selon précision
+ Select best "advanced" model (excluding BERT) by precision
            │
  ┌─────────▼──────────┐
- │    API FastAPI     │
- │    + Streamlit     │
+ │  FastAPI           │
+ │  + Streamlit       │
  └─────────┬──────────┘
            │
- Déploiement :
-   ├─ Google Cloud Run (manuel)
-   └─ NAS local (automatisé via Watchtower)
+ Deployment:
+   ├─ Google Cloud Run (manual)
+   └─ Local NAS (automated via Watchtower)
            │
 ┌──────────▼─────────────┐
-│ Monitoring léger maison│
-│ (alertes sur mauvaises │
-│       prédictions)     │
+│  Lightweight in-house  │
+│     Monitoring         │
+│   (alerts on bad       │
+│     predictions)       │
 └────────────────────────┘
+
 ```
-### Schéma détaillé
-![Diagramme détaillé](diagram.drawio.png)
+
+### Detailed Diagram  
+![Detailed Diagram](diagram.drawio.png)
 
 ---
 
 ## ✨ Conclusion
 
-Ce projet démontre comment construire une chaîne MLOps complète, autonome et reproductible pour du NLP appliqué à Twitter.  
-Il souligne les **forces et limites des modèles** (y compris BERT), la nécessité d’une métrique adaptée au contexte (précision vs accuracy), et l’importance d’un **déploiement maîtrisé**, même sur une infrastructure personnelle.
+This project demonstrates how to build a complete, autonomous, and reproducible MLOps pipeline for NLP applied to Twitter.  
+It highlights the **strengths and limitations of the models** (including BERT), the need for a **metric adapted to the context** (precision vs accuracy), and the importance of **controlled deployment**, even on personal infrastructure.
 
 ---
 
-💬 Merci pour votre lecture !
+💬 Thank you for reading!
+
+
+
+
+
+
+
+Demander à ChatGPT

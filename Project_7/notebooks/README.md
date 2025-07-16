@@ -22,7 +22,7 @@ Manual cleanup or specific generation of requirements files will be needed to sl
 ### Classical Models (trained on 200,000 tweets)
 
 | Model                        | Precision | Training Time   |
-|-----------------------------|-----------|-----------------|
+|------------------------------|-----------|-----------------|
 | Random Forest + BoW          | 0.7798    | ~5 hours        |
 | Logistic Regression + TF-IDF | 0.7796    | <2 minutes      |
 
