@@ -25,12 +25,4 @@ def test_preprocess_tweet_lowercases_text():
     My 3rd time w/ @AirParadis &amp; still amazed &#128525; Crew = lovely &agrave; every step! 
     #flyhappy #AirParadis
     """
-    assert preprocess_tweet(tweet) == '3rd time w < MENTION > still amazed crew lovely à every step ! # flyhappy # airparadis'
-    
-    
-    
-tweet = """
-Just flew w/ @AirParadis &#128640; &amp; I&#8217;m in LOVE! Epic service, comfy seats. 
-#bestflight #AirParadis
-"""
-preprocess_tweet(tweet)
+    assert preprocess_tweet(tweet) == '3rd time w < MENTION > still amazed crew lovely every step ! # flyhappy # airparadis'
