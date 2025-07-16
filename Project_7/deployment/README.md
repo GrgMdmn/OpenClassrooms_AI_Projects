@@ -73,13 +73,13 @@ For running the Docker image locally (development), it is important to provide t
 Example commands to build and run:
 
     docker build -t sentiment-api .
-    docker run --env-file ../../.env -p 8000:8000 -p 8501:8501 sentiment-api
+    docker run --env-file ../../.env -p 8000:8000 -p 8080:8080 sentiment-api
 
 For deployment on a personal or public cloud (with docker-compose, Kubernetes), it is preferable to specify the necessary environment variables in `docker-compose.yml` or in secrets.
 
 Add the `--rm` argument so that the container is removed after stopping.
 
-**UPDATE** : in our case, we encountered some issues with the NAS which CPU is not able to run AVX2 instructions so we are obliged to deploy it on a "standard" public cloud service. To be precise, N100 CPU is normally able to run AXV2 instructions but some NAS motherboard manufacturers sometimes disable this feature. Maybe is it possible to renable it on the BIOS, but I am away from my NAS so it will have to wait.
+**UPDATE** : in our case, we encountered some issues with the NAS which CPU is not able to run AVX2 instructions so we are obliged to deploy it on a "standard" public cloud service. To be precise, N100 CPU is normally able to run AXV2 instructions but some NAS/home server motherboard manufacturers sometimes disable this feature. Maybe is it possible to renable it on the BIOS, but I am away from my NAS so it will have to wait.
 
 So, we decided to use Google Cloud. A common issue arises here: we cannot expose multiple ports (contrary to the instruction above) on a cloud service.
 
@@ -89,6 +89,8 @@ Two options are possible:
 - Configure a reverse proxy like nginx to redirect requests to different internal ports
 
 We decided to keep the second solution to install the API from a single Docker container.
+
+**UPDATE 2** : AVX2 instructions have been enabled by accessing the home server motherboard BIOS. So the deployment is also done here and complete continuous deployment will be done as well.
 
 ---
 
@@ -101,3 +103,5 @@ A GitHub Actions pipeline (CI/CD) is planned at the very root of the repo to:
 - Update the Dockerfile and push it to DockerHub.
 
 Unit tests will be defined in `./deployment/api/tests/`
+
+- API docker is automatically updated on home server docker using watchtower docker (= cron with logging options)
