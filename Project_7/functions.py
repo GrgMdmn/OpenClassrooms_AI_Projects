@@ -65,6 +65,9 @@ def preprocess_tweet(tweet):
     if not isinstance(tweet, str):
         return ""
 
+    # Decode HTML entities (e.g., &amp; to &)
+    tweet = html.unescape(tweet)
+
     # Convert to lowercase
     tweet = tweet.lower()
 
@@ -76,9 +79,6 @@ def preprocess_tweet(tweet):
 
     # Separate hashtags from words to facilitate tokenization
     tweet = re.sub(r'#(\w+)', r'# \1', tweet)
-
-    # Decode HTML entities (e.g., &amp; to &)
-    tweet = html.unescape(tweet)
 
     # Remove unwanted punctuation and special characters except some useful ones
     tweet = re.sub(r'[^\w\s<>@#!?]', '', tweet)
