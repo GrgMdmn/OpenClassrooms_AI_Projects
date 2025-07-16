@@ -28,6 +28,9 @@ def preprocess_tweet(tweet):
     if not isinstance(tweet, str):
         return ""
 
+    # Decode HTML entities (e.g., &amp; → &)
+    tweet = html.unescape(tweet)
+    
     # Convert text to lowercase
     tweet = tweet.lower()
 
@@ -40,14 +43,11 @@ def preprocess_tweet(tweet):
     # Separate hashtags from the word to preserve semantics during tokenization
     tweet = re.sub(r'#(\w+)', r'# \1', tweet)
 
-    # Decode HTML entities (e.g., &amp; → &)
-    tweet = html.unescape(tweet)
-
     # Remove unwanted punctuation and special characters (except useful ones like < > @ # ! ?)
     tweet = re.sub(r'[^\w\s<>@#!?]', '', tweet)
 
     # Remove non-printable/control characters (e.g., \n, \t, emojis, corrupted unicode)
-    # tweet = re.sub(r'[^\x20-\x7E]', '', tweet)
+    tweet = re.sub(r'[^\x20-\x7E]', '', tweet)
 
     # Tokenize the tweet into individual words
     tokens = word_tokenize(tweet)
