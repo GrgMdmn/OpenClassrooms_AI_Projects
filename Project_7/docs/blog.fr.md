@@ -157,13 +157,13 @@ Interface de déploiement Google Cloud :
 #### 🔄 Déploiement continu automatisé (NAS uniquement)
 
 Pour assurer un **déploiement continu** sur le NAS, il a été choisi d'installer [**Watchtower**](https://containrrr.dev/watchtower/arguments/) pour rester dans un logique d'environnement 100% `docker`. Cet outil surveille toutes les **10 minutes** l’image Docker de l’API (`sentiment_api`) et, en cas de nouvelle version disponible sur DockerHub, redémarre automatiquement le conteneur avec la dernière image.
-![alt text](watchtower_docker-1.png)
-
-> Un **système d’alerte mail** notifie automatiquement toute mise à jour effectuée.
-![alt text](watchtower_logs_by_email-1.png)
+![Docker Watchtower dans OMV Docker-Compose](watchtower_docker-1.png)
 
 Ce mécanisme garantit que la version déployée sur le NAS reste toujours synchronisée avec la dernière version validée par les tests sur GitHub Actions, **sans intervention manuelle**.
-![alt text](watchtower_logs-1.png)
+![Logs watchtower dans docker (console SSH)](watchtower_logs-1.png)
+
+Un **système d’alerte mail** notifie automatiquement toute mise à jour effectuée.
+![Rapport mail watchtower update sentiment_api](watchtower_logs_by_email.png)
 
 ---
 
