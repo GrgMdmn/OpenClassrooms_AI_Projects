@@ -8,10 +8,10 @@ from preprocessing import preprocess_tweet
 
 def test_preprocess_tweet_removes_hashtags():
     tweet = """
-    Just flew w/ @AirParadis &#128640; &amp; I&#8217;m in LOVE! Epic service, comfy seats. 
+    Just flew w/ @AirParadis &#128640; &amp; I&#8217;m in LOVE! Epic service, comfy seats, good prices at https://airparadis.com
     #bestflight #AirParadis
     """
-    assert preprocess_tweet(tweet) == "flew w < MENTION > im love ! epic service comfy seat # bestflight # airparadis"
+    assert preprocess_tweet(tweet) == 'flew w < MENTION > im love ! epic service comfy seat good price < URL > # bestflight # airparadis'
 
 def test_preprocess_tweet_removes_mentions():
     tweet = """
