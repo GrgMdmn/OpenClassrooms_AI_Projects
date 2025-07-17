@@ -88,11 +88,11 @@ MLFlow Experiments Dashboard:
 ![MLFlow Dashboard](./mlflow_experiments_dashboard.png)
 
 Production Models (model registry):  
-![Models Registry](mlflow_models_registry_2-1.png)
+![Models Registry](mlflow_models_registry_2.png)
 
 Best non-BERT selected model:  
-![Selected Model](mlflow_models_registry_best_LSTM_model-1.png)  
-![Best Non-BERT Model](mlflolw_experiments_dashboard_best_LSTM_model-1.png)
+![Selected Model](mlflow_models_registry_best_LSTM_model.png)  
+![Best Non-BERT Model](mlflolw_experiments_dashboard_best_LSTM_model.png)
 
 ---
 
@@ -110,7 +110,7 @@ A full [CI/CD pipeline](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/bl
 - Validation of unit tests  
 - Build and push of the containerized API to DockerHub
 
-![GitHub Workflow](github_ci-cd-1.png)
+![GitHub Workflow](github_ci-cd.png)
 
 ---
 
@@ -148,21 +148,21 @@ The project offers a **dual API deployment**, locally and in the cloud:
 
 - 🏠 **Local NAS**: [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)  
 Docker Compose interface on the NAS:  
-![Docker Compose OpenMediaVault](openmediavault_docker-compose_settings-1.png)
+![Docker Compose OpenMediaVault](openmediavault_docker-compose_settings.png)
 
 - ☁️ **Google Cloud Run**: [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)  
 Google Cloud deployment interface:  
-![Google Cloud Deployment](google_cloud_interface-1.png)
+![Google Cloud Deployment](google_cloud_interface.png)
 
 ---
 
 #### 🔄 Automated Continuous Deployment (NAS only)
 
 To ensure **continuous deployment** on the NAS, we chose to install [**Watchtower**](https://containrrr.dev/watchtower/arguments/) to maintain a 100% `docker` environment. This tool checks every **10 minutes** the Docker image of the API (`sentiment_api`) and, if a new version is available on DockerHub, automatically restarts the container with the latest image.  
-![Docker Watchtower in OMV Docker-Compose](watchtower_docker-1.png)
+![Docker Watchtower in OMV Docker-Compose](watchtower_docker.png)
 
 This mechanism ensures that the version deployed on the NAS always stays synchronized with the latest version validated by GitHub Actions tests, **without manual intervention**.  
-![Logs watchtower in docker (SSH console)](watchtower_logs-1.png)
+![Logs watchtower in docker (SSH console)](watchtower_logs.png)
 
 An **email alert system** automatically notifies any update performed.  
 ![Watchtower Logs by Email](watchtower_logs_by_email.png)

@@ -88,11 +88,11 @@ Dashboard Expériences MLFlow :
 ![Dashboard MLFLow](./mlflow_experiments_dashboard.png)
 
 Modèles en production (registre de modèles):
-![Models Registry](mlflow_models_registry_2-1.png)
+![Models Registry](mlflow_models_registry_2.png)
 
 Meilleur modèle non BERT retenu :
-![Modèle retenu](mlflow_models_registry_best_LSTM_model-1.png)
-![Meilleur modèle non BERT](mlflolw_experiments_dashboard_best_LSTM_model-1.png)
+![Modèle retenu](mlflow_models_registry_best_LSTM_model.png)
+![Meilleur modèle non BERT](mlflolw_experiments_dashboard_best_LSTM_model.png)
 ---
 
 ## 🧪 CI, tests et versioning
@@ -109,7 +109,7 @@ Un [pipeline CI/CD](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/m
 - La validation de tests unitaires
 - La construction et le push de l'api conteneurisée sur dockerhub
 
-![github workflow](github_ci-cd-1.png)
+![github workflow](github_ci-cd.png)
 ---
 
 ## 🚀 Déploiement de l’API FastAPI (double)
@@ -146,21 +146,21 @@ Le projet propose un **double déploiement** de l’API, en local et dans le clo
 
 - 🏠 **NAS local** : [sentiment-api.greg-madman-nas.duckdns.org](https://sentiment-api.greg-madman-nas.duckdns.org)\
 Interface Docker Compose sur le NAS :
-![docker compose openmediavault](openmediavault_docker-compose_settings-1.png)
+![docker compose openmediavault](openmediavault_docker-compose_settings.png)
 
 - ☁️ **Google Cloud Run** : [sentiment-api-service-7772256003.europe-west1.run.app](https://sentiment-api-service-7772256003.europe-west1.run.app)\
 Interface de déploiement Google Cloud :
-![déploiement google cloud](google_cloud_interface-1.png)
+![déploiement google cloud](google_cloud_interface.png)
 
 ---
 
 #### 🔄 Déploiement continu automatisé (NAS uniquement)
 
 Pour assurer un **déploiement continu** sur le NAS, il a été choisi d'installer [**Watchtower**](https://containrrr.dev/watchtower/arguments/) pour rester dans un logique d'environnement 100% `docker`. Cet outil surveille toutes les **10 minutes** l’image Docker de l’API (`sentiment_api`) et, en cas de nouvelle version disponible sur DockerHub, redémarre automatiquement le conteneur avec la dernière image.
-![Docker Watchtower dans OMV Docker-Compose](watchtower_docker-1.png)
+![Docker Watchtower dans OMV Docker-Compose](watchtower_docker.png)
 
 Ce mécanisme garantit que la version déployée sur le NAS reste toujours synchronisée avec la dernière version validée par les tests sur GitHub Actions, **sans intervention manuelle**.
-![Logs watchtower dans docker (console SSH)](watchtower_logs-1.png)
+![Logs watchtower dans docker (console SSH)](watchtower_logs.png)
 
 Un **système d’alerte mail** notifie automatiquement toute mise à jour effectuée.
 ![Rapport mail watchtower update sentiment_api](watchtower_logs_by_email.png)
