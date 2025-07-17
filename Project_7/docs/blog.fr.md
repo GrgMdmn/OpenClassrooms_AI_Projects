@@ -107,7 +107,7 @@ Meilleur modèle non BERT retenu :
 L’API FastAPI est packagée via Docker, puis poussée sur DockerHub.  
 Un [pipeline CI/CD](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/main/.github/workflows/p7_ci-cd.yml) complet garantit **un déploiement reproductible**. Il assure:
 - La validation de tests unitaires
-- La construction et le push de l'api conteneurisée sur dockerhub
+- La construction et le push de l'api conteneurisée sur [dockerhub](https://hub.docker.com/r/grgmdmn/sentiment_api)
 
 ![github workflow](github_ci-cd.png)
 ---

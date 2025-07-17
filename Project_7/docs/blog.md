@@ -108,7 +108,7 @@ Best non-BERT selected model:
 The FastAPI API is packaged with Docker, then pushed to DockerHub.  
 A full [CI/CD pipeline](https://github.com/GrgMdmn/OpenClassrooms_AI_Projects/blob/main/.github/workflows/p7_ci-cd.yml) guarantees **reproducible deployment**, ensuring:  
 - Validation of unit tests  
-- Build and push of the containerized API to DockerHub
+- Build and push of the containerized API to [DockerHub](https://hub.docker.com/r/grgmdmn/sentiment_api)
 
 ![GitHub Workflow](github_ci-cd.png)
 
