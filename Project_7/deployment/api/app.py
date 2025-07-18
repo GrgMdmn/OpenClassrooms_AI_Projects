@@ -96,3 +96,29 @@ elif st.session_state.report_sent:
     
     if st.session_state.last_report_sent:
         st.info("📩 A complete report has been sent to the website administrator.")
+        
+        
+st.markdown(
+    """
+    <style>
+    .floating-message {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background-color: #f0f0f0;
+        color: #333333;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        box-shadow: 0 0 8px rgba(0,0,0,0.15);
+        max-width: 300px;
+        z-index: 1000;
+        opacity: 0.85;
+    }
+    </style>
+    <div class="floating-message">
+        Reported wrong predictions help improve the model. Please avoid including personal information.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
