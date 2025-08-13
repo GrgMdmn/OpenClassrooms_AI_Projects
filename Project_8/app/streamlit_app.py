@@ -11,9 +11,9 @@ import pickle
 
 # Configuration de l'API
 # prod docker
-# API_BASE_URL = os.getenv("MULTISEG_API_BASE_URL", "http://127.0.0.1:8080/api")
+API_BASE_URL = os.getenv("MULTISEG_API_BASE_URL", "http://127.0.0.1:8080/api")
 # test local
-API_BASE_URL = os.getenv("MULTISEG_API_BASE_URL", "http://127.0.0.1:8000")  # ← Port 8000 au lieu de 8080
+# API_BASE_URL = os.getenv("MULTISEG_API_BASE_URL", "http://127.0.0.1:8000")  # ← Port 8000 au lieu de 8080
 
 # Import des fonctions utils pour l'affichage local
 sys.path.append('/app')

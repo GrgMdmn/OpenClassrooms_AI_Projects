@@ -11,12 +11,12 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import pandas as pd
 from datetime import datetime, timedelta
 
-# TO UNCOMMENT FOR DEVELOPMENT. OTHERWISE, LEAVE AS IS
-# Access the .env file
-PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-sys.path.append(PARENT_DIR)
-# 🔐 Load environment variables (.env two levels above)
-load_dotenv()
+# # TO UNCOMMENT FOR DEVELOPMENT. OTHERWISE, LEAVE AS IS
+# # Access the .env file
+# PARENT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+# sys.path.append(PARENT_DIR)
+# # 🔐 Load environment variables (.env two levels above)
+# load_dotenv()
 
 # 🔁 Import the preprocessing function (LOCAL)
 from preprocessing import preprocess_tweet
