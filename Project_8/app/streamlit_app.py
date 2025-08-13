@@ -385,6 +385,27 @@ def display_class_legend(model_info):
                 </div>
                 """, unsafe_allow_html=True)
 
+# # Sidebar avec informations du modèle
+# with st.sidebar:
+#     st.markdown("## 🔧 Informations du Modèle")
+    
+#     model_info = get_model_info()
+#     if model_info:
+#         st.success("✅ Modèle chargé")
+#         st.write(f"**Nom:** {model_info.get('model_name', 'N/A')}")
+#         st.write(f"**Encoder:** {model_info.get('encoder', 'N/A')}")
+#         st.write(f"**Classes:** {model_info.get('num_classes', 'N/A')}")
+#         st.write(f"**Taille d'entrée:** {model_info.get('input_size', 'N/A')}")
+#         st.write(f"**Run ID:** {model_info.get('run_id', 'N/A')[:8]}...")
+#     else:
+#         st.error("❌ Modèle non disponible")
+
+#     st.markdown("---")
+#     st.markdown("## 🎯 Classes Segmentées")
+#     if model_info and 'class_names' in model_info:
+#         for i, class_name in enumerate(model_info['class_names']):
+#             st.write(f"{i}. {class_name}")
+            
 # Sidebar avec informations du modèle
 with st.sidebar:
     st.markdown("## 🔧 Informations du Modèle")
@@ -402,9 +423,43 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("## 🎯 Classes Segmentées")
-    if model_info and 'class_names' in model_info:
-        for i, class_name in enumerate(model_info['class_names']):
-            st.write(f"{i}. {class_name}")
+    
+    # ✨ NOUVEAU: Affichage avec carrés colorés
+    if model_info and 'class_names' in model_info and 'class_colors' in model_info:
+        class_names = model_info['class_names']
+        class_colors = model_info['class_colors']
+        
+        for i, (class_name, color) in enumerate(zip(class_names, class_colors)):
+            # Convertir RGB en hex
+            color_hex = f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
+            
+            # Affichage avec carré coloré
+            st.markdown(f"""
+            <div style="
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin: 0.3rem 0;
+                font-size: 0.9rem;
+            ">
+                <div style="
+                    width: 14px;
+                    height: 14px;
+                    background-color: {color_hex};
+                    border-radius: 2px;
+                    border: 1px solid rgba(0,0,0,0.2);
+                    flex-shrink: 0;
+                "></div>
+                <span style="font-weight: 500;">{i}. {class_name}</span>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        # Fallback si pas d'info couleur
+        if model_info and 'class_names' in model_info:
+            for i, class_name in enumerate(model_info['class_names']):
+                st.write(f"{i}. {class_name}")
+        else:
+            st.write("Informations des classes non disponibles")
 
 
 # Initialisation des états - MODIFIÉE pour séparer les résultats par onglet
