@@ -1,0 +1,38 @@
+services:
+  multiseg-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: multisegmentation_api
+    ports:
+      - "${NGINX_PORT:-8080}:${NGINX_PORT:-8080}"  # Port configurable, défaut 8080
+    environment:
+      # Configuration du port nginx
+      NGINX_PORT: "${NGINX_PORT:-8080}"
+
+      # Configuration MLflow pour le suivi des modèles
+      MLFLOW_TRACKING_URI: "${MLFLOW_TRACKING_URI}"        # ex: http://mlflow:5000
+      MLFLOW_S3_ENDPOINT_URL: "${MLFLOW_S3_ENDPOINT_URL}"  # ex: http://minio:9000 ou https://s3.amazonaws.com
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"            # clé d'accès S3/MinIO
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"    # clé secrète S3/MinIO
+
+      # Configuration email pour notifications (optionnel)
+      SMTP_SERVER: "${SMTP_SERVER}"                         # ex: smtp.gmail.com
+      SMTP_PORT: "${SMTP_PORT}"                             # ex: 587
+      SMTP_EMAIL: "${SMTP_EMAIL}"                           # ex: noreply@company.com
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"                     # mot de passe d'application SMTP
+      SMTP_FROM_ALIAS: "${SMTP_FROM_ALIAS}"                 # ex: "Multi-Segmentation API"
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"                         # ex: admin@company.com
+
+      # URL de base de l'API (utilisée par Streamlit pour les appels API)
+      MULTISEG_API_BASE_URL: "${MULTISEG_API_BASE_URL}"     # ex: http://localhost:8080/api ou https://your-domain.com/api
+
+# only if you have a reverse proxy server (like nginx-proxy or Traefik)
+#    networks:
+#      - proxy
+    restart: always
+
+# only if you have a reverse proxy server
+# networks:
+#   proxy:
+#     external: true

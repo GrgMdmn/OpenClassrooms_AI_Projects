@@ -10,17 +10,24 @@ Le système s'inscrit dans une chaîne complète de vision par ordinateur embarq
 
 ```
 ├── notebooks/
-│   ├── p8_notebook.py          # Notebook principal d'entraînement des modèles
-│   ├── requirements.txt        # Dépendances pour l'entraînement et expérimentation
+│   ├── p8_notebook.ipynb       # Notebook principal d'entraînement des modèles
 │   └── content/
 │       └── data/
 │           ├── new_images_to_predict/     # Images diverses pour tests d'inférence
 │           └── test_images_sample/        # Échantillon Cityscapes avec masques
 ├── utils/
 │   └── utils.py                # Fonctions communes (prétraitement, chargement, inférence)
-├── api/                        # [En développement] API FastAPI
-│   └── requirements.txt        # Dépendances légères pour l'API uniquement
-├── .env                        # Variables d'environnement (MLFlow, MinIO)
+├── app/                        # API et Interface Web
+│   ├── main.py                 # API FastAPI avec routes de segmentation
+│   ├── streamlit_app.py        # Interface web interactive
+│   └── requirements.txt        # Dépendances pour l'API et l'interface
+├── cityscapes_config.json      # Configuration des classes Cityscapes
+├── .env.example                # Template de variables d'environnement
+├── Dockerfile                  # Configuration Docker
+├── docker-compose.yml.example  # Template Docker Compose
+├── nginx.conf                  # Configuration reverse proxy
+├── start.sh                    # Script de démarrage des services
+├── .dockerignore              # Optimisation du build Docker
 └── README.md
 ```
 
@@ -29,8 +36,9 @@ Le système s'inscrit dans une chaîne complète de vision par ordinateur embarq
 **État actuel du développement :**
 - ✅ **Entraînement des modèles** : Complet (notebook + MLFlow + MinIO)
 - ✅ **Fonctions d'inférence** : Développées et prêtes
-- 🔄 **API FastAPI** : En cours de développement
-- 🔄 **Déploiement** : Conteneurisation Docker + NAS personnel
+- ✅ **API FastAPI** : API complète avec endpoints de segmentation
+- ✅ **Interface Web** : Interface Streamlit pour upload et visualisation
+- ✅ **Déploiement** : Conteneurisation Docker complète + reverse proxy nginx
 
 ## 🏷️ Classes de Segmentation
 
@@ -83,7 +91,9 @@ Utilisation de la bibliothèque **[segmentation_models](https://github.com/qubve
 - **Architectures** : [segmentation_models](https://github.com/qubvel/segmentation_models) (qubvel)
 - **Gestion des expériences** : MLFlow
 - **Stockage des artefacts** : MinIO (S3-compatible)
-- **API** : FastAPI *(en développement)*
+- **API** : FastAPI avec validation Pydantic
+- **Interface** : Streamlit pour l'interaction utilisateur
+- **Reverse Proxy** : nginx pour routage API/Interface
 - **Déploiement** : Docker + NAS personnel *(solutions souveraines)*
 
 ## 📊 Dataset
@@ -95,45 +105,173 @@ Utilisation de la bibliothèque **[segmentation_models](https://github.com/qubve
 
 ## 🚀 Installation et Configuration
 
-### Installation
+### Option 1: Déploiement Docker (Recommandé)
+
+#### Configuration rapide
 ```bash
+# Cloner le projet
 git clone https://github.com/GrgMdmn/OpenClassrooms_AI_Projects.git
 cd OpenClassrooms_AI_Projects/Project_8
 
-# Pour l'expérimentation et l'entraînement
+# Copier et adapter la configuration
+cp .env.example .env
+cp docker-compose.yml.example docker-compose.yml
+
+# Éditer les variables d'environnement
+nano .env
+```
+
+#### Variables d'environnement requises
+```bash
+# Configuration du serveur
+NGINX_PORT=8080
+
+# Configuration MLflow
+MLFLOW_TRACKING_URI=http://localhost:5000
+MLFLOW_S3_ENDPOINT_URL=http://localhost:9000
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+
+# URL de base de l'API (pour Streamlit)
+MULTISEG_API_BASE_URL=http://localhost:8080/api
+```
+
+#### Déploiement
+```bash
+# Construction et lancement
+docker-compose up --build
+
+# Ou en arrière-plan
+docker-compose up -d --build
+
+# Accès à l'application
+# Interface web: http://localhost:8080
+# API docs: http://localhost:8080/api/docs
+# Health check: http://localhost:8080/health
+```
+
+#### Test local sans docker-compose
+```bash
+# Lancement avec port personnalisé
+docker build -t multiseg-api .
+docker run -p 3000:3000 \
+  -e NGINX_PORT=3000 \
+  -e MLFLOW_TRACKING_URI=http://host.docker.internal:5000 \
+  -e MULTISEG_API_BASE_URL=http://localhost:3000/api \
+  multiseg-api
+```
+
+### Option 2: Installation Locale (Développement)
+
+#### Pour l'expérimentation et l'entraînement
+```bash
 cd notebooks
 pip install -r requirements.txt
-
-# Pour l'API uniquement (plus léger)
-cd api  
-pip install -r requirements.txt
 ```
 
-### Configuration MLFlow et MinIO
-Créer un fichier `.env` à la racine du projet :
+#### Pour l'API uniquement
 ```bash
-MLFLOW_TRACKING_URI=http://localhost:5000 # mlflow url
-MLFLOW_S3_ENDPOINT_URL=http://localhost:9000 # minio url
-AWS_ACCESS_KEY_ID=your_access_key # minio login
-AWS_SECRET_ACCESS_KEY=your_secret_key # minio password
+cd app
+pip install -r requirements.txt
+
+# Lancement manuel des services
+# Terminal 1: FastAPI
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# Terminal 2: Streamlit  
+streamlit run app/streamlit_app.py --server.port 8501
 ```
 
-Le chargement des variables se fait via `python-dotenv` dans le notebook et l'API.
+## 🌐 Utilisation de l'API
 
-## 🌐 API et Déploiement
+### Endpoints Principaux
 
-### API FastAPI (En développement)
-L'API utilisera les fonctions de `utils.py` et sera déployée via Docker sur NAS personnel pour maintenir la souveraineté des données.
+#### Segmentation d'image
+```bash
+# Upload et segmentation via curl
+curl -X POST "http://localhost:8080/api/segment" \
+  -F "file=@image.jpg" \
+  -F "model_name=unet_mobilenetv2" \
+  -F "confidence_threshold=0.5"
+```
+
+#### Informations sur les modèles
+```bash
+# Liste des modèles disponibles
+curl "http://localhost:8080/api/models"
+
+# Détails d'un modèle
+curl "http://localhost:8080/api/models/unet_mobilenetv2"
+```
+
+#### Monitoring
+```bash
+# Health check
+curl "http://localhost:8080/health"
+
+# Métriques API
+curl "http://localhost:8080/api/metrics"
+```
+
+### Interface Web
+
+L'interface Streamlit accessible sur `http://localhost:8080` permet :
+- **Upload d'images** par glisser-déposer ou sélection
+- **Sélection du modèle** parmi les modèles disponibles
+- **Ajustement des paramètres** (seuil de confiance, etc.)
+- **Visualisation** des résultats avec overlay des segmentations
+- **Téléchargement** des masques de segmentation
+
+## 🔧 Architecture de Déploiement
+
+### Structure des Services
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   nginx:8080    │────│  FastAPI:8000    │────│   MLFlow/MinIO  │
+│  (Reverse Proxy)│    │  (API Backend)   │    │ (Model Storage) │
+└─────────┬───────┘    └──────────────────┘    └─────────────────┘
+          │
+┌─────────▼───────┐
+│  Streamlit:8501 │
+│ (Web Interface) │
+└─────────────────┘
+```
+
+### Volumes et Persistance
+- **Modèles** : Téléchargés depuis MLFlow/MinIO au démarrage
+- **Uploads temporaires** : Stockage en mémoire (pas de persistance)
+- **Logs** : Accessibles via `docker-compose logs`
+
+### Monitoring et Logs
+```bash
+# Logs en temps réel
+docker-compose logs -f
+
+# Logs d'un service spécifique
+docker-compose logs -f multiseg-api
+
+# Métriques de performance
+curl http://localhost:8080/api/metrics
+```
 
 ## 🔮 Améliorations Futures
 
-- **Prétraitement adaptatif** : Prétraitement spécifique à chaque backbone au lieu de la normalisation générique (division par 255)
-- **Généralisation des conditions** : Extension au-delà des conditions urbaines de Cityscapes (météo, environnements variés)
-- **Optimisation temps réel** : Évaluation et amélioration des performances d'inférence
-- **Résolution variable** : Support de tailles d'images variables au-delà du format fixe 224x224
-- **Transfer learning ciblé** : Utilisation de backbones pré-entraînés sur Mapillary Vistas plutôt qu'ImageNet pour un meilleur alignement domaine
-- **Segmentation des personnes** : Amélioration de l'IoU sur les humains via data augmentation (IA générative)
-- **Limitation du dataset** : Les performances similaires entre modèles suggèrent une limite liée à la qualité/diversité des données d'entraînement
+### Modèles et Performance
+- **Prétraitement adaptatif** : Prétraitement spécifique à chaque backbone au lieu de la normalisation générique
+- **Optimisation temps réel** : Amélioration des performances d'inférence pour déploiement embarqué
+- **Résolution d'entraînement améliorée** : L'API accepte toutes les résolutions d'images, mais l'entraînement a été effectué sur des images redimensionnées à 224x224. Un réentraînement sur des résolutions supérieures (512x512, 1024x1024) pourrait améliorer la précision en capturant plus de détails fins, au prix d'une augmentation des besoins en puissance de calcul
+- **Transfer learning ciblé** : Utilisation de backbones pré-entraînés sur Mapillary Vistas
+
+### Infrastructure et Déploiement
+- **Scaling horizontal** : Support Kubernetes pour déploiement multi-instances
+- **Cache intelligent** : Mise en cache des prédictions pour images similaires
+- **API Gateway** : Intégration d'un gateway pour authentification et rate limiting
+- **Monitoring avancé** : Intégration Prometheus/Grafana pour métriques détaillées
+
+### Données et Généralisation
+- **Généralisation des conditions** : Extension au-delà des conditions urbaines de Cityscapes
+- **Segmentation des personnes** : Amélioration de l'IoU via data augmentation (IA générative)
+- **Datasets additionnels** : Intégration de datasets complémentaires pour robustesse
 
 ---
 

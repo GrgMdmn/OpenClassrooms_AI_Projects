@@ -8,6 +8,14 @@ import matplotlib.pyplot as plt
 import mlflow
 
 
+# Au début de utils.py, après les imports
+import segmentation_models as sm
+import tensorflow.keras.backend as K
+
+# Configuration du backend segmentation_models (comme dans le notebook)
+sm.set_framework('tf.keras')
+sm.backend = K
+
 
 def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True):
     """
@@ -80,6 +88,7 @@ def load_best_model_from_registry(model_name):
 
     # Récupérer la dernière version en Production (votre logique)
     versions = client.search_model_versions(f"name='{model_name}'")
+    
     prod_versions = [v for v in versions if v.current_stage == "Production"]
     if not prod_versions:
         raise RuntimeError(f"Aucune version en Production trouvée pour {model_name}")
@@ -216,7 +225,7 @@ def colorize_mask(mask, group_colors):
 
 
 def run_inference_and_visualize(image_path, model, encoder_name, img_size, mapping_config, 
-                               mask_path=None, save_dir=None, show_stats=True):
+                               mask_path=None, save_dir=None, show_stats=True, show_plot=True):
     print(f"=== INFÉRENCE SUR {os.path.basename(image_path)} ===")
     
     img_preprocessed, img_display, mask_gt = preprocess_image_and_mask(
@@ -290,7 +299,6 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
         fig.savefig(fig_path, dpi=150, bbox_inches='tight')
         print(f"💾 Résultat sauvegardé: {fig_path}")
     
-    plt.show()
     
     if show_stats:
         print("\n📊 Statistiques du masque prédit:")
@@ -307,5 +315,9 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
                 if class_id < len(mapping_config['group_names']):
                     percentage = (count / mask_gt.numpy().size) * 100
                     print(f"   {mapping_config['group_names'][class_id]}: {count} pixels ({percentage:.1f}%)")
-    
-    return predicted_mask
+                    
+    if show_plot:
+        plt.show()
+        return predicted_mask
+    else:
+        return predicted_mask, fig
