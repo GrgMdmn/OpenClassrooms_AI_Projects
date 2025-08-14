@@ -28,7 +28,9 @@ La segmentation sémantique constitue un enjeu critique pour les véhicules auto
 
 ### 1.3 Dataset et Métriques
 
-Le dataset Cityscapes¹ comprend 2380 images d'entraînement, 595 de validation et 500 de test, avec regroupement des 34 classes originales en 8 catégories pertinentes pour la conduite autonome. L'évaluation s'appuie principalement sur le **Mean Intersection over Union (IoU)**, métrique standard pour la segmentation sémantique.
+Le dataset Cityscapes¹ comprend **2975 images d'entraînement** que nous avons divisées en **2380 images d'entraînement** (80%) et **595 images de validation** (20%). Le jeu de données **"val" officiel de Cityscapes (500 images) sert de jeu de test** pour notre évaluation, car il contient les masques de vérité terrain nécessaires et n'intervient pas dans l'apprentissage. Le jeu "test" officiel de Cityscapes (1525 images) n'est pas utilisé car il ne contient pas de masques de vérité et est destiné au concours Kaggle.
+
+Les 34 classes originales sont regroupées en 8 catégories pertinentes pour la conduite autonome. L'évaluation s'appuie principalement sur le **Mean Intersection over Union (IoU)**, métrique standard pour la segmentation sémantique.
 
 ---
 
@@ -76,7 +78,7 @@ La famille **DeepLab**<sup>17</sup> utilise les convolutions à trous (atrous/di
 
 Ces architectures<sup>19,20</sup> sont spécifiquement conçues pour l'inférence temps réel avec des compromis précision/vitesse optimisés. **ICNet** utilise des branches multi-résolution en cascade, tandis que **BiSeNet** sépare les chemins spatiaux et contextuels.
 
-*Justification du non-usage :* Bien qu'alignées avec nos objectifs temps réel, ces architectures nécessitent des implémentations custom complexes non disponibles dans segmentation_models_pytorch. La priorité était donnée à la validation de concept avec des architectures standard avant optimisation spécifique.
+*Justification du non-usage :* Bien qu'alignées avec nos objectifs d'efficacité, ces architectures nécessitent des implémentations custom complexes non disponibles dans [**segmentation_models**](https://github.com/qubvel/segmentation_models) (TensorFlow/Keras). Dans le cadre de cette étude académique exploratoire, la priorité était donnée à la validation de concept avec des architectures standard bien documentées plutôt qu'à l'optimisation temps réel spécifique.
 
 #### 2.1.5 Approches Basées Transformers
 
@@ -87,8 +89,8 @@ Les architectures basées **Vision Transformers**<sup>21</sup> ont démontré de
 *Justification du non-usage :* Les transformers, bien que performants, présentent plusieurs obstacles pour notre contexte :
 - **Coût computationnel** : Complexité quadratique en attention, inadaptée aux contraintes GPU T4
 - **Données requises** : Nécessitent des datasets massifs pour convergence optimale
-- **Latence critique** : Temps d'inférence prohibitifs (>10s sur N100) incompatibles avec contraintes temps réel embarquées (<2s requis)
-- **Maturité** : Écosystème moins mature pour optimisations embarquées
+- **Latence critique** : Temps d'inférence prohibitifs (>10s sur N100) incompatibles avec interface web responsive
+- **Maturité** : Écosystème moins mature pour optimisations pratiques
 
 ### 2.2 Justification de Notre Sélection : U-Net et FPN
 
@@ -97,18 +99,18 @@ Notre choix s'est porté sur **U-Net** et **FPN** pour plusieurs raisons straté
 **Avantages Techniques :**
 - **Efficacité computationnelle** : Compatible avec contraintes GPU T4 et sessions 2h
 - **Maturité** : Architectures robustes avec optimisations établies
-- **Flexibilité** : Support natif dans segmentation_models_pytorch
+- **Flexibilité** : Support natif dans [segmentation_models](https://github.com/qubvel/segmentation_models) (TensorFlow/Keras)
 - **Transfer learning** : Adaptation aisée avec backbones pré-entraînés
 
 **Pertinence Métier :**
 - **Multi-échelle** : FPN gère naturellement les variations d'échelle urbaines
 - **Détails fins** : U-Net préserve l'information spatiale critique pour frontières précises
-- **Temps réel** : Architectures compatibles avec futures contraintes latence embarquées (validées sur N100)
+- **Contraintes pratiques** : Architectures adaptées aux ressources limitées disponibles
 
-**Contraintes Temps Réel Futures :**
-- **Validation intermédiaire** : Tests d'inférence sur serveur Intel N100 (processeur basse consommation)
-- **Latence cible** : <2s d'inférence représentatif des contraintes embarquées futures
-- **Objectif final** : Déploiement temps réel sur hardware véhicule autonome (hors scope de cette étude)
+**Contraintes de Validation :**
+- **Tests d'inférence** : Serveur Intel N100 pour validation fonctionnelle
+- **Latence web** : <2s d'inférence pour interface utilisateur responsive
+- **Objectif futur** : Déploiement temps réel sur hardware véhicule autonome (hors scope de cette étude)
 - **Efficacité énergétique** : Optimisation consommation pour systèmes embarqués
 
 **Contraintes Pratiques :**
@@ -118,7 +120,15 @@ Notre choix s'est porté sur **U-Net** et **FPN** pour plusieurs raisons straté
 
 ### 2.3 Positionnement par Rapport à l'État de l'Art
 
-Dans le contexte de la conduite autonome, la segmentation sémantique temps réel constitue un défi majeur. Les recherches récentes<sup>8</sup> mettent l'accent sur l'optimisation du compromis précision/vitesse, avec des architectures légères capables de fonctionner sur hardware embarqué. **Pour valider la faisabilité de notre approche, les tests d'inférence sont réalisés sur serveur Intel N100, avec un objectif de latence <2s** représentatif des contraintes embarquées futures. Les métriques d'évaluation incluent non seulement la précision (Mean IoU) mais aussi la latence et la consommation mémoire.
+Dans le contexte de cette étude académique exploratoire, notre approche se distingue par ses contraintes pratiques spécifiques. Les recherches récentes<sup>8</sup> mettent l'accent sur l'optimisation du compromis précision/vitesse pour applications industrielles, avec des architectures spécialisées et des ressources computationnelles importantes.
+
+**Notre positionnement se caractérise par :**
+- **Ressources limitées** : GPU T4 Google Colab avec sessions limitées à 2h maximum
+- **Approche comparative** : Focus sur l'évaluation systématique d'architectures standard plutôt que sur l'optimisation spécialisée
+- **Validation fonctionnelle** : Tests d'inférence sur serveur Intel N100 pour interface web (<2s pour UX responsive)
+- **Cadre académique** : Priorité à la compréhension des compromis architecturaux avant optimisation industrielle
+
+Cette approche permet une analyse rigoureuse des fondamentaux tout en posant les bases pour de futures optimisations spécialisées. Les métriques d'évaluation se concentrent sur la précision (Mean IoU) et l'efficacité computationnelle dans nos contraintes matérielles.
 
 ### 2.4 Benchmarks Cityscapes et Performances État de l'Art
 
@@ -126,9 +136,9 @@ Le benchmark officiel Cityscapes<sup>9</sup> établit les métriques standard po
 
 Des études récentes<sup>11</sup> indiquent qu'un **Mean IoU ≥ 75%** constitue un seuil acceptable pour les applications de conduite autonome, particulièrement pour les classes critiques comme les humains et véhicules.
 
-### 2.5 Segmentation Models PyTorch
+### 2.5 Segmentation Models (TensorFlow/Keras)
 
-La bibliothèque **segmentation_models_pytorch**<sup>12</sup> fournit une implémentation unifiée de 12 architectures encoder-décodeur avec plus de 800 encodeurs pré-entraînés. Cette bibliothèque facilite l'expérimentation comparative et l'optimisation des hyperparamètres, constituant la base technique de notre étude.
+La bibliothèque [**segmentation_models**](https://github.com/qubvel/segmentation_models)<sup>12</sup> (TensorFlow/Keras) fournit une implémentation unifiée de 12 architectures encoder-décodeur avec plus de 500 encodeurs pré-entraînés. Cette bibliothèque facilite l'expérimentation comparative et l'optimisation des hyperparamètres, constituant la base technique de notre étude.
 
 ---
 
@@ -149,6 +159,8 @@ La bibliothèque **segmentation_models_pytorch**<sup>12</sup> fournit une implé
 - **EfficientNetB0** : Architecture efficace avec scaling compound optimal¹⁴
 - **ResNet34** : Architecture résiduelle standard comme référence
 
+*Note technique :* FPN utilise VGG16 comme backbone par défaut (vanilla) dans l'implémentation [segmentation_models](https://github.com/qubvel/segmentation_models), tandis que U-Net peut s'entraîner entièrement from scratch.
+
 ### 3.2 Stratégies d'Entraînement
 
 - **Frozen Encoder** : Backbone gelé pour transfer learning rapide
@@ -157,15 +169,15 @@ La bibliothèque **segmentation_models_pytorch**<sup>12</sup> fournit une implé
 ### 3.3 Pipeline de Données
 
 - **Résolution** : Images redimensionnées à 224×224 pixels pour optimisation mémoire
-- **Normalisation** : Preprocessing spécifique au backbone via segmentation_models
-- **Augmentation** : Retournement horizontal aléatoire (p=0.5) et ajustement luminosité (δ=0.1)
+- **Normalisation** : Preprocessing spécifique au backbone via [segmentation_models](https://github.com/qubvel/segmentation_models)
+- **Augmentation** : Retournement horizontal aléatoire (p=0.5) et/ou ajustement luminosité aléatoire (δ=0.1)
 
 ### 3.4 Configuration d'Entraînement
 
 - **Loss** : Sparse categorical crossentropy
 - **Optimiseur** : Adam (lr=1e-4 base, 5e-5 fine-tuning)
-- **Régularisation** : Early stopping (patience=5), ReduceLROnPlateau
-- **Métriques** : Accuracy pixel-wise, Mean IoU
+- **Régularisation** : Early stopping (patience=5), ReduceLROnPlateau (patience=3)
+- **Métriques** : Mean IoU (principal), Sparse categorical accuracy
 
 ---
 
@@ -173,6 +185,7 @@ La bibliothèque **segmentation_models_pytorch**<sup>12</sup> fournit une implé
 
 ### 4.1 Performance Globale
 
+![Comparaison des performances par architecture et backbone](performances_comparison.png)
 [FIGURE_1] : Comparaison des performances par architecture et backbone
 
 Le tableau suivant présente les résultats des trois meilleurs modèles :
@@ -185,27 +198,41 @@ Le tableau suivant présente les résultats des trois meilleurs modèles :
 
 ### 4.2 Analyse Comparative des Architectures
 
-**FPN domine U-Net** : Les résultats démontrent la supériorité systématique de FPN sur U-Net, avec des gains moyens de +3-5% en Mean IoU. Cette performance s'explique par la capacité de FPN à mieux gérer les variations d'échelle présentes dans les scènes urbaines.
+**FPN domine U-Net** : Les résultats démontrent la supériorité de FPN sur U-Net, avec un gain moyen de **~1.2%** en Mean IoU. Cette performance s'explique par la capacité de FPN à mieux gérer les variations d'échelle présentes dans les scènes urbaines.
 
-[FIGURE_2] : Distribution des performances FPN vs U-Net par backbone
+![Comparaison FPN vs UNET IoU](fpn_vs_unet.png)\
+[FIGURE_2] : Distribution générale des performances (IoU) FPN vs U-Net (moyennes)
 
 ### 4.3 Impact des Backbones
 
-**EfficientNetB0 optimal** : Ce backbone présente le meilleur compromis précision/efficacité pour les contraintes embarquées, surpassant MobileNetV2 (+2-3% IoU) tout en restant computationnellement léger comparé à ResNet34.
+**EfficientNetB0 optimal** : Ce backbone présente le meilleur compromis précision/efficacité pour les contraintes embarquées, surpassant MobileNetV2 de **~1.2%** en IoU tout en restant computationnellement léger comparé à ResNet34.
 
-[FIGURE_3] : Performance vs complexité computationnelle par backbone
+![Comparaison performances selon backbones](backbones_performances_comparison.png)\
+[FIGURE_3] : Distribution générale des performances (IoU) selon le backbone.
 
 ### 4.4 Stratégies d'Entraînement
 
-**Fine-tuning supérieur au Frozen** : Le fine-tuning apporte des gains significatifs (+2-3% IoU) justifiant le coût computationnel additionnel, particulièrement pour l'adaptation au domaine de conduite autonome.
+**Fine-tuning supérieur au Frozen** : L'analyse des configurations principales révèle que le fine-tuning apporte des gains d'IoU moyen variables selon l'architecture:
+- Pour **MobileNetV2**, il apporte environ **+0.5%** pour **FPN** et environ **+1.6%** pour **U-net**
+- Pour **EfficientNetB0**, il apporte un gain plus important de **+2.6%** pour FPN et relativement négligeable pour **U-net**
+
+![Comparaison FPN vs UNET IOU, backbone avec ou sans fine-tuning](fpn_vs_unet_fine_tune.png)\
+[FIGURE_4] : Distribution des performances (IoU) FPN vs U-Net par backbone (Comparaison avec ou sans fine tuning du backbone)
 
 ### 4.5 Gains de l'Augmentation
 
-**Impact modéré mais positif** : L'augmentation des données améliore la robustesse avec des gains de +1-2% IoU, particulièrement bénéfique pour les classes sous-représentées.
+**Impact variable selon architecture** : L'augmentation aléatoire des données montre des effets contrastés:
+- Performances moindres pour un contexte **Vanilla** (encodeur intégré pour **U-Net**, VGG16 pour **FPN**)
+- Augmentation favorable pour **FPN** (**+0.5%**), mais défavorable (**-0.7%**) pour U-Net avec un backbone **MobileNetV2**.
+- Apport systématiquement positif avec un backbone **EfficientNetB0** (**+1.0%** pour **FPN** et **+0.4%** pour **U-Net**)
 
-[FIGURE_4] : Comparaison avec/sans augmentation par classe sémantique
+![Comparaison FPN vs UNET IOU, data augmentation](fpn_vs_unet_data_augmentation.png)\
+[FIGURE_5] : Distribution des performances (IoU) FPN vs U-Net par backbone (Comparaison avec ou sans Data Augmentation aléatoire)
 
 ### 4.6 Analyse par Classe Sémantique
+
+![Matrice de confusion pour meilleur modèle](best_model_confusion_matrix.png)\
+[FIGURE_6] : Matrice de confusion (en %) des différentes catégories pour le meilleur modèle
 
 Performance détaillée du modèle optimal (FPN_efficientnetb0_finetune_augTrue) :
 
@@ -220,7 +247,10 @@ Performance détaillée du modèle optimal (FPN_efficientnetb0_finetune_augTrue)
 | **Object** | 0.374 | ❌ Insuffisant - Critique |
 | **Nature** | 0.863 | ✅ Bon |
 
-**Analyse critique** : Les performances sur les classes **Human** et **Object** (signalétique) nécessitent amélioration prioritaire étant donné leur criticité pour la sécurité. Cette limitation rejoint les constats de la littérature sur les défis de segmentation des petits objets¹⁵.
+**Analyse critique** : Les performances sur les classes **Human** et **Object** (signalétique) nécessitent amélioration prioritaire étant donné leur criticité pour la sécurité. Cette limitation rejoint les constats de la littérature sur les défis de segmentation des petits objets¹⁵. Les faibles IoU sur certaines catégories peuvent s'expliquer en raison de leur faible représentation sur le jeu de données (entrainement comme test).
+
+![Répartition des pixels sur les 500 images de test (jeu de données cityscapes "val")](repartition_classes_jeu_données_val.png)\
+[FIGURE_7] : Répartition des pixels sur les 500 images de test (jeu de données cityscapes "val")
 
 ---
 
@@ -326,7 +356,7 @@ Cette base technique solide ouvre la voie vers un système de perception embarqu
 
 11. Wen, L.-H., & Jo, K.-H. (2022). Deep learning-based perception systems for autonomous driving: A comprehensive survey. *Neurocomputing*.
 
-12. Iakubovskii, P. (2019). Segmentation Models Pytorch. *GitHub repository*.
+12. Iakubovskii, P. (2019). Segmentation Models. *GitHub repository* (TensorFlow/Keras). https://github.com/qubvel/segmentation_models
 
 13. Sandler, M., Howard, A., Zhu, M., et al. (2018). MobileNetV2: Inverted Residuals and Linear Bottlenecks. *CVPR*.
 
