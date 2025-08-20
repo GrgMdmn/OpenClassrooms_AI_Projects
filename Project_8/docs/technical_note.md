@@ -30,7 +30,7 @@ La segmentation sémantique constitue un enjeu critique pour les véhicules auto
 
 Le dataset Cityscapes¹ comprend **2975 images d'entraînement** que nous avons divisées en **2380 images d'entraînement** (80%) et **595 images de validation** (20%). Le jeu de données **"val" officiel de Cityscapes (500 images) sert de jeu de test** pour notre évaluation, car il contient les masques de vérité terrain nécessaires et n'intervient pas dans l'apprentissage. Le jeu "test" officiel de Cityscapes (1525 images) n'est pas utilisé car il ne contient pas de masques de vérité et est destiné au concours Kaggle.
 
-Les 34 classes originales sont regroupées en 8 catégories pertinentes pour la conduite autonome. L'évaluation s'appuie principalement sur le **Mean Intersection over Union (IoU)**, métrique standard pour la segmentation sémantique.
+Les 34 classes originales sont regroupées en 8 catégories pertinentes pour la conduite autonome. L'évaluation s'appuie principalement sur le **Mean Intersection over Union (IoU)**, métrique standard pour la segmentation sémantique. Le mapping est largement inspiré de celui proposé sur le github de Cityscapes dans [labels.py](https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/helpers/labels.py).
 
 ---
 
@@ -169,7 +169,7 @@ La bibliothèque [**segmentation_models**](https://github.com/qubvel/segmentatio
 ### 3.3 Pipeline de Données
 
 - **Résolution** : Images redimensionnées à 224×224 pixels pour optimisation mémoire
-- **Normalisation** : Preprocessing spécifique au backbone via [segmentation_models](https://github.com/qubvel/segmentation_models)
+- **Normalisation** : Division par 255 (pixels dans [0,1])
 - **Augmentation** : Retournement horizontal aléatoire (p=0.5) et/ou ajustement luminosité aléatoire (δ=0.1)
 
 ### 3.4 Configuration d'Entraînement

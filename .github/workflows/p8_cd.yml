@@ -50,24 +50,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_LOG }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision_api
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./Project_8
           file: ./Project_8/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision_api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
