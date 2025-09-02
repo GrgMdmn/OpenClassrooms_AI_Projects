@@ -178,12 +178,18 @@ Entraînement séquentiel des 4 modèles à 512×512, puis à 768×768, suivi de
 ![mIoU + Accuracy](mIoU_accuracy.png)
 *Fig.1: Mean IoU et Accuracy par expérience*
 
-| **Modèle** | **mIoU** | **Gain vs meilleure baseline** | **Paramètres** | **Taille modèle** | **Temps inférence** |
-|------------|----------|-------------------------------|----------------|--------------------|-------------------|
+
+| **Modèle** | **mIoU** | **Gain** | **Paramètres** | **Taille** | **Temps** |
+|------------|----------|----------|----------------|------------|-----------|
 | **SegFormer-B1** | **79.98%** | **+1.31%** | **13.68M** | **52MB** | **1.39s** |
 | **FPN+ResNet34** | **79.22%** | **+0.55%** | **23.16M** | **88MB** | **0.73s** |
 | **FPN+EfficientNet-B0** | **78.67%** | *baseline* | **5.76M** | **22MB** | **0.48s** |
 | **SegFormer-B0** | **77.91%** | **-0.76%** | **3.72M** | **14MB** | **0.87s** |
+
+*Temps d'inférence mesurés sur CPU Intel Xeon @ 2.20GHz (2 vCPUs) de Google Colab*
+
+**Variabilité des performances selon l'architecture CPU :**
+Les temps d'inférence révèlent des comportements distincts selon la philosophie architecturale. Les **CPU haute performance** (Ryzen 9600X, Intel Xeon Colab) avec leurs hautes fréquences et gros caches (32-56MB) favorisent ResNet+FPN (0.5s vs 1.5s pour SegFormer). Le **N100**, optimisé pour l'efficacité énergétique mais bénéficiant des optimisations Intel modernes (MKL/oneDNN, AVX2) pour les calculs matriciels, avantage SegFormerB1 (2s vs 5s pour FPN). Cette dichotomie souligne l'importance du choix matériel selon le type de modèle déployé.
 
 ### Analyse Détaillée par Classes
 
@@ -271,21 +277,17 @@ Cette preuve de concept valide l'intérêt des architectures Transformer pour la
 
 ## L'analyse de la feature importance globale et locale du nouveau modèle
 
-### Complexité de l'Explicabilité des Transformers
+### Scope et Limitations
 
-L'analyse d'explicabilité des modèles de deep learning basés sur l'architecture Transformer représente un défi technique considérable, particulièrement pour des tâches de segmentation sémantique dense comme celle étudiée ici. Les méthodes traditionnelles d'explicabilité s'appuient généralement sur les cartes d'attention obtenues ou utilisent des méthodes de propagation heuristiques le long du graphe d'attention, mais ces approches présentent des limitations importantes dans le contexte d'une preuve de concept.
+L'analyse d'explicabilité des architectures Transformer pour la segmentation dense représente un défi technique considérable qui constitue **un travail à part entière**, dépassant le cadre d'une preuve de concept. Contrairement aux approches CNN où les cartes d'activation sont plus directement interprétables, les mécanismes d'attention complexes des Transformers nécessitent des méthodologies spécialisées.
 
-### Approches Disponibles dans la Littérature
+### Outils Disponibles vs Explicabilité Complète
 
-Dans le cadre de cette mission d'évaluation technique, une analyse d'explicabilité approfondie dépasse le scope d'une preuve de concept. Néanmoins, les auteurs de SegFormer fournissent des éléments d'analyse via l'**effective receptive field (ERF)** qui permet de visualiser comment l'encodeur produit naturellement des attentions locales dans les couches inférieures (similaires aux convolutions) et des attentions hautement non-locales dans les couches supérieures pour capturer le contexte global.
+Les auteurs de SegFormer fournissent des éléments d'analyse via l'**effective receptive field (ERF)** qui révèle la structure hiérarchique du modèle : attentions locales dans les couches inférieures, globales dans les supérieures. Ces visualisations montrent **"où"** le modèle porte son attention, mais n'expliquent pas **"pourquoi"** ces régions sont critiques pour la décision finale.
 
-Cette différence fondamentale avec les CNN explique en partie la supériorité de SegFormer sur les classes nécessitant une compréhension contextuelle étendue (Human, Vehicle, Object) observée dans nos résultats expérimentaux.
+**Limitation fondamentale :** Les cartes d'attention ne correspondent pas nécessairement à l'importance causale réelle des pixels. De plus, les interactions complexes entre Mix-FFN, connexions résiduelles, et fusion multi-échelles rendent l'attribution pixel-par-pixel particulièrement ardue. Une explicabilité rigoureuse nécessiterait des approches comme le **Deep Taylor Decomposition** pour propager correctement les scores de pertinence à travers l'architecture.
 
-### Limitations et Perspectives
-
-Pour une analyse d'explicabilité complète, des méthodes spécialisées comme celle basée sur le **Deep Taylor Decomposition** seraient nécessaires pour propager correctement les scores de pertinence à travers les couches d'attention et les connexions résiduelles. Ces approches, bien que techniquement réalisables, nécessitent des développements spécifiques qui dépassent le cadre temporel d'une preuve de concept.
-
-L'analyse des patterns attentionnels de SegFormer révèle néanmoins que le modèle développe une **"compréhension scénique"** globale des environnements urbains, expliquant sa supériorité sur les classes nécessitant une contextualisation étendue par rapport aux approches CNN traditionnelles.
+Cette différence architecturale avec les CNN explique néanmoins les gains observés sur les classes contextuelles (Human +1.78%, Vehicle +1.05%, Object +0.56%), suggérant une **"compréhension scénique"** globale sans pour autant permettre une explicabilité fine facilement accessible.
 
 ---
 
