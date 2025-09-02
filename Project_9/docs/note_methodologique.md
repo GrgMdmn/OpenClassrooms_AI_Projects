@@ -299,26 +299,24 @@ L'analyse des patterns attentionnels de SegFormer révèle néanmoins que le mod
 - **Dataset unique** : Généralisation à d'autres environnements urbains non-validée
 - **Protocole d'évaluation statique** : Images redimensionnées avec déformation du ratio, contrairement à la méthodologie sliding window du papier original
 
-**2. Limitations Architecturales**
-- **Complexité computationnelle** : Attention quadratique, scalabilité limitée pour très hautes résolutions
-- **Transfer learning hétérogène** : SegFormer (ADE20K) vs FPN (ImageNet)
-
-**3. Limitations Applicatives**
-- **Classes déséquilibrées** : Performance variable sur objets rares
-- **Conditions d'acquisition** : Robustesse non-testée (nuit, intempéries)
+**2. Limitations Applicatives**
+- **Classes déséquilibrées** : Performance variable sur objets rares dans Cityscapes
+- **Conditions d'acquisition** : Robustesse non-testée sur conditions météo adverses (nuit, intempéries)
 
 ### Améliorations Prioritaires
 
 **1. Optimisation Computationnelle**
-- **Migration GPU + TensorRT** : Réduction estimée ×3-5 temps d'inférence
-- **Quantization INT8** : Compression modèle sans perte significative
+- **Migration GPU optimisé** : Les architectures Transformer bénéficient davantage des accélérations GPU spécialisées que les CNN
+- **Quantization et optimisations dédiées** : Réduction de la précision numérique pour améliorer les performances d'inférence
 
 **2. Validation Étendue**
-- **SegFormer-B2/B3 benchmark** : Évaluation ROI performance-coût
-- **Multi-dataset validation** : ADE20K + Mapillary Vistas pour robustesse
+- **Variants SegFormer plus lourds** : Évaluation des versions B2, B3, B4 si les ressources computationnelles le permettent
+- **Protocole d'évaluation standard** : Implémentation du sliding window comme dans la publication originale
+- **Multi-dataset validation** : Tests sur d'autres datasets urbains pour évaluer la généralisation
 
 **3. Données et Robustesse**
-- **Synthetic data** : CARLA/GTA pour conditions météo variées
-- **Multi-resolution training** : Amélioration adaptabilité résolutions
+- **Conditions météorologiques variées** : Extension aux données de nuit, pluie, neige
+- **Résolutions natives** : Tests sans redimensionnement avec déformation pour préserver les relations spatiales
+- **Synthetic data augmentation** : Utilisation de simulateurs pour enrichir les conditions d'entraînement
 
-**Impact estimé :** Performance +2-3% mIoU, temps d'inférence ÷3, robustesse conditions adverses +40%.
+Ces améliorations permettraient d'évaluer plus complètement le potentiel réel de SegFormer dans un contexte de production, au-delà des limitations de cette preuve de concept.
