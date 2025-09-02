@@ -72,6 +72,10 @@ class ModelInfo(BaseModel):
     encoder_name: str
     input_size: tuple
     rank: int
+    architecture: Optional[str] = None  # Ajout architecture
+    test_mean_iou: Optional[float] = None   # Ajout mIoU
+    test_accuracy: Optional[float] = None   # Ajout accuracy
+    class_ious: Optional[dict] = None   # Ajout IoU par classe
 
 class ComparisonResult(BaseModel):
     success: bool
@@ -104,6 +108,45 @@ best_model_info = {}
 second_best_model_info = {}
 mapping_config = None
 
+def get_model_detailed_info(run_id, mapping_config):
+    """Récupère les informations détaillées d'un modèle depuis MLflow"""
+    client = mlflow.tracking.MlflowClient()
+    
+    try:
+        run = mlflow.get_run(run_id)
+        params = run.data.params
+        metrics = run.data.metrics
+        
+        # Architecture depuis le paramètre model_architecture
+        architecture = params.get("model_architecture", "Unknown").split('_')[0]
+        
+        # Métriques de performance
+        test_mean_iou = metrics.get("test_mean_iou", None)
+        test_accuracy = metrics.get("test_accuracy", None)
+        
+        # IoU par classe depuis les métriques class_X_iou
+        class_ious = {}
+        if mapping_config and 'group_names' in mapping_config:
+            for i, class_name in enumerate(mapping_config['group_names']):
+                metric_key = f"class_{i}_iou"
+                if metric_key in metrics:
+                    class_ious[class_name] = round(metrics[metric_key], 3)
+        
+        return {
+            "architecture": architecture,
+            "test_mean_iou": test_mean_iou,
+            "test_accuracy": test_accuracy,
+            "class_ious": class_ious
+        }
+    except Exception as e:
+        print(f"⚠️ Erreur lors de la récupération des infos détaillées: {e}")
+        return {
+            "architecture": "Unknown",
+            "test_mean_iou": None,
+            "test_accuracy": None,
+            "class_ious": {}
+        }
+
 def initialize_models():
     """Initialise les deux meilleurs modèles au démarrage"""
     global best_model, second_best_model, best_model_info, second_best_model_info, mapping_config
@@ -122,12 +165,20 @@ def initialize_models():
             metric="test_mean_iou", 
             top_n=1
         )
+        
+        # Récupérer les infos détaillées du meilleur modèle
+        best_detailed_info = get_model_detailed_info(best_run_id, mapping_config)
+        
         best_model_info = {
             "name": "Meilleur modèle",
             "run_id": best_run_id,
             "encoder_name": best_encoder_name,
             "input_size": best_img_size,
-            "rank": 1
+            "rank": 1,
+            "architecture": best_detailed_info["architecture"],
+            "test_mean_iou": best_detailed_info["test_mean_iou"],
+            "test_accuracy": best_detailed_info["test_accuracy"],
+            "class_ious": best_detailed_info["class_ious"]
         }
         
         print("🔄 Chargement du deuxième meilleur modèle...")
@@ -136,12 +187,20 @@ def initialize_models():
             metric="test_mean_iou", 
             top_n=2
         )
+        
+        # Récupérer les infos détaillées du deuxième modèle
+        second_detailed_info = get_model_detailed_info(second_run_id, mapping_config)
+        
         second_best_model_info = {
             "name": "Deuxième modèle",
             "run_id": second_run_id,
             "encoder_name": second_encoder_name,
             "input_size": second_img_size,
-            "rank": 2
+            "rank": 2,
+            "architecture": second_detailed_info["architecture"],
+            "test_mean_iou": second_detailed_info["test_mean_iou"],
+            "test_accuracy": second_detailed_info["test_accuracy"],
+            "class_ious": second_detailed_info["class_ious"]
         }
         
         os.makedirs(TEMP_UPLOAD_DIR, exist_ok=True)
@@ -257,40 +316,95 @@ def compare_sample_image(request: SampleImageRequest):
         mask_path = Path(SAMPLE_IMAGES_DIR) / "mask" / mask_name
         mask_path_str = str(mask_path) if mask_path.exists() else None
         
-        # Inférence modèle 1
-        pred1, t1, _ = run_inference_and_visualize(
+        # Inférence modèle 1 avec sa résolution spécifique
+        pred1, t1, fig1 = run_inference_and_visualize(
             image_path=str(image_path),
             mask_path=mask_path_str,
             model=best_model,
-            encoder_name=None,
-            img_size=best_model_info["input_size"],
+            encoder_name=None,  # Normalisé de la même manière
+            img_size=best_model_info["input_size"],  # Utilise la résolution du modèle
             mapping_config=mapping_config,
             save_dir=None, show_stats=False, show_plot=False
         )
-        # Inférence modèle 2
-        pred2, t2, _ = run_inference_and_visualize(
+        # Inférence modèle 2 avec sa résolution spécifique
+        pred2, t2, fig2 = run_inference_and_visualize(
             image_path=str(image_path),
             mask_path=mask_path_str,
             model=second_best_model,
-            encoder_name=None,
-            img_size=second_best_model_info["input_size"],
+            encoder_name=None,  # Normalisé de la même manière
+            img_size=second_best_model_info["input_size"],  # Utilise la résolution du modèle
             mapping_config=mapping_config,
             save_dir=None, show_stats=False, show_plot=False
         )
-        # Figure combinée
-        fig, axes = plt.subplots(2, 3, figsize=(15, 8))
-        img_arr = mpimg.imread(str(image_path))
-        axes[0, 0].imshow(img_arr); axes[0, 0].set_title("Image originale"); axes[0, 0].axis('off')
-        axes[1, 0].imshow(img_arr); axes[1, 0].set_title("Image originale"); axes[1, 0].axis('off')
-        axes[0, 1].imshow(colorize_mask(pred1, mapping_config['group_colors']))
-        axes[0, 1].set_title(f"Prédiction {best_model_info['encoder_name']}"); axes[0, 1].axis('off')
-        axes[1, 1].imshow(colorize_mask(pred2, mapping_config['group_colors']))
-        axes[1, 1].set_title(f"Prédiction {second_best_model_info['encoder_name']}"); axes[1, 1].axis('off')
-        if mask_path_str and os.path.exists(mask_path_str):
-            gt = mpimg.imread(mask_path_str)
-            axes[0, 2].imshow(gt); axes[0, 2].set_title("Ground Truth"); axes[0, 2].axis('off')
-            axes[1, 2].imshow(gt); axes[1, 2].set_title("Ground Truth"); axes[1, 2].axis('off')
+        
+        # Créer une figure combinée avec les deux modèles
+        # Nombre de colonnes : 3 si pas de GT, 4 si GT disponible
+        num_cols = 3 if not (mask_path_str and os.path.exists(mask_path_str)) else 4
+        fig, axes = plt.subplots(2, num_cols, figsize=(5*num_cols, 8))
+        
+        # Récupérer les images depuis les figures individuelles
+        axes1 = fig1.get_axes()
+        axes2 = fig2.get_axes()
+        
+        # Ligne 1 : Modèle 1
+        for i in range(min(len(axes1), num_cols)):
+            ax_src = axes1[i]
+            ax_dst = axes[0, i]
+            
+            # Copier toutes les images de l'axe source
+            for img_obj in ax_src.get_images():
+                ax_dst.imshow(
+                    img_obj.get_array(),
+                    cmap=img_obj.get_cmap(),
+                    alpha=img_obj.get_alpha(),
+                    vmin=img_obj.get_clim()[0] if img_obj.get_clim() else None,
+                    vmax=img_obj.get_clim()[1] if img_obj.get_clim() else None
+                )
+            
+            # Copier le titre avec nom du modèle
+            original_title = ax_src.get_title()
+            if i == 0:
+                new_title = "Image originale"
+            elif "Prédit" in original_title:
+                new_title = f"Prédiction {best_model_info['architecture']} - {best_model_info['encoder_name']}"
+            else:
+                new_title = original_title
+            
+            ax_dst.set_title(new_title)
+            ax_dst.axis('off')
+        
+        # Ligne 2 : Modèle 2
+        for i in range(min(len(axes2), num_cols)):
+            ax_src = axes2[i]
+            ax_dst = axes[1, i]
+            
+            # Copier toutes les images de l'axe source
+            for img_obj in ax_src.get_images():
+                ax_dst.imshow(
+                    img_obj.get_array(),
+                    cmap=img_obj.get_cmap(),
+                    alpha=img_obj.get_alpha(),
+                    vmin=img_obj.get_clim()[0] if img_obj.get_clim() else None,
+                    vmax=img_obj.get_clim()[1] if img_obj.get_clim() else None
+                )
+            
+            # Copier le titre avec nom du modèle
+            original_title = ax_src.get_title()
+            if i == 0:
+                new_title = "Image originale"
+            elif "Prédit" in original_title:
+                new_title = f"Prédiction {second_best_model_info['architecture']} - {second_best_model_info['encoder_name']}"
+            else:
+                new_title = original_title
+            
+            ax_dst.set_title(new_title)
+            ax_dst.axis('off')
+        
         plt.tight_layout()
+        
+        # Fermer les figures individuelles pour libérer la mémoire
+        plt.close(fig1)
+        plt.close(fig2)
         fig_b64 = base64.b64encode(pickle.dumps(fig)).decode()
         # Stats
         def calc(mask):
@@ -333,28 +447,82 @@ def compare_uploaded_image(file: UploadFile = File(...)):
         temp_file_path = os.path.join(TEMP_UPLOAD_DIR, temp_filename)
         with open(temp_file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        # Inférences
-        pred1, t1, _ = run_inference_and_visualize(
+        # Inférences avec résolutions spécifiques
+        pred1, t1, fig1 = run_inference_and_visualize(
             image_path=temp_file_path, mask_path=None,
-            model=best_model, encoder_name=None,
+            model=best_model, encoder_name=None,  # Normalisé de la même manière
             img_size=best_model_info["input_size"], mapping_config=mapping_config,
             save_dir=None, show_stats=False, show_plot=False,
         )
-        pred2, t2, _ = run_inference_and_visualize(
+        pred2, t2, fig2 = run_inference_and_visualize(
             image_path=temp_file_path, mask_path=None,
-            model=second_best_model, encoder_name=None,
+            model=second_best_model, encoder_name=None,  # Normalisé de la même manière
             img_size=second_best_model_info["input_size"], mapping_config=mapping_config,
             save_dir=None, show_stats=False, show_plot=False,
         )
-        # Figure
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-        img_arr = mpimg.imread(temp_file_path)
-        axes[0].imshow(img_arr); axes[0].set_title("Image originale"); axes[0].axis('off')
-        axes[1].imshow(colorize_mask(pred1, mapping_config['group_colors']))
-        axes[1].set_title(f"Prédiction {best_model_info['encoder_name']}"); axes[1].axis('off')
-        axes[2].imshow(colorize_mask(pred2, mapping_config['group_colors']))
-        axes[2].set_title(f"Prédiction {second_best_model_info['encoder_name']}"); axes[2].axis('off')
+        
+        # Figure combinée pour uploads (pas de GT, donc 2 colonnes seulement)
+        fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+        
+        # Récupérer les images depuis les figures individuelles
+        axes1 = fig1.get_axes()
+        axes2 = fig2.get_axes()
+        
+        # Ligne 1 : Modèle 1 (Image originale + Prédiction)
+        for i in range(min(len(axes1), 2)):
+            ax_src = axes1[i]
+            ax_dst = axes[0, i]
+            
+            # Copier toutes les images de l'axe source
+            for img_obj in ax_src.get_images():
+                ax_dst.imshow(
+                    img_obj.get_array(),
+                    cmap=img_obj.get_cmap(),
+                    alpha=img_obj.get_alpha(),
+                    vmin=img_obj.get_clim()[0] if img_obj.get_clim() else None,
+                    vmax=img_obj.get_clim()[1] if img_obj.get_clim() else None
+                )
+            
+            # Copier le titre avec nom du modèle
+            original_title = ax_src.get_title()
+            if i == 0:
+                new_title = "Image originale"
+            else:
+                new_title = f"Prédiction {best_model_info['architecture']} - {best_model_info['encoder_name']}"
+            
+            ax_dst.set_title(new_title)
+            ax_dst.axis('off')
+        
+        # Ligne 2 : Modèle 2 (Image originale + Prédiction)  
+        for i in range(min(len(axes2), 2)):
+            ax_src = axes2[i]
+            ax_dst = axes[1, i]
+            
+            # Copier toutes les images de l'axe source
+            for img_obj in ax_src.get_images():
+                ax_dst.imshow(
+                    img_obj.get_array(),
+                    cmap=img_obj.get_cmap(),
+                    alpha=img_obj.get_alpha(),
+                    vmin=img_obj.get_clim()[0] if img_obj.get_clim() else None,
+                    vmax=img_obj.get_clim()[1] if img_obj.get_clim() else None
+                )
+            
+            # Copier le titre avec nom du modèle
+            original_title = ax_src.get_title()
+            if i == 0:
+                new_title = "Image originale"
+            else:
+                new_title = f"Prédiction {second_best_model_info['architecture']} - {second_best_model_info['encoder_name']}"
+            
+            ax_dst.set_title(new_title)
+            ax_dst.axis('off')
+        
         plt.tight_layout()
+        
+        # Fermer les figures individuelles pour libérer la mémoire
+        plt.close(fig1)
+        plt.close(fig2)
         fig_b64 = base64.b64encode(pickle.dumps(fig)).decode()
         # Stats
         def calc(mask):

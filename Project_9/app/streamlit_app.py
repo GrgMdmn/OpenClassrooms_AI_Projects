@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 import streamlit as st
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -66,6 +67,47 @@ st.markdown("""
     padding: 1rem;
     border-radius: 8px;
     margin: 1rem 0;
+}
+.color-box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.2);
+    vertical-align: middle;
+}
+.comparison-table {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.comparison-table th {
+    background-color: #667eea !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+.comparison-table td {
+    text-align: center !important;
+    padding: 0.5rem !important;
+    vertical-align: middle !important;
+}
+.diff-positive {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    font-weight: 600;
+}
+.diff-negative {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    font-weight: 600;
+}
+.diff-neutral {
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+    font-weight: 600;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -151,23 +193,33 @@ def display_comparison_results(result, models_info):
     
     with col1:
         model1 = result['model1_info']
+        # Formater les métriques séparément
+        miou1 = f"{model1.get('test_mean_iou'):.4f}" if model1.get('test_mean_iou') is not None else 'N/A'
+        acc1 = f"{model1.get('test_accuracy'):.4f}" if model1.get('test_accuracy') is not None else 'N/A'
+        
         st.markdown(f"""
         <div class="comparison-card">
             <h4>🥇 Modèle #1</h4>
-            <strong>{model1['encoder_name']}</strong><br>
+            <strong>{model1.get('architecture', 'N/A')} - {model1['encoder_name']}</strong><br>
             📐 Taille: {model1['input_size']}<br>
-            🆔 Run: {model1['run_id'][:8]}...
+            📊 mIoU: {miou1}<br>
+            🎯 Accuracy: {acc1}
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         model2 = result['model2_info']
+        # Formater les métriques séparément
+        miou2 = f"{model2.get('test_mean_iou'):.4f}" if model2.get('test_mean_iou') is not None else 'N/A'
+        acc2 = f"{model2.get('test_accuracy'):.4f}" if model2.get('test_accuracy') is not None else 'N/A'
+        
         st.markdown(f"""
         <div class="comparison-card">
             <h4>🥈 Modèle #2</h4>
-            <strong>{model2['encoder_name']}</strong><br>
+            <strong>{model2.get('architecture', 'N/A')} - {model2['encoder_name']}</strong><br>
             📐 Taille: {model2['input_size']}<br>
-            🆔 Run: {model2['run_id'][:8]}...
+            📊 mIoU: {miou2}<br>
+            🎯 Accuracy: {acc2}
         </div>
         """, unsafe_allow_html=True)
     
@@ -184,7 +236,7 @@ def display_comparison_results(result, models_info):
         winner_class = "speed-winner" if speed_comp['faster_model'] == model1['encoder_name'] else "speed-slower"
         st.markdown(f"""
         <div class="comparison-card {winner_class}">
-            <h5>🥇 {model1['encoder_name']}</h5>
+            <h5>🥇 {model1.get('architecture', 'N/A')} - {model1['encoder_name']}</h5>
             <strong>{model1_time:.1f} ms</strong>
         </div>
         """, unsafe_allow_html=True)
@@ -203,7 +255,7 @@ def display_comparison_results(result, models_info):
         winner_class = "speed-winner" if speed_comp['faster_model'] == model2['encoder_name'] else "speed-slower"
         st.markdown(f"""
         <div class="comparison-card {winner_class}">
-            <h5>🥈 {model2['encoder_name']}</h5>
+            <h5>🥈 {model2.get('architecture', 'N/A')} - {model2['encoder_name']}</h5>
             <strong>{model2_time:.1f} ms</strong>
         </div>
         """, unsafe_allow_html=True)
@@ -220,23 +272,21 @@ def display_comparison_results(result, models_info):
             st.error(f"Erreur lors de l'affichage: {e}")
     
     # Comparaison des statistiques
-    st.markdown("### 📊 Comparaison des Statistiques")
+    st.markdown("### 📊 Répartition des classes par modèle")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown(f"**📈 {model1['encoder_name']} - Répartition des classes:**")
         if result.get('model1_stats'):
-            display_model_stats_chart(result['model1_stats'], models_info, f"Modèle 1 - {model1['encoder_name']}")
+            display_model_stats_chart(result['model1_stats'], models_info, f"{model1.get('architecture', 'N/A')} - {model1['encoder_name']}")
     
     with col2:
-        st.markdown(f"**📈 {model2['encoder_name']} - Répartition des classes:**")
         if result.get('model2_stats'):
-            display_model_stats_chart(result['model2_stats'], models_info, f"Modèle 2 - {model2['encoder_name']}")
+            display_model_stats_chart(result['model2_stats'], models_info, f"{model2.get('architecture', 'N/A')} - {model2['encoder_name']}")
     
     # Analyse comparative des classes
     if result.get('model1_stats') and result.get('model2_stats'):
-        display_class_comparison(result['model1_stats'], result['model2_stats'], model1, model2)
+        display_class_comparison(result['model1_stats'], result['model2_stats'], model1, model2, models_info)
 
 def display_model_stats_chart(stats, models_info, title):
     """Affiche les statistiques d'un modèle sous forme de graphique"""
@@ -244,9 +294,15 @@ def display_model_stats_chart(stats, models_info, title):
         st.warning("Aucune statistique disponible")
         return
     
-    # Préparer les données pour le graphique
-    class_names = list(stats.keys())
-    percentages = [data['percentage'] for data in stats.values()]
+    # Utiliser l'ordre des classes du modèle pour la cohérence
+    if models_info and 'class_names' in models_info:
+        # Ordonner selon l'ordre du modèle
+        ordered_class_names = [name for name in models_info['class_names'] if name in stats]
+    else:
+        # Fallback : ordre alphabétique
+        ordered_class_names = sorted(stats.keys())
+    
+    percentages = [stats[name]['percentage'] for name in ordered_class_names]
     
     # Récupérer les couleurs des classes
     colors = []
@@ -254,7 +310,7 @@ def display_model_stats_chart(stats, models_info, title):
         model_class_names = models_info['class_names']
         model_class_colors = models_info['class_colors']
         
-        for class_name in class_names:
+        for class_name in ordered_class_names:
             try:
                 idx = model_class_names.index(class_name)
                 color = model_class_colors[idx]
@@ -262,21 +318,21 @@ def display_model_stats_chart(stats, models_info, title):
             except (ValueError, IndexError):
                 colors.append([0.5, 0.5, 0.5])
     else:
-        colors = plt.cm.Set3(np.linspace(0, 1, len(class_names)))
+        colors = plt.cm.Set3(np.linspace(0, 1, len(ordered_class_names)))
     
     # Créer le graphique
     fig, ax = plt.subplots(figsize=(8, 5))
     
-    bars = ax.bar(class_names, percentages, color=colors, alpha=0.8, edgecolor='white', linewidth=1)
+    bars = ax.bar(ordered_class_names, percentages, color=colors, alpha=0.8, edgecolor='white', linewidth=1)
     
     ax.set_xlabel('Classes de Segmentation', fontsize=10, fontweight='bold')
     ax.set_ylabel('Pourcentage (%)', fontsize=10, fontweight='bold')
     ax.set_title(title, fontsize=11, fontweight='bold', pad=15)
     
     # Rotation des labels selon le nombre de classes
-    if len(class_names) <= 4:
+    if len(ordered_class_names) <= 4:
         plt.xticks(rotation=0, ha='center', fontsize=9)
-    elif len(class_names) <= 6:
+    elif len(ordered_class_names) <= 6:
         plt.xticks(rotation=30, ha='right', fontsize=8)
     else:
         plt.xticks(rotation=45, ha='right', fontsize=8)
@@ -305,15 +361,22 @@ def display_model_stats_chart(stats, models_info, title):
     st.pyplot(fig)
     plt.close(fig)
 
-def display_class_comparison(stats1, stats2, model1, model2):
+def display_class_comparison(stats1, stats2, model1, model2, models_info):
     """Affiche une comparaison détaillée des classes entre les deux modèles"""
     st.markdown("### 🔍 Analyse Comparative par Classe")
     
-    # Combiner toutes les classes présentes
-    all_classes = set(stats1.keys()) | set(stats2.keys())
+    # Utiliser l'ordre des classes du modèle pour la cohérence
+    if models_info and 'class_names' in models_info:
+        # Combiner toutes les classes présentes en conservant l'ordre du modèle
+        all_classes_in_stats = set(stats1.keys()) | set(stats2.keys())
+        ordered_all_classes = [name for name in models_info['class_names'] if name in all_classes_in_stats]
+    else:
+        # Fallback : ordre alphabétique
+        all_classes = set(stats1.keys()) | set(stats2.keys())
+        ordered_all_classes = sorted(all_classes)
     
     comparison_data = []
-    for class_name in sorted(all_classes):
+    for class_name in ordered_all_classes:
         pct1 = stats1.get(class_name, {}).get('percentage', 0)
         pct2 = stats2.get(class_name, {}).get('percentage', 0)
         diff = pct1 - pct2
@@ -325,27 +388,122 @@ def display_class_comparison(stats1, stats2, model1, model2):
             'difference': diff
         })
     
-    # Afficher sous forme de tableau interactif
-    col1, col2 = st.columns([2, 1])
+    # Créer un graphique comparatif des barres
+    st.markdown("**📊 Comparaison des classes entre les modèles:**")
     
-    with col1:
-        st.markdown("**📋 Tableau Comparatif:**")
-        for data in comparison_data:
-            diff_color = "🟢" if abs(data['difference']) < 1 else ("🔴" if abs(data['difference']) > 5 else "🟡")
-            diff_text = f"{data['difference']:+.1f}%"
-            
-            st.markdown(f"""
-            **{data['class']}** {diff_color}
-            - {model1['encoder_name']}: {data['model1_pct']:.1f}%
-            - {model2['encoder_name']}: {data['model2_pct']:.1f}%
-            - Différence: {diff_text}
-            """)
+    # Préparation des données
+    class_names = [data['class'] for data in comparison_data]
+    model1_values = [data['model1_pct'] for data in comparison_data]
+    model2_values = [data['model2_pct'] for data in comparison_data]
     
-    with col2:
-        st.markdown("**🎯 Légende:**")
-        st.markdown("🟢 Différence < 1%")
-        st.markdown("🟡 Différence 1-5%")
-        st.markdown("🔴 Différence > 5%")
+    # Récupérer les couleurs des classes
+    colors = []
+    if models_info and 'class_colors' in models_info and 'class_names' in models_info:
+        model_class_names = models_info['class_names']
+        model_class_colors = models_info['class_colors']
+        
+        for class_name in class_names:
+            try:
+                idx = model_class_names.index(class_name)
+                color = model_class_colors[idx]
+                hex_color = f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
+                colors.append(hex_color)
+            except (ValueError, IndexError):
+                colors.append("#999999")
+    else:
+        colors = ['#999999'] * len(class_names)
+    
+    # Créer le graphique comparatif
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    x = np.arange(len(class_names))  # Positions des barres
+    width = 0.35  # Largeur des barres
+    
+    bars1 = ax.bar(x - width/2, model1_values, width, label=f"{model1.get('architecture', 'N/A')} - {model1['encoder_name']}", 
+                  color=colors, alpha=0.8, edgecolor='white')
+    
+    # Barres hachurées pour le modèle 2
+    bars2 = ax.bar(x + width/2, model2_values, width, label=f"{model2.get('architecture', 'N/A')} - {model2['encoder_name']}", 
+                  color=colors, alpha=0.6, edgecolor='white', hatch='///')
+    
+    ax.set_xlabel('Classes', fontsize=11, fontweight='bold')
+    ax.set_ylabel('Pourcentage (%)', fontsize=11, fontweight='bold')
+    ax.set_title('Comparaison des classes entre les deux modèles', fontsize=13, fontweight='bold', pad=15)
+    ax.set_xticks(x)
+    
+    # Rotation des labels selon le nombre de classes
+    if len(class_names) <= 4:
+        ax.set_xticklabels(class_names, fontsize=10)
+    elif len(class_names) <= 6:
+        ax.set_xticklabels(class_names, rotation=30, ha='right', fontsize=9)
+    else:
+        ax.set_xticklabels(class_names, rotation=45, ha='right', fontsize=9)
+    
+    ax.legend(loc='upper right', fontsize=10)
+    ax.grid(axis='y', alpha=0.2, linestyle='--')
+    ax.set_axisbelow(True)
+    
+    # Style des axes
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # Valeurs sur les barres
+    for bar1, bar2, val1, val2 in zip(bars1, bars2, model1_values, model2_values):
+        height1 = bar1.get_height()
+        height2 = bar2.get_height()
+        ax.text(bar1.get_x() + bar1.get_width()/2., height1 + 0.5,
+               f'{val1:.1f}%', ha='center', va='bottom', fontsize=8, fontweight='bold')
+        ax.text(bar2.get_x() + bar2.get_width()/2., height2 + 0.5,
+               f'{val2:.1f}%', ha='center', va='bottom', fontsize=8, fontweight='bold')
+    
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+    
+    # Tableau détaillé avec un beau format
+    st.markdown("**🔎 Détails des différences par classe:**")
+    
+    # Préparer les données pour le tableau
+    table_data = []
+    for i, data in enumerate(comparison_data):
+        class_color = colors[i]
+        diff_value = data['difference']
+        
+        # Classification de la différence
+        if abs(diff_value) < 1:
+            diff_category = "Similaire"
+            diff_emoji = "🟢"
+        elif abs(diff_value) < 5:
+            diff_category = "Différence modérée"
+            diff_emoji = "🟡"
+        else:
+            diff_category = "Différence importante"
+            diff_emoji = "🔴"
+        
+        table_data.append({
+            "Classe": data['class'],
+            f"🥇 {model1.get('architecture', 'N/A')[:15]} (%)": f"{data['model1_pct']:.1f}%",
+            f"🥈 {model2.get('architecture', 'N/A')[:15]} (%)": f"{data['model2_pct']:.1f}%",
+            "Différence": f"{diff_value:+.1f}%",
+            "Catégorie": f"{diff_emoji} {diff_category}"
+        })
+    
+    # Créer le DataFrame et l'afficher
+    df = pd.DataFrame(table_data)
+    
+    # Utiliser st.dataframe avec style personnalisé
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Classe": st.column_config.TextColumn("🎯 Classe", width="medium"),
+            f"🥇 {model1.get('architecture', 'N/A')[:15]} (%)": st.column_config.TextColumn(width="medium"),
+            f"🥈 {model2.get('architecture', 'N/A')[:15]} (%)": st.column_config.TextColumn(width="medium"),
+            "Différence": st.column_config.TextColumn("📊 Différence", width="small"),
+            "Catégorie": st.column_config.TextColumn("📈 Évaluation", width="medium")
+        }
+    )
 
 # Sidebar avec informations des modèles
 with st.sidebar:
@@ -358,29 +516,46 @@ with st.sidebar:
         # Modèle 1
         best_model = models_info.get('best_model', {})
         st.markdown("**🥇 Meilleur Modèle:**")
+        st.write(f"**Architecture:** {best_model.get('architecture', 'N/A')}")
         st.write(f"**Encoder:** {best_model.get('encoder_name', 'N/A')}")
-        st.write(f"**Run ID:** {best_model.get('run_id', 'N/A')[:8]}...")
+        st.write(f"**Résolution:** {best_model.get('input_size', 'N/A')}")
         
         # Modèle 2
         second_model = models_info.get('second_best_model', {})
         st.markdown("**🥈 Deuxième Modèle:**")
+        st.write(f"**Architecture:** {second_model.get('architecture', 'N/A')}")
         st.write(f"**Encoder:** {second_model.get('encoder_name', 'N/A')}")
-        st.write(f"**Run ID:** {second_model.get('run_id', 'N/A')[:8]}...")
-        
-        st.write(f"**Classes:** {models_info.get('num_classes', 'N/A')}")
+        st.write(f"**Résolution:** {second_model.get('input_size', 'N/A')}")
     else:
         st.error("❌ Modèles non disponibles")
 
     st.markdown("---")
-    st.markdown("## 🎯 Classes Segmentées")
+    st.markdown("## 🎯 Classes Segmentées (IoU)")
     
-    # Affichage avec carrés colorés
+    # Affichage avec carrés colorés et IoU
     if models_info and 'class_names' in models_info and 'class_colors' in models_info:
         class_names = models_info['class_names']
         class_colors = models_info['class_colors']
         
+        # Récupérer les IoU des modèles
+        best_ious = best_model.get('class_ious', {}) if models_info else {}
+        second_ious = second_model.get('class_ious', {}) if models_info else {}
+        
         for i, (class_name, color) in enumerate(zip(class_names, class_colors)):
             color_hex = f"#{color[0]:02x}{color[1]:02x}{color[2]:02x}"
+            
+            # Construire la chaîne IoU
+            iou_str = ""
+            if best_ious.get(class_name) is not None and second_ious.get(class_name) is not None:
+                best_iou = best_ious[class_name]
+                second_iou = second_ious[class_name]
+                iou_str = f" (🥇{best_iou:.2f} - 🥈{second_iou:.2f})"
+            elif best_ious.get(class_name) is not None:
+                best_iou = best_ious[class_name]
+                iou_str = f" (🥇{best_iou:.2f})"
+            elif second_ious.get(class_name) is not None:
+                second_iou = second_ious[class_name]
+                iou_str = f" (🥈{second_iou:.2f})"
             
             st.markdown(f"""
             <div style="
@@ -388,7 +563,7 @@ with st.sidebar:
                 align-items: center;
                 gap: 0.5rem;
                 margin: 0.3rem 0;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             ">
                 <div style="
                     width: 14px;
@@ -398,7 +573,7 @@ with st.sidebar:
                     border: 1px solid rgba(0,0,0,0.2);
                     flex-shrink: 0;
                 "></div>
-                <span style="font-weight: 500;">{i}. {class_name}</span>
+                <span style="font-weight: 500;">{i}. {class_name}{iou_str}</span>
             </div>
             """, unsafe_allow_html=True)
 
