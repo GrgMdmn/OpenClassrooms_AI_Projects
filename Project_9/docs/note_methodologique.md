@@ -175,7 +175,8 @@ Entraînement séquentiel des 4 modèles à 512×512, puis à 768×768, suivi de
 
 **Résultats principaux (mIoU sur Cityscapes Validation) :**
 
-*[Insérer ici le graphique Image 1 : "Mean IoU par Expérience" et "Accuracy par Expérience"]*
+![mIoU + Accuracy](mIoU_accuracy.png)
+*Fig.1: Mean IoU et Accuracy par expérience*
 
 | **Modèle** | **mIoU** | **Gain vs meilleure baseline** | **Paramètres** | **Taille modèle** | **Temps inférence** |
 |------------|----------|-------------------------------|----------------|--------------------|-------------------|
@@ -187,7 +188,7 @@ Entraînement séquentiel des 4 modèles à 512×512, puis à 768×768, suivi de
 ### Analyse Détaillée par Classes
 
 ![IoU Classe et Δ IoU par Classe](iou_delta_iou_per_class.png)
-*Fig.1*: IoU et Δ IoU par Classe entre SegFormer-B1 et FPN-ResNet34
+*Fig.2: IoU et Δ IoU par Classe entre SegFormer-B1 et FPN-ResNet34*
 
 **Performance par méta-classes Cityscapes :**
 
@@ -240,7 +241,7 @@ SegFormer-B1 démontre une **supériorité en précision** (+0.76% mIoU) avec un
 ### Évolution des Performances
 
 ![Matrice de confusion FPN_ResNet34](mIoU_accuracy.png)
-*Fig.2*: Évolution de MeanIoU et Accuracy pour les 8 modèles.
+*Fig.3: Évolution de MeanIoU et Accuracy pour les 8 modèles.*
 
 ### Conclusion Expérimentale
 
