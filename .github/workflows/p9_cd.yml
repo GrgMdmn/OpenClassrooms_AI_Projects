@@ -1,0 +1,92 @@
+name: CD Pipeline - Street Vision Comparison API
+
+on:
+  push:
+    branches:
+      - main
+    # Jobs s'exécutent si des fichiers du Projet 9 changent
+    paths:
+      - 'Project_9/app/**'
+      - 'Project_9/utils/**'
+      - 'Project_9/notebooks/content/data/**'
+      - 'Project_9/Dockerfile'
+      - 'Project_9/start.sh'
+      - 'Project_9/nginx.conf'
+      - 'Project_9/cityscapes_config.json'
+      - 'Project_9/docker-compose.yml*'
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    env:
+      # MLflow + S3 configuration
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      MLFLOW_S3_ENDPOINT_URL: ${{ secrets.MLFLOW_S3_ENDPOINT_URL }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Docker configuration
+      NGINX_PORT: 8080
+      MULTISEG_API_BASE_URL: http://localhost:8080/api
+
+      # SMTP Configuration (optionnel)
+      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_EMAIL: ${{ secrets.SMTP_EMAIL }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      SMTP_FROM_ALIAS: ${{ secrets.SMTP_FROM_ALIAS }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOG }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Project_9
+          file: ./Project_9/Dockerfile
+          push: true
+          tags: docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision-poc_api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Test Docker image health
+        run: |
+          # Test basique que l'image se lance correctement
+          docker run --rm -d --name test-container \
+            -e NGINX_PORT=8080 \
+            -e MULTISEG_API_BASE_URL=http://localhost:8080/api \
+            -p 8081:8080 \
+            docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision-poc_api:latest
+
+          # Attendre le démarrage
+          sleep 30
+
+          # Test health check
+          if curl -f http://localhost:8081/health; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed"
+            exit 1
+          fi
+
+          # Nettoyer
+          docker stop test-container
+
+      - name: Deploy notification
+        if: success()
+        run: |
+          echo "🚀 Successfully deployed street-vision-poc_api:latest to Docker Hub"
+          echo "📊 Image: docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision-poc_api:latest"
+          echo "🔗 Pull command: docker pull docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision-poc_api:latest"

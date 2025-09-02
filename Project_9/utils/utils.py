@@ -3,7 +3,6 @@ import json
 import tempfile
 import numpy as np
 import torch
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import segmentation_models_pytorch as smp
 import mlflow
@@ -16,8 +15,8 @@ import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
 
 # Preprocessing/Images
-from PIL import Image
-import torchvision.transforms as transforms
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 
 def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True):
@@ -103,48 +102,12 @@ def colorize_mask(mask, group_colors):
     
     return colored_mask
 
-# def get_preprocessing_fn(encoder_name=None):
-#     """
-#     Retourne la fonction de prétraitement adaptée au backbone utilisé.
-#     ADAPTÉ PYTORCH : utilise smp.encoders.get_preprocessing_params
-#     """
-#     if encoder_name is None:
-#         print("ℹ️ Modèle vanilla - normalisation simple")
-#         return lambda x: x / 255.0
-#     else:
-#         print(f"ℹ️ Préprocessing du backbone {encoder_name}")
-#         try:
-#             # PyTorch segmentation_models utilise get_preprocessing_params
-#             preprocess_params = smp.encoders.get_preprocessing_params(encoder_name)
-#             mean = preprocess_params['mean']
-#             std = preprocess_params['std']
-            
-#             def preprocess_fn(x):
-#                 # x doit être dans [0, 1] puis normalisé
-#                 x = x / 255.0 if x.max() > 1.0 else x
-#                 # Normalisation ImageNet ou spécifique au backbone
-#                 if isinstance(x, torch.Tensor):
-#                     for i in range(3):  # RGB
-#                         x[:, i, :, :] = (x[:, i, :, :] - mean[i]) / std[i]
-#                 else:  # numpy
-#                     for i in range(3):
-#                         x[:, :, i] = (x[:, :, i] - mean[i]) / std[i]
-#                 return x
-            
-#             return preprocess_fn
-#         except Exception as e:
-#             print(f"⚠️ Erreur preprocessing {encoder_name}: {e}, fallback simple")
-#             return lambda x: x / 255.0
 
 def get_preprocessing_fn(img_size=(512, 512), encoder=None):
     """
     Retourne une fonction qui prétraite à la fois les images et les masques
     pour l'inférence, en reproduisant exactement le pipeline CityscapesDataset.
     """
-    import albumentations as A
-    from albumentations.pytorch import ToTensorV2
-    import cv2
-    import torch
     
     if encoder is None:
         mean, std = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
@@ -205,173 +168,9 @@ def preprocess_image_and_mask(image_path, mask_path=None, img_size=(512, 512),
     
     return img_preprocessed, img_display, mask_preprocessed
 
-
-# def preprocess_image_and_mask(image_path, mask_path=None, img_size=(512, 512),  # ← CHANGÉ: 224→512
-#                              encoder_name=None, id_to_group_mapping=None):
-#     """
-#     Préprocesse une image (et optionnellement un masque) avec le même pipeline que l'entraînement
-#     ADAPTÉ PYTORCH : Utilise PIL + torch au lieu de tf
-#     """
-
-#     print(f"🔄 Préprocessing de l'image: {os.path.basename(image_path)}")
-    
-#     # Chargement et preprocessing de l'image
-#     img_pil = Image.open(image_path).convert('RGB')
-#     img_original = img_pil.resize(img_size, Image.BILINEAR)
-    
-#     # Conversion en tensor et normalisation
-#     img_tensor = transforms.ToTensor()(img_original)  # [3, H, W] dans [0, 1]
-    
-#     # Appliquer le preprocessing du backbone
-#     preprocessing_fn = get_preprocessing_fn(encoder_name)
-#     if encoder_name is not None:
-#         # Pour les backbones pré-entraînés, on applique leur normalisation
-#         img_preprocessed = preprocessing_fn(img_tensor.permute(1, 2, 0).numpy())
-#         img_preprocessed = torch.from_numpy(img_preprocessed).permute(2, 0, 1).float()
-#     else:
-#         # Simple normalisation [0, 1]
-#         img_preprocessed = img_tensor.float()
-    
-#     # Preprocessing du masque si fourni
-#     mask_preprocessed = None
-#     if mask_path and os.path.exists(mask_path):
-#         print(f"🔄 Préprocessing du masque: {os.path.basename(mask_path)}")
-        
-#         mask_pil = Image.open(mask_path).convert('L')  # Grayscale
-#         mask_resized = mask_pil.resize(img_size, Image.NEAREST)
-#         mask_tensor = torch.from_numpy(np.array(mask_resized)).long()
-        
-#         print(f"   Valeurs uniques avant mapping: {torch.unique(mask_tensor)[:10]}...")
-        
-#         # Appliquer le mapping si fourni
-#         if id_to_group_mapping is not None:
-#             mask_tensor = map_mask_ids(mask_tensor, id_to_group_mapping)
-#             print(f"   Valeurs uniques après mapping: {torch.unique(mask_tensor)}")
-        
-#         mask_preprocessed = mask_tensor
-    
-#     # img_original en numpy pour affichage
-#     img_display = np.array(img_original)
-    
-#     return img_preprocessed, img_display, mask_preprocessed
-
-# def run_inference_and_visualize(image_path, model, encoder_name, img_size, mapping_config, 
-#                               mask_path=None, save_dir=None, show_stats=True):
-#     """
-#     ADAPTÉ PYTORCH : Inférence avec modèle PyTorch
-#     Returns: (predicted_mask, inference_time_seconds)
-#     """
-
-#     print(f"=== INFÉRENCE PYTORCH SUR {os.path.basename(image_path)} ===")
-
-#     img_preprocessed, img_display, mask_gt = preprocess_image_and_mask(
-#         image_path=image_path,
-#         mask_path=mask_path,
-#         img_size=img_size or (512, 512),
-#         encoder_name=encoder_name,
-#         id_to_group_mapping=mapping_config.get('id_to_group')
-#     )
-
-#     print("🔮 Exécution de l'inférence PyTorch...")
-#     model.eval()
-#     device = next(model.parameters()).device
-
-#     with torch.no_grad():
-#         # Ajouter dimension batch
-#         img_batch = img_preprocessed.unsqueeze(0).to(device)  # [1, 3, H, W]
-        
-#         # ⏱️ MESURE DU TEMPS D'INFÉRENCE
-#         start_time = time.time()
-#         predictions = model(img_batch)  # [1, num_classes, H, W]
-#         end_time = time.time()
-        
-#         inference_time = end_time - start_time
-        
-#         predicted_mask = torch.argmax(predictions[0], dim=0).cpu().numpy()  # [H, W]
-
-#     print(f"✅ Inférence terminée - Shape: {predicted_mask.shape}")
-#     print(f"⏱️ Temps d'inférence: {inference_time*1000:.1f} ms ({inference_time:.4f} s)")
-
-#     # Visualisation
-#     num_plots = 2 if mask_gt is None else 4
-#     fig, axes = plt.subplots(1, num_plots, figsize=(5*num_plots, 5))
-#     if num_plots == 1:
-#         axes = [axes]
-
-#     axes[0].imshow(img_display)
-#     axes[0].set_title("Image Originale")
-#     axes[0].axis('off')
-
-#     predicted_colored = colorize_mask(predicted_mask, mapping_config['group_colors'])
-#     axes[1].imshow(predicted_colored)
-#     axes[1].set_title("Masque Prédit")
-#     axes[1].axis('off')
-
-#     if mask_gt is not None:
-#         mask_gt_np = mask_gt.numpy() if isinstance(mask_gt, torch.Tensor) else mask_gt
-#         gt_colored = colorize_mask(mask_gt_np, mapping_config['group_colors'])
-#         axes[2].imshow(gt_colored)
-#         axes[2].set_title("Masque de Vérité")
-#         axes[2].axis('off')
-
-#         # Visualisation des erreurs
-#         diff_mask = (mask_gt_np != predicted_mask).astype(float)
-#         axes[3].imshow(img_display)
-#         axes[3].imshow(diff_mask, alpha=0.5, cmap='Reds')
-#         axes[3].set_title("Erreurs (en rouge)")
-#         axes[3].axis('off')
-
-#     colors_normalized = mapping_config['group_colors'] / 255.0
-#     custom_cmap = ListedColormap(colors_normalized)
-
-#     legend_elements = []
-#     for i, (name, color) in enumerate(zip(mapping_config['group_names'], colors_normalized)):
-#         legend_elements.append(mpatches.Patch(color=color, label=f'{i}: {name}'))
-
-#     fig.legend(handles=legend_elements, 
-#               loc='center left', 
-#               bbox_to_anchor=(1.01, 0.5),
-#               fontsize=9,
-#               frameon=True,
-#               fancybox=True,
-#               shadow=True)
-
-#     plt.tight_layout()
-#     fig.subplots_adjust(right=0.95)
-
-#     if save_dir:
-#         os.makedirs(save_dir, exist_ok=True)
-#         img_name = os.path.splitext(os.path.basename(image_path))[0]
-#         fig_path = os.path.join(save_dir, f'{img_name}_inference.png')
-#         fig.savefig(fig_path, dpi=150, bbox_inches='tight')
-#         print(f"💾 Résultat sauvegardé: {fig_path}")
-
-#     plt.show()
-
-#     # Statistiques
-#     if show_stats:
-#         print("\n📊 Statistiques du masque prédit:")
-#         unique_classes, counts = np.unique(predicted_mask, return_counts=True)
-#         for class_id, count in zip(unique_classes, counts):
-#             if class_id < len(mapping_config['group_names']):
-#                 percentage = (count / predicted_mask.size) * 100
-#                 print(f"   {mapping_config['group_names'][class_id]}: {count} pixels ({percentage:.1f}%)")
-
-#         if mask_gt is not None:
-#             mask_gt_np = mask_gt.numpy() if isinstance(mask_gt, torch.Tensor) else mask_gt
-#             print("\n📊 Statistiques du masque de vérité:")
-#             unique_classes, counts = np.unique(mask_gt_np, return_counts=True)
-#             for class_id, count in zip(unique_classes, counts):
-#                 if class_id < len(mapping_config['group_names']):
-#                     percentage = (count / mask_gt_np.size) * 100
-#                     print(f"   {mapping_config['group_names'][class_id]}: {count} pixels ({percentage:.1f}%)")
-
-#     return predicted_mask, inference_time
-
-
 # Version mise à jour de run_inference_and_visualize
 def run_inference_and_visualize(image_path, model, encoder_name, img_size, mapping_config, 
-                               mask_path=None, save_dir=None, show_stats=True):
+                               mask_path=None, save_dir=None, show_stats=True, show_plot=True):
     """
     Version simplifiée utilisant preprocess_image_and_mask
     """
@@ -461,7 +260,6 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
         fig.savefig(fig_path, dpi=150, bbox_inches='tight')
         print(f"💾 Résultat sauvegardé: {fig_path}")
 
-    plt.show()
 
     # Statistiques
     if show_stats:
@@ -481,7 +279,11 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
                     percentage = (count / mask_gt_np.size) * 100
                     print(f"   {mapping_config['group_names'][class_id]}: {count} pixels ({percentage:.1f}%)")
 
-    return predicted_mask, inference_time
+    if show_plot:
+        plt.show()
+        return predicted_mask, inference_time
+    else:
+        return predicted_mask, inference_time, fig
 
 
 def load_model(run_id=None, experiment_name="OC Projet 9", 
@@ -736,6 +538,6 @@ def load_second_best_model(experiment_name="OC Projet 9", metric="test_mean_iou"
 
 def load_model_by_run_id(run_id):
     """Charge un modèle par run_id spécifique"""
-    return load_model_by_param(run_id=run_id)
+    return load_model(run_id=run_id)
 
 
