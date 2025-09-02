@@ -3,7 +3,6 @@ import json
 import tempfile
 import numpy as np
 import torch
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import segmentation_models_pytorch as smp
 import mlflow
@@ -16,8 +15,8 @@ import matplotlib.patches as mpatches
 from matplotlib.colors import ListedColormap
 
 # Preprocessing/Images
-from PIL import Image
-import torchvision.transforms as transforms
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 
 def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True):
@@ -141,10 +140,6 @@ def get_preprocessing_fn(img_size=(512, 512), encoder=None):
     Retourne une fonction qui prétraite à la fois les images et les masques
     pour l'inférence, en reproduisant exactement le pipeline CityscapesDataset.
     """
-    import albumentations as A
-    from albumentations.pytorch import ToTensorV2
-    import cv2
-    import torch
     
     if encoder is None:
         mean, std = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
@@ -371,7 +366,7 @@ def preprocess_image_and_mask(image_path, mask_path=None, img_size=(512, 512),
 
 # Version mise à jour de run_inference_and_visualize
 def run_inference_and_visualize(image_path, model, encoder_name, img_size, mapping_config, 
-                               mask_path=None, save_dir=None, show_stats=True):
+                               mask_path=None, save_dir=None, show_stats=True, show_plot=True):
     """
     Version simplifiée utilisant preprocess_image_and_mask
     """
@@ -461,7 +456,6 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
         fig.savefig(fig_path, dpi=150, bbox_inches='tight')
         print(f"💾 Résultat sauvegardé: {fig_path}")
 
-    plt.show()
 
     # Statistiques
     if show_stats:
@@ -481,7 +475,11 @@ def run_inference_and_visualize(image_path, model, encoder_name, img_size, mappi
                     percentage = (count / mask_gt_np.size) * 100
                     print(f"   {mapping_config['group_names'][class_id]}: {count} pixels ({percentage:.1f}%)")
 
-    return predicted_mask, inference_time
+    if show_plot:
+        plt.show()
+        return predicted_mask, inference_time
+    else:
+        return predicted_mask, inference_time, fig
 
 
 def load_model(run_id=None, experiment_name="OC Projet 9", 
@@ -736,6 +734,6 @@ def load_second_best_model(experiment_name="OC Projet 9", metric="test_mean_iou"
 
 def load_model_by_run_id(run_id):
     """Charge un modèle par run_id spécifique"""
-    return load_model_by_param(run_id=run_id)
+    return load_model(run_id=run_id)
 
 
