@@ -24,6 +24,7 @@ COPY start.sh ./start.sh
 COPY utils/ ./utils/
 COPY cityscapes_config.json .
 COPY notebooks/content/data/test_images_sample/ ./notebooks/content/data/test_images_sample/
+COPY notebooks/content/data/train_images_sample/ ./notebooks/content/data/train_images_sample/
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/nginx.conf.template

@@ -225,34 +225,6 @@ def initialize_models():
         print(f"❌ Erreur lors de l'initialisation: {e}")
         traceback.print_exc()
         raise e
-        
-def get_accessibility_info():
-    """Retourne les informations d'accessibilité pour le frontend"""
-    return {
-        "wcag_compliant": True,
-        "color_palette": {
-            "primary_blue": "#0066CC",
-            "primary_red": "#CC0000", 
-            "primary_green": "#006600",
-            "primary_orange": "#CC6600",
-            "secondary_purple": "#663399",
-            "secondary_teal": "#006666",
-            "neutral_dark": "#333333",
-            "neutral_medium": "#666666"
-        },
-        "contrast_ratios": {
-            "primary_colors_vs_white": "≥ 4.1:1 (WCAG AA)",
-            "text_vs_background": "≥ 4.5:1 (WCAG AA)"
-        },
-        "features": [
-            "Couleurs à contraste élevé",
-            "Motifs alternatifs aux couleurs",
-            "Descriptions textuelles alternatives en cas d'absence d'images",
-            "Tableaux de données complémentaires",
-            "Navigation clavier supportée"
-        ]
-    }
-
 
 # Initialisation de l'API
 app = FastAPI(
@@ -289,33 +261,16 @@ def health_check():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-
-# Modifier le endpoint /models pour inclure des couleurs accessibles :
 @app.get("/models", response_model=dict)
 def get_models_info():
     if best_model is None or second_best_model is None:
         raise HTTPException(status_code=503, detail="Models not loaded")
-    
-    # Couleurs accessibles pour les classes
-    accessible_class_colors = [
-        [0, 102, 204],    # primary_blue
-        [204, 0, 0],      # primary_red  
-        [0, 102, 0],      # primary_green
-        [204, 102, 0],    # primary_orange
-        [102, 51, 153],   # secondary_purple
-        [0, 102, 102],    # secondary_teal
-        [51, 51, 51],     # neutral_dark
-        [102, 102, 102]   # neutral_medium
-    ]
-    
     return {
         "best_model": best_model_info,
         "second_best_model": second_best_model_info,
         "num_classes": mapping_config['num_classes'],
         "class_names": mapping_config['group_names'],
-        "class_colors": accessible_class_colors,
-        "accessibility_info": get_accessibility_info(),
-        "preprocessing_resolution": best_model_info.get("input_size", (512, 512))  # Ajout pour clarté
+        "class_colors": mapping_config['group_colors'].tolist()
     }
 
 @app.get("/dataset-info")
@@ -431,10 +386,6 @@ def preprocess_train_image(request: PreprocessingRequest):
     if mapping_config is None:
         raise HTTPException(status_code=503, detail="Configuration not loaded")
     
-    # Vérifier que le meilleur modèle est chargé
-    if best_model is None or not best_model_info:
-        raise HTTPException(status_code=503, detail="Best model not loaded")
-    
     try:
         original_dir = Path(TRAIN_IMAGES_DIR) / "original"
         image_path = original_dir / request.filename
@@ -454,12 +405,8 @@ def preprocess_train_image(request: PreprocessingRequest):
         original_pil = Image.open(image_path).convert('RGB')
         original_np = np.array(original_pil)
         
-        # UTILISER LA RÉSOLUTION DU MEILLEUR MODÈLE au lieu de (512, 512)
-        target_size = best_model_info.get("input_size", (512, 512))
-        print(f"🎯 Utilisation de la taille du meilleur modèle: {target_size}")
-        
-        # Appliquer le preprocessing avec la résolution du meilleur modèle
-        preprocess_fn = get_preprocessing_fn(img_size=target_size, encoder=None)
+        # Appliquer le preprocessing standard (resize + normalisation)
+        preprocess_fn = get_preprocessing_fn(img_size=(512, 512), encoder=None)
         normalized_tensor, _ = preprocess_fn(original_np, None)
         
         # Convertir le tensor en image pour affichage
@@ -474,15 +421,15 @@ def preprocess_train_image(request: PreprocessingRequest):
             img_pil.save(buffer, format='PNG')
             return base64.b64encode(buffer.getvalue()).decode()
         
-        # Image originale redimensionnée pour comparaison (avec la taille du meilleur modèle)
-        original_resized = np.array(original_pil.resize(target_size))
+        # Image originale redimensionnée pour comparaison
+        original_resized = np.array(original_pil.resize((512, 512)))
         
         result = PreprocessingResult(
             success=True,
             message="Preprocessing completed successfully",
             original_image=img_to_base64(original_resized),
             normalized_image=img_to_base64(normalized_display),
-            transformations_applied=[f"Resize {target_size}", "Normalization (0-1)"]
+            transformations_applied=["Resize (512x512)", "Normalization (0-1)"]
         )
         
         # Appliquer l'augmentation si demandée
@@ -499,19 +446,6 @@ def preprocess_train_image(request: PreprocessingRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Preprocessing error: {str(e)}")
-
-@app.get("/best-model-resolution")
-def get_best_model_resolution():
-    """Retourne la résolution utilisée par le meilleur modèle"""
-    if best_model is None or not best_model_info:
-        raise HTTPException(status_code=503, detail="Best model not loaded")
-    
-    return {
-        "model_name": best_model_info.get("name", "Unknown"),
-        "encoder_name": best_model_info.get("encoder_name", "Unknown"),
-        "input_size": best_model_info.get("input_size", (512, 512)),
-        "architecture": best_model_info.get("architecture", "Unknown")
-    }
 
 @app.get("/sample-images", response_model=AvailableImagesResponse)
 def get_sample_images():
@@ -819,9 +753,3 @@ def get_metrics():
         "num_classes": mapping_config['num_classes'] if mapping_config else None,
         "timestamp": datetime.utcnow().isoformat()
     }
-
-# Ajouter cette route après les autres routes :
-@app.get("/accessibility-info")
-def get_accessibility_information():
-    """Retourne les informations sur la conformité d'accessibilité"""
-    return get_accessibility_info()

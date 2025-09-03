@@ -9,6 +9,7 @@ import mlflow
 import re
 import ast
 import time
+import random
 
 # Visualisation
 import matplotlib.patches as mpatches
@@ -132,6 +133,78 @@ def get_preprocessing_fn(img_size=(512, 512), encoder=None):
             return transformed['image'], None
 
     return preprocess
+
+def apply_random_augmentation(image_np, prob=0.7):
+    """
+    Applique des transformations d'augmentation aléatoires à une image,
+    similaires à celles utilisées pendant l'entraînement.
+    
+    Args:
+        image_np (np.ndarray): Image numpy array (H, W, 3)
+        prob (float): Probabilité d'appliquer chaque transformation
+        
+    Returns:
+        tuple: (image_augmentée, liste_des_transformations_appliquées)
+    """
+    transforms_applied = []
+    
+    # Définir les transformations possibles
+    possible_transforms = [
+        {
+            "name": "Rotation aléatoire",
+            "transform": A.Rotate(limit=15, p=prob),
+            "description": "Rotation de -15° à +15°"
+        },
+        {
+            "name": "Flip horizontal", 
+            "transform": A.HorizontalFlip(p=0.5),
+            "description": "Miroir horizontal (50% chance)"
+        },
+        {
+            "name": "Changement de luminosité",
+            "transform": A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=prob),
+            "description": "Luminosité et contraste ±20%"
+        },
+        {
+            "name": "Flou gaussien léger",
+            "transform": A.GaussianBlur(blur_limit=(1, 3), p=prob*0.3),
+            "description": "Flou gaussien subtil"
+        },
+        {
+            "name": "Décalage couleur",
+            "transform": A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=15, val_shift_limit=10, p=prob),
+            "description": "Ajustement teinte/saturation/valeur"
+        },
+        {
+            "name": "Zoom aléatoire",
+            "transform": A.RandomScale(scale_limit=0.1, p=prob*0.5),
+            "description": "Zoom de -10% à +10%"
+        }
+    ]
+    
+    # Sélectionner aléatoirement quelques transformations
+    num_transforms = random.randint(1, min(4, len(possible_transforms)))
+    selected_transforms = random.sample(possible_transforms, num_transforms)
+    
+    # Créer le pipeline d'augmentation
+    augmentation_pipeline = []
+    for transform_info in selected_transforms:
+        augmentation_pipeline.append(transform_info["transform"])
+        transforms_applied.append(f"{transform_info['name']}: {transform_info['description']}")
+    
+    # Appliquer les transformations
+    compose = A.Compose(augmentation_pipeline)
+    
+    try:
+        augmented = compose(image=image_np)
+        augmented_image = augmented['image']
+    except Exception as e:
+        print(f"Erreur lors de l'augmentation: {e}")
+        # En cas d'erreur, retourner l'image originale
+        augmented_image = image_np.copy()
+        transforms_applied = ["Erreur - image originale conservée"]
+    
+    return augmented_image, transforms_applied
     
 # Version simplifiée de preprocess_image_and_mask utilisant la nouvelle get_preprocessing_fn
 def preprocess_image_and_mask(image_path, mask_path=None, img_size=(512, 512),
@@ -539,5 +612,3 @@ def load_second_best_model(experiment_name="OC Projet 9", metric="test_mean_iou"
 def load_model_by_run_id(run_id):
     """Charge un modèle par run_id spécifique"""
     return load_model(run_id=run_id)
-
-
