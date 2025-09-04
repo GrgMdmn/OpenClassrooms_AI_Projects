@@ -1,112 +1,116 @@
-# Projet 9
+# Street Vision PoC - Segmentation Sémantique Urbaine
 
-Documentation à venir
+## 🎯 Description du Projet
 
+**Street Vision PoC** est une preuve de concept démontrant l'amélioration des performances de segmentation sémantique urbaine en comparant les architectures CNN traditionnelles (FPN) aux approches Transformer modernes (SegFormer).
 
-# Dashboard de Comparaison de Modèles
+Ce projet évalue empiriquement le potentiel des **Vision Transformers** pour la compréhension de scènes urbaines complexes, avec un focus sur les classes critiques pour la sécurité (piétons, véhicules, signalétique).
 
-## Conformité aux Exigences
+### 🔬 Contexte Technique
 
-### Analyse Exploratoire des Données Non Structurées (Images)
+- **Dataset** : Cityscapes (2,975 images haute résolution annotées pixel-par-pixel)
+- **Architectures comparées** : 
+  - **CNN traditionnel** : FPN + EfficientNet-B0/ResNet34
+  - **Vision Transformer** : SegFormer-B0/B1
+- **Résolutions d'évaluation** : 512×512 et 768×768 pixels
+- **Métrique principale** : Mean Intersection over Union (mIoU)
 
-**Présentation d'exemples d'images selon les catégories :**
-- Visualisation d'images du dataset Cityscapes organisées par 8 méta-classes de segmentation
-- Sélection interactive d'images d'entraînement et de test avec prévisualisation
-- Interface de navigation par catégories avec noms d'affichage conviviaux
+## 📊 Résultats Principaux
 
-**Comptage et répartition des données :**
-- Graphiques en secteurs (pie charts) détaillant la répartition des 25,000 images Cityscapes
-- Visualisation de l'utilisation projet : 80% train / 20% validation / 100% test
-- Graphique de distribution des classes dans le dataset d'entraînement
-- Tableaux récapitulatifs avec statistiques détaillées par split
+| **Modèle** | **mIoU** | **Paramètres** | **Taille** | **Performance** |
+|------------|----------|----------------|------------|-----------------|
+| **SegFormer-B1** | **79.98%** | 13.68M | 52MB | ⭐ **Meilleur** |
+| **FPN+ResNet34** | 79.22% | 23.16M | 88MB | 🔄 Baseline forte |
+| **FPN+EfficientNet-B0** | 78.67% | 5.76M | 22MB | 💡 Compact |
+| **SegFormer-B0** | 77.91% | 3.72M | 14MB | ⚡ Ultra-léger |
 
-**Transformations des images :**
-- Démonstration interactive du preprocessing : redimensionnement et normalisation
-- Visualisation des augmentations de données aléatoires (rotation, flip, luminosité, etc.)
-- Comparaison avant/après transformations avec alignement visuel
-- Documentation complète des 6 types d'augmentations possibles
+**Analyse comparative** : SegFormer-B1 et FPN+ResNet34 atteignent des performances similaires (~79-80% mIoU), mais SegFormer-B1 présente l'avantage d'être plus compact et probablement plus rapide sur GPU. Les versions SegFormer-B2 à B5 promettraient des gains significatifs, mais mes contraintes matérielles n'ont pas permis leur évaluation.
 
-### Sélection de Données d'Entrée
+### 🎯 Gains Significatifs par Classes Critiques
 
-**Interface de sélection multiple :**
-- Liste déroulante pour images test Cityscapes avec informations sur la vérité terrain
-- Upload de fichiers personnels (JPEG, PNG) avec validation de format
-- Prévisualisation des images sélectionnées avant traitement
-- Gestion des erreurs et feedback utilisateur en temps réel
+- **Human** : +1.78% IoU (sécurité critique)
+- **Vehicle** : +1.05% IoU (obstacles mobiles)
+- **Object** : +0.56% IoU (signalétique urbaine)
 
-### Résultats de Prédiction
+## 🚀 Déploiement Rapide
 
-**Comparaison complète de modèles :**
-- Affichage côte à côte des prédictions des deux meilleurs modèles
-- Visualisations avec image originale, masques prédits et vérité terrain
-- Détection et mise en évidence des erreurs de segmentation
-- Statistiques détaillées par classe avec pourcentages et nombre de pixels
+### Docker Hub
 
-**Métriques de performance :**
-- Temps d'inférence comparatif avec analyse de vitesse
-- Scores de performance (mIoU, Accuracy) par modèle
-- IoU par classe pour analyse fine des performances
-- Graphiques comparatifs interactifs des résultats
+L'application est containerisée et disponible sur Docker Hub :
 
-### Déploiement Cloud
+```bash
+docker pull grgmdmn/street-vision-poc_api
+```
 
-**Architecture déployée :**
-- Application FastAPI pour l'API de comparaison de modèles
-- Interface Streamlit pour le dashboard utilisateur
-- Déploiement sur infrastructure cloud avec haute disponibilité
-- Gestion automatique des ressources et montée en charge
+### Configuration avec Docker Compose
 
-### Accessibilité WCAG
+1. Copiez le fichier d'exemple de configuration :
+```bash
+cp docker-compose.yml.example docker-compose.yml
+```
 
-**Conformité aux critères essentiels :**
+2. Configurez les variables d'environnement dans `docker-compose.yml`.
 
-#### Contraste des Couleurs (WCAG AA)
-- Palette de couleurs avec ratios de contraste ≥ 4.1:1 pour éléments graphiques
-- Ratios de contraste ≥ 4.5:1 pour le texte sur fond
-- 8 couleurs principales validées : bleu (#0066CC), rouge (#CC0000), vert (#006600), etc.
-- Remplacement des dégradés par des couleurs unies à contraste élevé
+3. Lancez l'application :
+```bash
+docker-compose up -d
+```
 
-#### Alternatives Textuelles
-- Descriptions alternatives détaillées pour tous les graphiques générées automatiquement
-- Textes explicatifs pour chaque visualisation (pie charts, bar charts)
-- Labels ARIA appropriés pour les éléments interactifs
-- Documentation textuelle complète des transformations d'images
+4. Accédez à l'interface : `http://localhost:$(port)`
 
-#### Indication Non-Couleur Uniquement
-- Motifs et hachures complémentaires aux couleurs (optionnel via checkbox)
-- 6 motifs différents : diagonales, verticales, horizontales, points, croix
-- Différenciation par forme et texture en plus des couleurs
-- Bordures et contours renforcés pour la distinction visuelle
+## 🎮 Fonctionnalités de l'Interface
 
-#### Navigation Clavier
-- CSS focus visible avec contours bleus (#0066CC) de 2px
-- Support complet de la navigation par tabulation
-- Indicateurs visuels clairs pour les éléments focusés
-- Respect de l'ordre logique de navigation
+### Dashboard Interactif
 
-#### Tableaux de Données Accessibles
-- Tableaux structurés complémentaires à tous les graphiques
-- En-têtes appropriés avec scope et descriptions
-- Données exportables et lisibles par lecteurs d'écran
-- Configuration responsive pour tous les écrans
+- **Upload d'images** : Glisser-déposer d'images urbaines
+- **Double inférence** : Comparaison simultanée FPN vs SegFormer
+- **Visualisation** : Masques de segmentation colorés par classe
+- **Métriques temps réel** : Temps d'inférence et scores de confiance
+- **Export** : Téléchargement des résultats de segmentation
+- **Accessibilité WCAG** : Interface conforme aux standards d'accessibilité
 
-**Fonctionnalités d'assistance intégrées :**
-- Checkbox "Activer les motifs (accessibilité visuelle)" pour personnalisation
-- Descriptions automatiques des graphiques avec statistiques complètes
-- Interface adaptable aux besoins des utilisateurs en situation de handicap
-- Documentation complète des fonctionnalités d'accessibilité via endpoint `/accessibility-info`
+### Analyse Exploratoire des Données
 
-## Architecture Technique
+- **Statistiques Cityscapes** : Distribution des classes, résolutions natives
+- **Graphiques interactifs** : Répartition pixel par méta-classe
+- **Exemples annotés** : Visualisation échantillons du dataset
 
-**Stack technologique :**
-- Backend : FastAPI + PyTorch pour l'inférence des modèles
-- Frontend : Streamlit avec composants accessibles
-- Visualisations : Matplotlib avec palettes WCAG
-- API REST documentée avec validation Pydantic
-- Gestion d'état optimisée pour les comparaisons de modèles
+## 📈 Méthodologie d'Évaluation
 
-**Performance et fiabilité :**
-- Temps d'inférence optimisés (< 1 seconde par image)
-- Gestion mémoire efficace avec fermeture automatique des figures
-- Validation des formats et tailles de fichiers
-- Nettoyage automatique des fichiers temporaires
+### Approche Comparative
+
+1. **Baseline CNN** : Réentraînement FPN+EfficientNet/ResNet aux résolutions supérieures
+2. **Nouvelle approche** : Évaluation SegFormer avec attention globale
+3. **Protocole rigoureux** : Validation croisée, métriques standardisées
+4. **Analyse par classe** : Performance détaillée sur 8 méta-classes urbaines
+
+### Limites Identifiées
+
+- **Résolution fixe** : Évaluation sans sliding window (vs protocole original)
+- **Ressources limitées** : Tests uniquement sur SegFormer-B0/B1
+- **Conditions contrôlées** : Dataset Cityscapes uniquement (météo favorable)
+
+## 🔬 Insights Techniques
+
+### Avantages SegFormer
+
+- **Attention globale** : Chaque pixel "voit" toute l'image simultanément
+- **Architecture plus légère** : Modèle compact avec moins de paramètres
+- **Robustesse contextuelle** : Meilleure gestion occlusions et objets complexes
+- **Potentiel d'amélioration** : Versions B2-B5 promettraient des gains significatifs
+
+### Trade-offs Identifiés
+
+- **Vitesse CPU classique** : ~2× plus lent que FPN sur processeurs haute performance (Xeon, 9600X)
+- **Vitesse CPU économe** : 3× plus rapide sur processeurs économes en énergie (N100)
+- **Optimisation GPU** : Architecture Transformer favorisée par accélération matérielle
+
+## 📚 Références
+
+- **Xie, E. et al.** (2021). *SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers*. NeurIPS 2021.
+- **Cordts, M. et al.** (2016). *The Cityscapes Dataset for Semantic Urban Scene Understanding*. CVPR 2016.
+- **Segmentation Models PyTorch** - [Framework d'implémentation utilisé](https://github.com/qubvel/segmentation_models.pytorch)
+
+---
+
+**Note** : Cette preuve de concept démontre le potentiel des architectures Transformer pour la segmentation urbaine, tout en soulignant l'importance des ressources computationnelles pour exploiter pleinement leurs capacités.
