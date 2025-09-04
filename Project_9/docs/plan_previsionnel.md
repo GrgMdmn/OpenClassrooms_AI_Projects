@@ -6,10 +6,7 @@
 
 ## Dataset Retenu
 
-## Dataset Retenu
-
 **Cityscapes** : Dataset de référence pour la segmentation sémantique de scènes urbaines comprenant 2975 images haute résolution annotées pixel par pixel. Les images sont capturées dans **50 villes allemandes différentes** avec **34 classes principales** que nous regroupons en **8 catégories pertinentes** (flat, vehicle, human, construction, object, nature, sky, void). La résolution sera progressivement testée à 512×512 puis 768×768 pixels, contre 224×224 dans le projet précédent, pour exploiter pleinement les capacités des architectures modernes.
-
 
 ---
 
@@ -18,8 +15,8 @@
 ### Algorithme : SegFormer
 
 **Justifications du choix :**
-SegFormer (Xie et al., 2021) combine l'efficacité des Vision Transformers avec un décodeur MLP simple, atteignant des performances état de l'art sur Cityscapes (**84.0% mIoU avec SegFormer-B5** contre 80.9% pour DeepLabv3+ ResNet-101). Cette architecture résout les limitations des CNN par son contexte global natif et évite les problèmes des Transformers classiques grâce à l'absence d'encodage positionnel fixe. Comparé à notre baseline actuelle FPN + EfficientNetB0 (74.6% mIoU), SegFormer présente un **potentiel d'amélioration de ~10 points mIoU**, particulièrement sur les petits objets critiques pour les classes Human et Object.\
-*Note : les résultats de référence utilisent parfois des techniques d'inférence sliding window, différentes de notre protocole à résolution fixe 768×768.*
+SegFormer (Xie et al., 2021) combine l'efficacité des Vision Transformers avec un décodeur MLP simple, atteignant des performances état de l'art sur Cityscapes (**84.0% mIoU avec SegFormer-B5** contre 80.9% pour DeepLabv3+ ResNet-101). Cette architecture résout les limitations des CNN par son contexte global natif et évite les problèmes des Transformers classiques grâce à l'absence d'encodage positionnel fixe. Comparé à notre baseline actuelle FPN + EfficientNetB0 (74.6% mIoU @224x224), SegFormer présente un **potentiel d'amélioration de ~10 points mIoU**, particulièrement sur les petits objets critiques pour les classes Human et Object.\
+*Note : les résultats de référence sur l'article utilisent parfois des techniques d'inférence sliding window, différentes de notre protocole à résolution fixe 768×768.*
 
 **Objectif et contexte :**
 SegFormer vise la compréhension précise pixel-wise des scènes urbaines. Son architecture hiérarchique capture simultanément détails fins et contexte global, essentiel pour la segmentation d'éléments critiques (piétons, véhicules, signalétique). Le modèle s'applique aux systèmes de perception embarqués nécessitant un équilibre performance/efficacité computationnelle.
@@ -39,7 +36,8 @@ SegFormer vise la compréhension précise pixel-wise des scènes urbaines. Son a
 ## Explication de la Démarche de Test
 
 ### Méthode Baseline
-**FPN + EfficientNetB0/ResNet34** : Réentraînement des modèles précédents (initialement 74.6% mIoU en 224×224) aux nouvelles résolutions 512×512 et 768×768. **Migration framework obligatoire** : passage de `segmentation_models` (TensorFlow/Keras) vers `segmentation_models_pytorch` pour accéder aux architectures récentes.
+**FPN + EfficientNetB0/ResNet34** : Réentraînement des modèles précédents (initialement 74.6% mIoU en 224×224) aux nouvelles résolutions 512×512 et 768×768. 
+**Migration framework obligatoire** : passage de `segmentation_models` (TensorFlow/Keras) vers `segmentation_models_pytorch` pour accéder aux architectures récentes.
 
 ### Méthode de Test SegFormer
 **Évaluation comparative progressive** :

@@ -244,11 +244,6 @@ SegFormer-B1 démontre une **supériorité en précision** (+0.76% mIoU) avec un
 - **Applications batch** : SegFormer-B1 recommandé pour la précision maximale hors contraintes temps réel
 - **Potentiel d'optimisation** : Les temps d'inférence seraient probablement divisés par 3-5x sur hardware dédié avec accélération GPU
 
-### Évolution des Performances
-
-![Matrice de confusion FPN_ResNet34](mIoU_accuracy.png)
-*Fig.3: Évolution de MeanIoU et Accuracy pour les 8 modèles.*
-
 ### Conclusion Expérimentale
 
 **Analyse nuancée des résultats :** Les résultats montrent que SegFormer-B1 **rivalise** avec les CNN traditionnels dans une configuration d'évaluation statique (images redimensionnées à résolution fixe, quitte à déformer le ratio), avec un gain modeste de +0.76% de mIoU sur FPN+ResNet34.
