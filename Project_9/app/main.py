@@ -171,9 +171,10 @@ def initialize_models():
         print("🔄 Configuration de MLflow...")
         configure_mlflow()
         
-        print("🔄 Chargement de la configuration Cityscapes...")
-        mapping_config = load_cityscapes_config(CITYSCAPES_CONFIG_PATH, verbose=False)
-        print("✅ Configuration Cityscapes chargée")
+        print("🔄 Chargement de la configuration Cityscapes avec couleurs WCAG...")
+        mapping_config = load_cityscapes_config(CITYSCAPES_CONFIG_PATH, verbose=False, use_wcag_colors=True)
+        print("✅ Configuration Cityscapes chargée avec couleurs WCAG")
+
         
         print("🔄 Chargement du meilleur modèle...")
         best_model, best_run_id, best_encoder_name, best_img_size = load_model(
@@ -296,27 +297,33 @@ def get_models_info():
     if best_model is None or second_best_model is None:
         raise HTTPException(status_code=503, detail="Models not loaded")
     
-    # Couleurs accessibles pour les classes
-    accessible_class_colors = [
-        [0, 102, 204],    # primary_blue
-        [204, 0, 0],      # primary_red  
-        [0, 102, 0],      # primary_green
-        [204, 102, 0],    # primary_orange
-        [102, 51, 153],   # secondary_purple
-        [0, 102, 102],    # secondary_teal
-        [51, 51, 51],     # neutral_dark
-        [102, 102, 102]   # neutral_medium
+    # NOUVELLE RÉPARTITION DES COULEURS selon votre mapping final
+    wcag_accessible_colors = [
+        [102, 102, 102],  # Flat: neutral_medium (gris moyen pour routes/trottoirs)
+        [204, 0, 0],      # Human: primary_red (rouge pour piétons/cyclistes)  
+        [102, 51, 153],   # Vehicle: secondary_purple (violet pour véhicules)
+        [204, 102, 0],    # Construction: primary_orange (orange pour bâtiments)
+        [0, 102, 102],    # Object: secondary_teal (teal pour objets/signalétique)
+        [0, 102, 0],      # Nature: primary_green (vert pour végétation)
+        [0, 102, 204],    # Sky: primary_blue (bleu pour ciel)
+        [51, 51, 51]      # Void: neutral_dark (gris foncé pour zones non-définies)
     ]
+    
+    # Mettre à jour la configuration avec les nouvelles couleurs
+    if mapping_config:
+        mapping_config['group_colors'] = np.array(wcag_accessible_colors, dtype=np.uint8)
     
     return {
         "best_model": best_model_info,
         "second_best_model": second_best_model_info,
         "num_classes": mapping_config['num_classes'],
         "class_names": mapping_config['group_names'],
-        "class_colors": accessible_class_colors,
+        "class_colors": wcag_accessible_colors,
         "accessibility_info": get_accessibility_info(),
-        "preprocessing_resolution": best_model_info.get("input_size", (512, 512))  # Ajout pour clarté
+        "preprocessing_resolution": best_model_info.get("input_size", (512, 512))
     }
+
+
 
 @app.get("/dataset-info")
 def get_dataset_info():

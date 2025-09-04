@@ -30,17 +30,36 @@ st.set_page_config(
 
 # Palettes de couleurs conformes WCAG AA (ratio contraste ≥ 3:1)
 WCAG_ACCESSIBLE_COLORS = {
-    'primary_blue': '#0066CC',      # Contraste 4.5:1 avec blanc
-    'primary_red': '#CC0000',       # Contraste 5.7:1 avec blanc  
-    'primary_green': '#006600',     # Contraste 4.8:1 avec blanc
-    'primary_orange': '#CC6600',    # Contraste 4.2:1 avec blanc
-    'secondary_purple': '#663399',  # Contraste 4.1:1 avec blanc
-    'secondary_teal': '#006666',    # Contraste 4.4:1 avec blanc
-    'neutral_dark': '#333333',      # Contraste 12.6:1 avec blanc
-    'neutral_medium': '#666666',    # Contraste 5.7:1 avec blanc
+    'primary_blue': '#0066CC',      # [0, 102, 204]
+    'primary_red': '#CC0000',       # [204, 0, 0]
+    'primary_green': '#006600',     # [0, 102, 0]
+    'primary_orange': '#CC6600',    # [204, 102, 0]
+    'secondary_purple': '#663399',  # [102, 51, 153]
+    'secondary_teal': '#006666',    # [0, 102, 102]
+    'neutral_dark': '#333333',      # [51, 51, 51]
+    'neutral_medium': '#666666',    # [102, 102, 102]
     'neutral_light': '#CCCCCC',     # Pour éléments désactivés
     'background_alt': '#F5F5F5'     # Fond alternatif accessible
 }
+
+# Convertir hex vers RGB
+def hex_to_rgb(hex_color):
+    """Convertit une couleur hex en tuple RGB"""
+    hex_color = hex_color.lstrip('#')
+    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+# Couleurs RGB pour les masques (dans le même ordre que les classes)
+WCAG_RGB_COLORS = [
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['neutral_medium']),    # Flat: gris moyen [102, 102, 102]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['primary_red']),       # Human: rouge [204, 0, 0]  
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['secondary_purple']),  # Vehicle: violet [102, 51, 153]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['primary_orange']),    # Construction: orange [204, 102, 0]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['secondary_teal']),    # Object: teal [0, 102, 102]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['primary_green']),     # Nature: vert [0, 102, 0]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['primary_blue']),      # Sky: bleu [0, 102, 204]
+    hex_to_rgb(WCAG_ACCESSIBLE_COLORS['neutral_dark'])       # Void: gris foncé [51, 51, 51]
+]
+
 
 # Motifs pour différencier sans couleur uniquement
 ACCESSIBILITY_PATTERNS = {
@@ -598,14 +617,14 @@ def display_model_stats_chart(stats, models_info, title):
     
     # Couleurs accessibles WCAG
     accessible_colors = [
-        WCAG_ACCESSIBLE_COLORS['primary_blue'],
-        WCAG_ACCESSIBLE_COLORS['primary_red'], 
-        WCAG_ACCESSIBLE_COLORS['primary_green'],
-        WCAG_ACCESSIBLE_COLORS['primary_orange'],
-        WCAG_ACCESSIBLE_COLORS['secondary_purple'],
-        WCAG_ACCESSIBLE_COLORS['secondary_teal'],
-        WCAG_ACCESSIBLE_COLORS['neutral_dark'],
-        WCAG_ACCESSIBLE_COLORS['neutral_medium']
+        WCAG_ACCESSIBLE_COLORS['neutral_medium'],    # Flat: gris moyen
+        WCAG_ACCESSIBLE_COLORS['primary_red'],       # Human: rouge
+        WCAG_ACCESSIBLE_COLORS['secondary_purple'],  # Vehicle: violet
+        WCAG_ACCESSIBLE_COLORS['primary_orange'],    # Construction: orange
+        WCAG_ACCESSIBLE_COLORS['secondary_teal'],    # Object: teal
+        WCAG_ACCESSIBLE_COLORS['primary_green'],     # Nature: vert
+        WCAG_ACCESSIBLE_COLORS['primary_blue'],      # Sky: bleu
+        WCAG_ACCESSIBLE_COLORS['neutral_dark']       # Void: gris foncé
     ]
     
     colors = accessible_colors[:len(ordered_class_names)]

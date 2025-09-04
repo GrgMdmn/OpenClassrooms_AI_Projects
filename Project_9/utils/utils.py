@@ -20,10 +20,47 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 
-def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True):
+def update_colors_to_wcag(mapping_config):
+    """
+    Met à jour les couleurs dans mapping_config pour utiliser les couleurs WCAG accessibles
+    avec redistribution sémantique intuitive finale
+    """
+    # Redistribution sémantique finale :
+    # Flat → gris moyen, Human → rouge, Vehicle → violet, Construction → orange,
+    # Object → teal, Nature → vert, Sky → bleu, Void → gris foncé
+    wcag_colors = np.array([
+        [102, 102, 102],  # Flat: gris moyen (routes, trottoirs)
+        [204, 0, 0],      # Human: rouge (piétons, cyclistes)  
+        [102, 51, 153],   # Vehicle: violet (véhicules)
+        [204, 102, 0],    # Construction: orange (bâtiments)
+        [0, 102, 102],    # Object: teal (objets, signalétique)
+        [0, 102, 0],      # Nature: vert (végétation)
+        [0, 102, 204],    # Sky: bleu (ciel)
+        [51, 51, 51]      # Void: gris foncé (zones non-définies)
+    ], dtype=np.uint8)
+    
+    # S'assurer qu'on a assez de couleurs pour le nombre de classes
+    num_classes = mapping_config['num_classes']
+    if len(wcag_colors) < num_classes:
+        print(f"⚠️ Attention: {num_classes} classes mais seulement {len(wcag_colors)} couleurs WCAG disponibles")
+        # Compléter avec les couleurs originales si nécessaire
+        original_colors = mapping_config['group_colors']
+        while len(wcag_colors) < num_classes:
+            wcag_colors = np.vstack([wcag_colors, original_colors[len(wcag_colors):len(wcag_colors)+1]])
+    
+    mapping_config['group_colors'] = wcag_colors[:num_classes]
+    print(f"✅ Couleurs mises à jour vers WCAG pour {num_classes} classes")
+    return mapping_config
+
+
+def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True, use_wcag_colors=False):
     """
     Charge la configuration Cityscapes depuis un fichier JSON.
-    INCHANGÉ - Compatible PyTorch
+    
+    Args:
+        config_path: Chemin vers le fichier de configuration
+        verbose: Affichage détaillé
+        use_wcag_colors: Utiliser les couleurs WCAG accessibles
     """
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
@@ -40,6 +77,20 @@ def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True
 
     num_classes = len(group_names)
 
+    mapping_config = {
+        "class_groups": class_groups,
+        "cityscapes_mapping": cityscapes_mapping,
+        "id_to_label": id_to_label,
+        "group_colors": group_colors,
+        "group_names": group_names,
+        "id_to_group": id_to_group,
+        "num_classes": num_classes
+    }
+    
+    # Appliquer les couleurs WCAG si demandé
+    if use_wcag_colors:
+        mapping_config = update_colors_to_wcag(mapping_config)
+
     if verbose:
         print("== Groupes de classes Cityscapes ==")
         for group, classes in class_groups.items():
@@ -52,20 +103,13 @@ def load_cityscapes_config(config_path="../cityscapes_config.json", verbose=True
             print(f"  ID {id_:2d} ('{label}') → groupe '{group_names[group_id]}' ({group_id})")
 
         print("\n== Liste des groupes et couleurs associées ==")
-        for i, (name, color) in enumerate(zip(group_names, group_colors)):
+        for i, (name, color) in enumerate(zip(group_names, mapping_config['group_colors'])):
             print(f"  Groupe {i}: {name} - Couleur RGB : {color}")
 
         print(f"\nNombre total de groupes/classes : {num_classes}")
 
-    return {
-        "class_groups": class_groups,
-        "cityscapes_mapping": cityscapes_mapping,
-        "id_to_label": id_to_label,
-        "group_colors": group_colors,
-        "group_names": group_names,
-        "id_to_group": id_to_group,
-        "num_classes": num_classes
-    }
+    return mapping_config
+
 
 def map_mask_ids(mask, id_to_group_mapping):
     """
