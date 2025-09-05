@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cahier des Charges Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 950px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            padding: 15px 12px;
+            text-align: center;
+            border: 2px solid white;
+        }
+
+        td {
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            vertical-align: top;
+        }
+
+        .category {
+            font-weight: bold;
+            text-align: center;
+            color: white;
+            font-size: 13px;
+            width: 20%;
+        }
+
+        .exploratoire {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .comparaison {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+        }
+
+        .accessibilite {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .technique {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+        }
+
+        .requirement {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #2c3e50;
+        }
+
+        .implementation {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #2c3e50;
+            font-style: italic;
+        }
+
+        .tech-stack {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #6c757d;
+        }
+
+        .tech-stack h3 {
+            color: #495057;
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .tech-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tech-item {
+            background: #6c757d;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Cahier des Charges Dashboard Interactif</div>
+        <div class="subtitle">Spécifications et implémentation - Projet DataSpace</div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Catégorie</th>
+                    <th style="width: 45%;">Exigences Projet</th>
+                    <th style="width: 35%;">Implémentation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="category exploratoire">ANALYSE EXPLORATOIRE</td>
+                    <td class="requirement">
+                        • Visualisation contenu dataset<br>
+                        • Analyses statistiques describe()<br>
+                        • 2+ graphiques interactifs<br>
+                        • Distribution des classes
+                    </td>
+                    <td class="implementation">
+                        Streamlit + Plotly interactif<br>
+                        Métriques dataset Cityscapes<br>
+                        Distribution pixel-wise classes<br>
+                        Graphiques responsive
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="category comparaison">COMPARAISON MODÈLES</td>
+                    <td class="requirement">
+                        • Sélection données entrée<br>
+                        • Upload images personnalisées<br>
+                        • Prédiction temps réel<br>
+                        • Affichage résultats comparatifs
+                    </td>
+                    <td class="implementation">
+                        Interface upload + dropdown<br>
+                        Inférence FPN vs SegFormer<br>
+                        Visualisation masques côte-à-côte<br>
+                        Métriques temps d'exécution
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="category accessibilite">ACCESSIBILITÉ WCAG</td>
+                    <td class="requirement">
+                        • Critères WCAG essentiels<br>
+                        • Contraste couleurs<br>
+                        • Navigation clavier<br>
+                        • Labels descriptifs
+                    </td>
+                    <td class="implementation">
+                        Palette couleurs accessibles<br>
+                        Alt-text images générées<br>
+                        Semantic HTML structure<br>
+                        Focus indicators
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="category technique">DÉPLOIEMENT CLOUD</td>
+                    <td class="requirement">
+                        • Application déployée online<br>
+                        • Interface responsive<br>
+                        • Performance acceptable<br>
+                        • Code source accessible
+                    </td>
+                    <td class="implementation">
+                        Serveur NAS personnel (Intel N100)<br>
+                        Streamlit containerisé<br>
+                        Optimisation modèles CPU<br>
+                        Repository GitHub documenté
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tech-stack">
+            <h3>🛠️ Stack Technique</h3>
+            <div class="tech-items">
+                <div class="tech-item">FastAPI</div>
+                <div class="tech-item">Streamlit</div>
+                <div class="tech-item">PyTorch</div>
+                <div class="tech-item">Plotly</div>
+                <div class="tech-item">PIL/OpenCV</div>
+                <div class="tech-item">Docker</div>
+                <div class="tech-item">Intel N100</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
