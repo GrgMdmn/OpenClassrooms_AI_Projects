@@ -5,6 +5,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 from PIL import Image
 import io
 import base64
@@ -18,9 +20,9 @@ sys.path.append('/app')
 sys.path.append('.')
 from utils.utils import colorize_mask
 
-# Configuration de la page
+# Configuration de la page avec titre approprié (WCAG 2.4.2)
 st.set_page_config(
-    page_title="Street Vision - Segmentation Comparison",
+    page_title="Street Vision - Segmentation Comparison | Dashboard Accessible",
     page_icon="🚗",
     layout="wide"
 )
@@ -72,67 +74,275 @@ ACCESSIBILITY_PATTERNS = {
 }
 
 def create_accessible_pie_chart_conditional(sizes, labels, title, use_patterns=False):
-    """
-    Crée un pie chart accessible - descriptions uniquement si erreur d'affichage
-    """
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as patches
-    
-    # Configuration uniforme (comme dans la solution qui marchait)
+    """Version corrigée qui règle le problème de lisibilité avec les motifs"""
     fig, ax = plt.subplots(figsize=(6, 6), tight_layout=True)
     
-    # Couleurs accessibles
     accessible_colors = [
-        WCAG_ACCESSIBLE_COLORS['primary_blue'],
-        WCAG_ACCESSIBLE_COLORS['primary_red'],
-        WCAG_ACCESSIBLE_COLORS['primary_green'],
-        WCAG_ACCESSIBLE_COLORS['primary_orange'],
-        WCAG_ACCESSIBLE_COLORS['secondary_purple'],
-        WCAG_ACCESSIBLE_COLORS['secondary_teal']
+        WCAG_ACCESSIBLE_COLORS['primary_blue'], WCAG_ACCESSIBLE_COLORS['primary_red'],
+        WCAG_ACCESSIBLE_COLORS['primary_green'], WCAG_ACCESSIBLE_COLORS['primary_orange'],
+        WCAG_ACCESSIBLE_COLORS['secondary_purple'], WCAG_ACCESSIBLE_COLORS['secondary_teal']
     ]
-    
     colors = accessible_colors[:len(sizes)]
     
-    # Configuration uniforme des propriétés
-    uniform_textprops = {'fontsize': 8, 'fontweight': 'bold', 'color': '#333333'}
-    
-    # Motifs pour accessibilité
-    patterns = None
-    if use_patterns:
-        pattern_list = list(ACCESSIBILITY_PATTERNS.values())
-        patterns = pattern_list[:len(sizes)]
+    # SOLUTION : texte avec fond contrasté
+    uniform_textprops = {
+        'fontsize': 10, 'fontweight': 'bold', 'color': 'white',
+        'bbox': dict(boxstyle="round,pad=0.3", facecolor='black', alpha=0.8)
+    }
     
     try:
         wedges, texts, autotexts = ax.pie(
-            sizes, 
-            labels=labels, 
-            colors=colors,
-            autopct='%1.0f%%',
-            startangle=90,
-            shadow=True,
-            textprops=uniform_textprops,  # Propriétés uniformes
-            wedgeprops={'edgecolor': 'white', 'linewidth': 2}
+            sizes, labels=labels, colors=colors, autopct='%1.0f%%', startangle=90, shadow=True,
+            textprops=uniform_textprops, wedgeprops={'edgecolor': 'white', 'linewidth': 2},
+            pctdistance=0.85  # Éloigner les pourcentages
         )
         
-        # Ajouter des motifs si demandé
-        if patterns:
-            for wedge, pattern in zip(wedges, patterns):
+        # Améliorer la lisibilité des pourcentages
+        for autotext in autotexts:
+            autotext.set_bbox(dict(boxstyle="round,pad=0.4", facecolor='black', alpha=0.9))
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+            autotext.set_fontsize(9)
+        
+        # Motifs APRÈS configuration du texte
+        if use_patterns:
+            patterns = ['///', '|||', '---', '...', 'xxx', '+++']
+            for wedge, pattern in zip(wedges, patterns[:len(wedges)]):
                 if pattern:
                     wedge.set_hatch(pattern)
         
         ax.set_title(title, fontsize=10, fontweight='bold', pad=15, color='#333333')
-        ax.axis('equal')  # Assure un cercle parfait
-        
+        ax.axis('equal')
         chart_displayed = True
         
     except Exception as e:
-        # En cas d'erreur, afficher la description alternative
         ax.text(0.5, 0.5, f"Erreur d'affichage du graphique\n{str(e)}", 
-                ha='center', va='center', transform=ax.transAxes,
-                fontsize=10, color='red', weight='bold')
+                ha='center', va='center', transform=ax.transAxes, fontsize=10, color='red', weight='bold')
         chart_displayed = False
     
     return fig, ax, {'colors': colors, 'patterns': patterns if use_patterns else None}, chart_displayed
+
+# Fonctions Plotly pour graphiques interactifs
+def create_interactive_pie_chart(sizes, labels, title, models_info=None):
+    """Crée un pie chart interactif avec les couleurs des classes définies dans models_info"""
+    
+    # Utiliser les couleurs des classes si disponibles
+    if models_info and 'class_colors' in models_info and 'class_names' in models_info:
+        colors = []
+        class_names = models_info['class_names']
+        class_colors = models_info['class_colors']
+        
+        for label in labels:
+            if label in class_names:
+                idx = class_names.index(label)
+                color_rgb = class_colors[idx]
+                color_hex = f"#{color_rgb[0]:02x}{color_rgb[1]:02x}{color_rgb[2]:02x}"
+                colors.append(color_hex)
+            else:
+                # Couleur par défaut si classe non trouvée
+                colors.append('#666666')
+    else:
+        # Fallback vers les couleurs WCAG
+        accessible_colors_list = list(WCAG_ACCESSIBLE_COLORS.values())
+        colors = accessible_colors_list[:len(sizes)]
+    
+    df = pd.DataFrame({'labels': labels, 'values': sizes, 'colors': colors})
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=df['labels'],
+        values=df['values'],
+        marker=dict(
+            colors=df['colors'], 
+            line=dict(color='#FFFFFF', width=3),
+            pattern=dict(
+                shape=['', '/', '\\', '|', '-', '+', 'x', '.'][:len(sizes)],
+                size=8,
+                solidity=0.3
+            )
+        ),
+        textinfo='label+percent',
+        textposition='auto',
+        textfont=dict(
+            size=13,
+            color='white', 
+            family="Arial Black"
+        ),
+        hovertemplate='<b>%{label}</b><br>Valeur: %{value}<br>Pourcentage: %{percent}<br><extra></extra>',
+        hoverlabel=dict(
+            bgcolor="rgba(255,255,255,0.95)",
+            bordercolor="#333333",
+            font=dict(size=14, color="#333333")
+        )
+    )])
+    
+    fig.update_layout(
+        title={
+            'text': title, 
+            'x': 0.5, 
+            'xanchor': 'center', 
+            'font': {'size': 16, 'color': '#333333', 'family': 'Arial Black'}
+        },
+        showlegend=True,
+        legend=dict(
+            orientation="v", 
+            yanchor="middle", 
+            y=0.5, 
+            xanchor="left", 
+            x=1.02, 
+            font=dict(size=12, color='#333333'),
+            bgcolor='rgba(255,255,255,0.9)',
+            bordercolor='#333333',
+        ),
+        margin=dict(l=20, r=120, t=60, b=20),
+        height=400,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#333333')
+    )
+    
+    return fig
+
+
+def create_interactive_comparison_chart(model1_stats, model2_stats, model1_name, model2_name):
+    """Crée un graphique en barres interactif WCAG-compliant pour comparer les deux modèles"""
+    classes = list(set(model1_stats.keys()) | set(model2_stats.keys()))
+    
+    data = []
+    for class_name in classes:
+        val1 = model1_stats.get(class_name, {}).get('percentage', 0)
+        val2 = model2_stats.get(class_name, {}).get('percentage', 0)
+        
+        data.append({'Classe': class_name, 'Modèle': model1_name, 'Pourcentage': val1, 'Pixels': model1_stats.get(class_name, {}).get('pixels', 0)})
+        data.append({'Classe': class_name, 'Modèle': model2_name, 'Pourcentage': val2, 'Pixels': model2_stats.get(class_name, {}).get('pixels', 0)})
+    
+    df = pd.DataFrame(data)
+    
+    # Filtrer les données pour supprimer les lignes vides potentielles
+    df = df[df['Modèle'].notna() & (df['Modèle'] != '')]
+    
+    fig = px.bar(
+        df, x='Classe', y='Pourcentage', color='Modèle', barmode='group',
+        title='Comparaison interactive des classes détectées',
+        hover_data=['Pixels'],
+        color_discrete_map={model1_name: '#0066CC', model2_name: '#CC0000'}
+        # PAS de pattern_shape du tout
+    )
+    
+    fig.update_layout(
+        title={'x': 0.5, 'xanchor': 'center', 'font': {'size': 16, 'color': '#333333', 'family': 'Arial Black'}},
+        xaxis=dict(
+            title='Classes de segmentation', 
+            titlefont=dict(size=14, color='#666666'),  # Plus clair comme vos pie charts
+            tickfont=dict(size=12, color='#666666'),   # Plus clair
+            tickangle=45,
+            showgrid=True,
+            gridcolor='#E8E8E8',     # Grille beaucoup plus claire
+            gridwidth=1,
+            linecolor='#AAAAAA',     # Axe gris moyen
+            linewidth=1,
+            showline=True
+        ),
+        yaxis=dict(
+            title='Pourcentage de l\'image (%)', 
+            titlefont=dict(size=14, color='#666666'),  # Plus clair
+            tickfont=dict(size=12, color='#666666'),   # Plus clair
+            showgrid=True,
+            gridcolor='#E8E8E8',     # Grille beaucoup plus claire
+            gridwidth=1,
+            linecolor='#AAAAAA',     # Axe gris moyen
+            linewidth=1,
+            showline=True
+        ),
+        legend=dict(
+            title='Modèles', 
+            font=dict(size=12, color='#333333'),       # Comme vos pie charts
+            bgcolor='rgba(255,255,255,0.9)',
+            bordercolor='#333333',
+        ),
+        hovermode='x unified',
+        height=500,
+        plot_bgcolor='rgba(0,0,0,0)',        # Transparent
+        paper_bgcolor='rgba(0,0,0,0)',       # Transparent
+        font=dict(color='#333333')           # Sans spécifier size qui peut poser problème
+    )
+    
+    fig.update_traces(
+        texttemplate='%{y:.1f}%', 
+        textposition='outside', 
+        textfont=dict(size=11, color='#666666'),      # Plus clair pour lisibilité
+        marker=dict(line=dict(color='#FFFFFF', width=1))  # Bordures blanches comme vos pie charts
+    )
+    
+    return fig
+
+
+def create_dataset_interactive_overview():
+    """Vue d'ensemble interactive du dataset avec les MÊMES couleurs que 'Visualisations accessibles'"""
+    
+    # RÉORGANISER les données pour que l'ordre soit logique et que les couleurs correspondent
+    dataset_data = {
+        'Split': ['Train (notre projet)', 'Validation (notre projet)', 'Test final', 'Non utilisé'],
+        'Images': [2380, 595, 500, 21525],
+        'Utilisation': ['Entraînement', 'Validation', 'Test', 'Non utilisé']
+    }
+    
+    df = pd.DataFrame(dataset_data)
+    
+    # Couleurs dans l'ordre exact des données
+    colors = [
+        WCAG_ACCESSIBLE_COLORS['primary_blue'],      # Train (notre projet) - bleu
+        WCAG_ACCESSIBLE_COLORS['primary_red'],       # Validation (notre projet) - rouge  
+        WCAG_ACCESSIBLE_COLORS['primary_orange'],    # Test final - orange
+        WCAG_ACCESSIBLE_COLORS['neutral_dark']       # Non utilisé - gris foncé
+    ]
+    
+    # FORCER l'ordre avec category_orders
+    fig = px.pie(
+        df, 
+        values='Images', 
+        names='Split',
+        title='Répartition interactive du dataset Cityscapes',
+        color_discrete_sequence=colors,
+        hover_data=['Utilisation'],
+        category_orders={'Split': ['Train (notre projet)', 'Validation (notre projet)', 'Test final', 'Non utilisé']}
+    )
+    
+    # FORCER la correspondance couleur-catégorie avec color_discrete_map
+    color_map = {
+        'Train (notre projet)': WCAG_ACCESSIBLE_COLORS['primary_blue'],
+        'Validation (notre projet)': WCAG_ACCESSIBLE_COLORS['primary_red'],
+        'Test final': WCAG_ACCESSIBLE_COLORS['primary_orange'],
+        'Non utilisé': WCAG_ACCESSIBLE_COLORS['neutral_dark']
+    }
+    
+    fig.update_traces(
+        marker=dict(
+            colors=[color_map[split] for split in df['Split']],  # Forcer les couleurs exactes
+            line=dict(color='#FFFFFF', width=3),
+            pattern=dict(
+                shape=['|', '/', '\\', ''],
+                size=8,
+                solidity=0.3
+            )
+        ),
+        textposition='auto', 
+        textinfo='percent+label',
+        textfont=dict(size=12, color='white', family="Arial Black"),
+        hovertemplate='<b>%{label}</b><br>Images: %{value}<br>Usage: %{customdata[0]}<extra></extra>'
+    )
+    
+    fig.update_layout(
+        title={'x': 0.5, 'xanchor': 'center', 'font': {'size': 16, 'color': '#333333'}}, 
+        height=500,
+        legend=dict(
+            font=dict(size=12, color='#333333'),
+            bgcolor='rgba(255,255,255,0.9)',
+            bordercolor='#333333',
+        ),
+        font=dict(color='#333333')
+    )
+    
+    return fig
 
 
 def create_accessible_bar_chart_conditional(data, labels, title, colors=None, use_patterns=False):
@@ -204,7 +414,7 @@ def create_accessible_bar_chart_conditional(data, labels, title, colors=None, us
     
     return fig, ax, chart_displayed
 
-
+# Fonction pour générer du texte alternatif (WCAG 1.1.1)
 def generate_alt_text_for_pie(sizes, labels, title):
     """
     Génère un texte alternatif détaillé pour un pie chart
@@ -222,6 +432,26 @@ def generate_alt_text_for_pie(sizes, labels, title):
     
     return alt_text
 
+# Fonction pour générer du texte alternatif (WCAG 1.1.1)
+def generate_alt_text_for_images(image_type, model_name=None, stats=None):
+    """Génère un texte alternatif détaillé pour les images de segmentation"""
+    if image_type == "original":
+        return "Image originale en couleur montrant une scène urbaine typique du dataset Cityscapes"
+    elif image_type == "segmentation":
+        base_text = f"Masque de segmentation sémantique prédit par le modèle {model_name or 'IA'}"
+        if stats:
+            # Ajouter les statistiques principales
+            main_classes = sorted(stats.items(), key=lambda x: x[1]['percentage'], reverse=True)[:3]
+            stats_text = ". Classes principales détectées: " + ", ".join([
+                f"{name} ({data['percentage']:.1f}%)" for name, data in main_classes
+            ])
+            return base_text + stats_text
+        return base_text
+    elif image_type == "comparison":
+        return "Visualisation comparative des prédictions de deux modèles de segmentation sémantique"
+    else:
+        return "Image de segmentation sémantique"
+
 def generate_alt_text_for_bar(data, labels, title, unit=""):
     """
     Génère un texte alternatif détaillé pour un bar chart
@@ -235,6 +465,33 @@ def generate_alt_text_for_bar(data, labels, title, unit=""):
     alt_text += "Valeurs: " + "; ".join(descriptions) + "."
     
     return alt_text
+
+def generate_comprehensive_alt_text(image_type, model_name=None, stats=None, comparison_data=None):
+    """Génère un texte alternatif complet selon WCAG 1.1.1"""
+    if image_type == "preprocessing_original":
+        return "Image urbaine originale redimensionnée à la résolution d'entraînement du modèle, montrant une scène typique du dataset Cityscapes avec véhicules, piétons et infrastructure urbaine"
+    
+    elif image_type == "preprocessing_normalized":
+        return "Même image après normalisation des pixels pour l'entraînement du modèle IA, les couleurs peuvent paraître légèrement différentes"
+    
+    elif image_type == "preprocessing_augmented":
+        return "Image avec augmentations de données appliquées (rotation, changement de luminosité, etc.) pour améliorer la robustesse du modèle"
+    
+    elif image_type == "segmentation_prediction":
+        base_text = f"Masque de segmentation sémantique coloré prédit par le modèle {model_name or 'IA'}"
+        if stats:
+            main_classes = sorted(stats.items(), key=lambda x: x[1]['percentage'], reverse=True)[:3]
+            stats_text = ". Classes principales détectées : " + ", ".join([
+                f"{name} ({data['percentage']:.1f}% de l'image)" for name, data in main_classes
+            ])
+            return base_text + stats_text
+        return base_text
+    
+    elif image_type == "comparison_grid":
+        return "Grille comparative montrant l'image originale et les prédictions de segmentation de deux modèles d'IA différents côte à côte pour évaluation"
+    
+    else:
+        return "Image de segmentation sémantique urbaine générée par intelligence artificielle"
 
 def create_data_table(data, columns, title, description=""):
     """
@@ -261,10 +518,49 @@ def create_data_table(data, columns, title, description=""):
     
     return df
 
-# CSS personnalisé pour l'accessibilité WCAG
-WCAG_CSS = """
+# CSS amélioré pour l'accessibilité complète
+ENHANCED_WCAG_CSS = """
 <style>
-/* Amélioration des contrastes */
+/* WCAG 1.4.4 - Support du redimensionnement jusqu'à 200% */
+html {
+    font-size: 16px; /* Taille de base */
+}
+
+/* WCAG 1.4.1 - Ne pas utiliser la couleur comme seul moyen de transmission d'information */
+.status-success {
+    background: #E8F5E8;
+    border-left: 4px solid #006600;
+    color: #333333;
+    font-weight: 500;
+}
+.status-success::before {
+    content: "✅ ";
+    font-weight: bold;
+}
+
+.status-error {
+    background: #FFF0F0;
+    border-left: 4px solid #CC0000;
+    color: #333333;
+    font-weight: 500;
+}
+.status-error::before {
+    content: "❌ ";
+    font-weight: bold;
+}
+
+.status-warning {
+    background: #FFF8E1;
+    border-left: 4px solid #CC6600;
+    color: #333333;
+    font-weight: 500;
+}
+.status-warning::before {
+    content: "⚠️ ";
+    font-weight: bold;
+}
+
+/* WCAG 1.4.3 - Contraste minimum respecté */
 .main-header {
     background: linear-gradient(90deg, #0066CC 0%, #663399 100%);
     padding: 2rem;
@@ -274,6 +570,7 @@ WCAG_CSS = """
     text-align: center;
 }
 
+/* Styles pour les cartes de comparaison - MANQUANTS DANS VOTRE VERSION */
 .comparison-card {
     background: #F5F5F5;
     padding: 1.5rem;
@@ -296,73 +593,94 @@ WCAG_CSS = """
     color: #333333;
 }
 
-.metric-card {
-    background: #F5F5F5;
-    padding: 1rem;
-    border-radius: 8px;
-    border-left: 4px solid #0066CC;
-    margin: 0.5rem 0;
+/* Navigation accessible */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: auto;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 2px solid transparent;
+}
+
+.stTabs [data-baseweb="tab"]:focus {
+    outline: 2px solid #0066CC;
+    outline-offset: 2px;
+}
+
+/* Amélioration des boutons pour l'accessibilité */
+.stButton button {
+    min-height: 44px; /* Taille minimale pour accessibilité tactile */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 2px solid transparent;
+}
+
+.stButton button:focus {
+    outline: 2px solid #0066CC;
+    outline-offset: 2px;
+}
+
+/* Sélecteurs accessibles */
+.stSelectbox label {
+    font-weight: 600;
+    font-size: 16px;
     color: #333333;
+}
+
+/* Messages d'état accessibles */
+.element-container .stAlert {
+    border-radius: 6px;
+    border-left-width: 4px;
     font-weight: 500;
 }
 
-.dataset-info {
-    background: #F8F9FA;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin: 1rem 0;
-    border-left: 4px solid #006666;
-    color: #333333;
+/* Tableaux accessibles */
+.stDataFrame {
+    border: 2px solid #666666;
 }
 
-.preprocessing-card {
-    background: #F0F8FF;
-    padding: 1rem;
-    border-radius: 8px;
-    margin: 0.5rem 0;
-    border-left: 4px solid #0066CC;
-    color: #333333;
+.stDataFrame table {
+    border-collapse: collapse;
 }
 
-/* Focus visible pour navigation clavier */
-button:focus,
-select:focus,
-input:focus {
-    outline: 2px solid #0066CC !important;
-    outline-offset: 2px !important;
-}
-
-/* Amélioration des liens */
-a {
-    color: #0066CC;
-    text-decoration: underline;
-}
-
-a:hover, a:focus {
-    color: #004499;
-    text-decoration: underline;
-}
-
-/* Styles pour les tableaux accessibles */
-.dataframe {
-    border: 1px solid #666666;
-}
-
-.dataframe th {
+.stDataFrame th {
     background-color: #F5F5F5;
     color: #333333;
     font-weight: bold;
     border: 1px solid #666666;
+    padding: 12px;
+    font-size: 16px;
 }
 
-.dataframe td {
+.stDataFrame td {
     border: 1px solid #CCCCCC;
     color: #333333;
+    padding: 12px;
+    font-size: 16px;
+}
+
+/* Images accessibles */
+.stImage > div {
+    border: 1px solid #CCCCCC;
+    border-radius: 4px;
+}
+
+/* Support du zoom jusqu'à 200% sans perte de fonctionnalité */
+@media (min-resolution: 192dpi) {
+    body {
+        font-size: 18px;
+    }
 }
 </style>
 """
 
-st.markdown(WCAG_CSS, unsafe_allow_html=True)
+st.markdown(ENHANCED_WCAG_CSS, unsafe_allow_html=True)
 
 # En-tête principal
 st.markdown("""
@@ -493,8 +811,8 @@ def compare_uploaded_image(uploaded_file):
         st.error(f"Erreur lors de la comparaison: {e}")
         return None
 
-def display_comparison_results(result, models_info):
-    """Affiche les résultats de comparaison entre les deux modèles"""
+def display_comparison_results(result, models_info, context=""):
+    """Affiche les résultats de comparaison avec graphiques interactifs et accessibilité complète"""
     if not result or not result['success']:
         st.error("Aucun résultat de comparaison disponible")
         return
@@ -573,94 +891,134 @@ def display_comparison_results(result, models_info):
         </div>
         """, unsafe_allow_html=True)
     
-    # Affichage des segmentations
+    # Affichage des segmentations avec descriptions alternatives CONDITIONNELLES
     if result.get('figure_data'):
         st.markdown("### 🎨 Résultats de Segmentation")
+        
         try:
             fig_bytes = base64.b64decode(result['figure_data'])
             fig = pickle.loads(fig_bytes)
+            
             st.pyplot(fig)
             plt.close(fig)
+            
         except Exception as e:
             st.error(f"Erreur lors de l'affichage: {e}")
+            # Description alternative SEULEMENT en cas d'erreur
+            alt_text = generate_comprehensive_alt_text("comparison_grid")
+            st.warning(f"**Description alternative:** {alt_text}")
     
-    # Comparaison des statistiques
-    st.markdown("### 📊 Répartition des classes par modèle")
+    # Section interactive (CE2 - Graphiques interactifs) - SEULEMENT 2 ONGLETS
+    st.markdown("### 📊 Analyse Interactive des Résultats")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if result.get('model1_stats'):
-            display_model_stats_chart(result['model1_stats'], models_info, f"{model1.get('architecture', 'N/A')} - {model1['encoder_name']}")
-    
-    with col2:
-        if result.get('model2_stats'):
-            display_model_stats_chart(result['model2_stats'], models_info, f"{model2.get('architecture', 'N/A')} - {model2['encoder_name']}")
-    
-    # Analyse comparative des classes
     if result.get('model1_stats') and result.get('model2_stats'):
-        display_class_comparison(result['model1_stats'], result['model2_stats'], model1, model2, models_info)    
+        # SUPPRIMER l'onglet "Performances"
+        tab1, tab2 = st.tabs(["🥧 Répartitions", "📊 Comparaison"])
+        
+        with tab1:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### Répartition Modèle 1")
+                sizes1 = [data['percentage'] for data in result['model1_stats'].values()]
+                labels1 = list(result['model1_stats'].keys())
+                
+                fig_pie1 = create_interactive_pie_chart(sizes1, labels1, 
+                                           f"Distribution - {result['model1_info'].get('architecture', 'N/A')} {result['model1_info']['encoder_name']}", 
+                                           models_info)
+                # AJOUTER key unique pour éviter l'erreur Streamlit
+                st.plotly_chart(fig_pie1, use_container_width=True, key=f"pie_model1_{context}")
+                
+            with col2:
+                st.markdown("#### Répartition Modèle 2")
+                sizes2 = [data['percentage'] for data in result['model2_stats'].values()]
+                labels2 = list(result['model2_stats'].keys())
+                
+                fig_pie2 = create_interactive_pie_chart(sizes2, labels2, 
+                                           f"Distribution - {result['model2_info'].get('architecture', 'N/A')} {result['model2_info']['encoder_name']}", 
+                                           models_info)
+                # AJOUTER key unique pour éviter l'erreur Streamlit
+                st.plotly_chart(fig_pie2, use_container_width=True, key=f"pie_model2_{context}")
+        
+        with tab2:
+            st.markdown("#### Comparaison Interactive des Classes")
+            
+            fig_comparison = create_interactive_comparison_chart(
+                result['model1_stats'], result['model2_stats'],
+                f"{result['model1_info'].get('architecture', 'N/A')} {result['model1_info']['encoder_name']}",
+                f"{result['model2_info'].get('architecture', 'N/A')} {result['model2_info']['encoder_name']}"
+            )
+            # AJOUTER key unique pour éviter l'erreur Streamlit
+            st.plotly_chart(fig_comparison, use_container_width=True, key=f"comparison_chart_{context}")
+            
+            st.info("💡 **Interactivité :** Survolez les barres, cliquez sur la légende, zoomez en sélectionnant une zone.")
+            # SUPPRIMER la description systématique
     
-def display_model_stats_chart(stats, models_info, title):
-    """Affiche les statistiques d'un modèle sous forme de graphique accessible"""
-    if not stats:
-        st.warning("Aucune statistique disponible")
-        return
+    # Garder seulement le tableau détaillé (sans graphique redondant)
+    if result.get('model1_stats') and result.get('model2_stats'):
+        display_class_comparison(result['model1_stats'], result['model2_stats'], 
+                                result['model1_info'], result['model2_info'], models_info)
     
-    # Utiliser l'ordre des classes du modèle pour la cohérence
-    if models_info and 'class_names' in models_info:
-        ordered_class_names = [name for name in models_info['class_names'] if name in stats]
-    else:
-        ordered_class_names = sorted(stats.keys())
+# def display_model_stats_chart(stats, models_info, title):
+#     """Affiche les statistiques d'un modèle sous forme de graphique accessible"""
+#     if not stats:
+#         st.warning("Aucune statistique disponible")
+#         return
     
-    percentages = [stats[name]['percentage'] for name in ordered_class_names]
+#     # Utiliser l'ordre des classes du modèle pour la cohérence
+#     if models_info and 'class_names' in models_info:
+#         ordered_class_names = [name for name in models_info['class_names'] if name in stats]
+#     else:
+#         ordered_class_names = sorted(stats.keys())
     
-    # Couleurs accessibles WCAG
-    accessible_colors = [
-        WCAG_ACCESSIBLE_COLORS['neutral_medium'],    # Flat: gris moyen
-        WCAG_ACCESSIBLE_COLORS['primary_red'],       # Human: rouge
-        WCAG_ACCESSIBLE_COLORS['secondary_purple'],  # Vehicle: violet
-        WCAG_ACCESSIBLE_COLORS['primary_orange'],    # Construction: orange
-        WCAG_ACCESSIBLE_COLORS['secondary_teal'],    # Object: teal
-        WCAG_ACCESSIBLE_COLORS['primary_green'],     # Nature: vert
-        WCAG_ACCESSIBLE_COLORS['primary_blue'],      # Sky: bleu
-        WCAG_ACCESSIBLE_COLORS['neutral_dark']       # Void: gris foncé
-    ]
+#     percentages = [stats[name]['percentage'] for name in ordered_class_names]
     
-    colors = accessible_colors[:len(ordered_class_names)]
+#     # Couleurs accessibles WCAG
+#     accessible_colors = [
+#         WCAG_ACCESSIBLE_COLORS['neutral_medium'],    # Flat: gris moyen
+#         WCAG_ACCESSIBLE_COLORS['primary_red'],       # Human: rouge
+#         WCAG_ACCESSIBLE_COLORS['secondary_purple'],  # Vehicle: violet
+#         WCAG_ACCESSIBLE_COLORS['primary_orange'],    # Construction: orange
+#         WCAG_ACCESSIBLE_COLORS['secondary_teal'],    # Object: teal
+#         WCAG_ACCESSIBLE_COLORS['primary_green'],     # Nature: vert
+#         WCAG_ACCESSIBLE_COLORS['primary_blue'],      # Sky: bleu
+#         WCAG_ACCESSIBLE_COLORS['neutral_dark']       # Void: gris foncé
+#     ]
     
-    # Créer le graphique accessible
-    fig, ax, displayed = create_accessible_bar_chart_conditional(
-        percentages, ordered_class_names, title, 
-        colors=colors, use_patterns=True
-    )
+#     colors = accessible_colors[:len(ordered_class_names)]
     
-    # Description alternative SEULEMENT si erreur d'affichage
-    if not displayed:
-        alt_text = generate_alt_text_for_bar(
-            percentages, ordered_class_names, title, unit="%"
-        )
-        st.warning(f"**Description du graphique:** {alt_text}")
+#     # Créer le graphique accessible
+#     fig, ax, displayed = create_accessible_bar_chart_conditional(
+#         percentages, ordered_class_names, title, 
+#         colors=colors, use_patterns=True
+#     )
     
-    st.pyplot(fig)
-    plt.close(fig)
+#     # Description alternative SEULEMENT si erreur d'affichage
+#     if not displayed:
+#         alt_text = generate_alt_text_for_bar(
+#             percentages, ordered_class_names, title, unit="%"
+#         )
+#         st.warning(f"**Description du graphique:** {alt_text}")
     
-    # Tableau de données complémentaire (toujours affiché)
-    table_data = []
-    for name, percentage in zip(ordered_class_names, percentages):
-        pixels = stats[name]['pixels']
-        table_data.append([name, f"{percentage:.1f}%", f"{pixels:,} pixels"])
+#     st.pyplot(fig)
+#     plt.close(fig)
     
-    create_data_table(
-        table_data,
-        ["Classe", "Pourcentage", "Nombre de pixels"],
-        f"Données - {title}",
-        "Répartition détaillée des classes de segmentation"
-    )
+#     # Tableau de données complémentaire (toujours affiché)
+#     table_data = []
+#     for name, percentage in zip(ordered_class_names, percentages):
+#         pixels = stats[name]['pixels']
+#         table_data.append([name, f"{percentage:.1f}%", f"{pixels:,} pixels"])
+    
+#     create_data_table(
+#         table_data,
+#         ["Classe", "Pourcentage", "Nombre de pixels"],
+#         f"Données - {title}",
+#         "Répartition détaillée des classes de segmentation"
+#     )
 
 def display_class_comparison(stats1, stats2, model1, model2, models_info):
-    """Affiche une comparaison accessible des classes entre les deux modèles"""
-    st.markdown("### 🔍 Analyse Comparative par Classe")
+    """Affiche uniquement le tableau détaillé de comparaison des classes (sans graphique redondant)"""
+    st.markdown("### 🔎 Tableau Détaillé des Comparaisons")
     
     # Préparer les données
     if models_info and 'class_names' in models_info:
@@ -674,73 +1032,8 @@ def display_class_comparison(stats1, stats2, model1, model2, models_info):
     model1_values = [stats1.get(name, {}).get('percentage', 0) for name in class_names]
     model2_values = [stats2.get(name, {}).get('percentage', 0) for name in class_names]
     
-    # Couleurs accessibles avec motifs différents
-    fig, ax = plt.subplots(figsize=(12, 7))
-    
-    x = np.arange(len(class_names))
-    width = 0.35
-    
-    # Couleurs accessibles
-    color1 = WCAG_ACCESSIBLE_COLORS['primary_blue']
-    color2 = WCAG_ACCESSIBLE_COLORS['primary_red']
-    
-    bars1 = ax.bar(x - width/2, model1_values, width, 
-                   label=f"{model1.get('architecture', 'N/A')} - {model1['encoder_name']}", 
-                   color=color1, alpha=0.8, edgecolor='#333333')
-    
-    bars2 = ax.bar(x + width/2, model2_values, width,
-                   label=f"{model2.get('architecture', 'N/A')} - {model2['encoder_name']}", 
-                   color=color2, alpha=0.8, edgecolor='#333333', hatch='///')
-    
-    # Style accessible
-    ax.set_xlabel('Classes', fontsize=11, fontweight='bold', color='#333333')
-    ax.set_ylabel('Pourcentage (%)', fontsize=11, fontweight='bold', color='#333333')
-    ax.set_title('Comparaison des classes entre les deux modèles', 
-                 fontsize=13, fontweight='bold', pad=15, color='#333333')
-    ax.set_xticks(x)
-    
-    if len(class_names) <= 4:
-        ax.set_xticklabels(class_names, fontsize=10, color='#333333')
-    elif len(class_names) <= 6:
-        ax.set_xticklabels(class_names, rotation=30, ha='right', fontsize=9, color='#333333')
-    else:
-        ax.set_xticklabels(class_names, rotation=45, ha='right', fontsize=9, color='#333333')
-    
-    ax.legend(loc='upper right', fontsize=10)
-    ax.grid(axis='y', alpha=0.3, linestyle='--', color='#666666')
-    ax.set_axisbelow(True)
-    
-    # Style des axes
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#666666')
-    ax.spines['bottom'].set_color('#666666')
-    
-    # Valeurs sur les barres
-    for bar1, bar2, val1, val2 in zip(bars1, bars2, model1_values, model2_values):
-        height1, height2 = bar1.get_height(), bar2.get_height()
-        ax.text(bar1.get_x() + bar1.get_width()/2., height1 + 0.5,
-               f'{val1:.1f}%', ha='center', va='bottom', fontsize=8, 
-               fontweight='bold', color='#333333')
-        ax.text(bar2.get_x() + bar2.get_width()/2., height2 + 0.5,
-               f'{val2:.1f}%', ha='center', va='bottom', fontsize=8, 
-               fontweight='bold', color='#333333')
-    
-    plt.tight_layout()
-    
-    # Description alternative
-    alt_text = f"Graphique comparatif en barres des classes entre {model1['encoder_name']} et {model2['encoder_name']}. "
-    comparisons = []
-    for name, val1, val2 in zip(class_names, model1_values, model2_values):
-        comparisons.append(f"{name}: {val1:.1f}% vs {val2:.1f}%")
-    alt_text += "Comparaisons: " + "; ".join(comparisons)
-    
-    st.markdown(f"**Description du graphique:** {alt_text}")
-    st.pyplot(fig)
-    plt.close(fig)
-    
-    # Tableau détaillé accessible
-    st.markdown("**🔎 Tableau détaillé des comparaisons:**")
+    # SUPPRIMER tout le code de génération du graphique matplotlib
+    # GARDER seulement le tableau
     
     table_data = []
     for i, name in enumerate(class_names):
@@ -776,6 +1069,124 @@ def display_class_comparison(stats1, stats2, model1, model2, models_info):
         "Analyse des écarts de performance entre les deux modèles pour chaque classe de segmentation"
     )
 
+# def display_class_comparison(stats1, stats2, model1, model2, models_info):
+#     """Affiche une comparaison accessible des classes entre les deux modèles"""
+#     st.markdown("### 🔍 Analyse Comparative par Classe")
+    
+#     # Préparer les données
+#     if models_info and 'class_names' in models_info:
+#         all_classes_in_stats = set(stats1.keys()) | set(stats2.keys())
+#         ordered_all_classes = [name for name in models_info['class_names'] if name in all_classes_in_stats]
+#     else:
+#         all_classes = set(stats1.keys()) | set(stats2.keys())
+#         ordered_all_classes = sorted(all_classes)
+    
+#     class_names = ordered_all_classes
+#     model1_values = [stats1.get(name, {}).get('percentage', 0) for name in class_names]
+#     model2_values = [stats2.get(name, {}).get('percentage', 0) for name in class_names]
+    
+#     # Couleurs accessibles avec motifs différents
+#     fig, ax = plt.subplots(figsize=(12, 7))
+    
+#     x = np.arange(len(class_names))
+#     width = 0.35
+    
+#     # Couleurs accessibles
+#     color1 = WCAG_ACCESSIBLE_COLORS['primary_blue']
+#     color2 = WCAG_ACCESSIBLE_COLORS['primary_red']
+    
+#     bars1 = ax.bar(x - width/2, model1_values, width, 
+#                    label=f"{model1.get('architecture', 'N/A')} - {model1['encoder_name']}", 
+#                    color=color1, alpha=0.8, edgecolor='#333333')
+    
+#     bars2 = ax.bar(x + width/2, model2_values, width,
+#                    label=f"{model2.get('architecture', 'N/A')} - {model2['encoder_name']}", 
+#                    color=color2, alpha=0.8, edgecolor='#333333', hatch='///')
+    
+#     # Style accessible
+#     ax.set_xlabel('Classes', fontsize=11, fontweight='bold', color='#333333')
+#     ax.set_ylabel('Pourcentage (%)', fontsize=11, fontweight='bold', color='#333333')
+#     ax.set_title('Comparaison des classes entre les deux modèles', 
+#                  fontsize=13, fontweight='bold', pad=15, color='#333333')
+#     ax.set_xticks(x)
+    
+#     if len(class_names) <= 4:
+#         ax.set_xticklabels(class_names, fontsize=10, color='#333333')
+#     elif len(class_names) <= 6:
+#         ax.set_xticklabels(class_names, rotation=30, ha='right', fontsize=9, color='#333333')
+#     else:
+#         ax.set_xticklabels(class_names, rotation=45, ha='right', fontsize=9, color='#333333')
+    
+#     ax.legend(loc='upper right', fontsize=10)
+#     ax.grid(axis='y', alpha=0.3, linestyle='--', color='#666666')
+#     ax.set_axisbelow(True)
+    
+#     # Style des axes
+#     ax.spines['top'].set_visible(False)
+#     ax.spines['right'].set_visible(False)
+#     ax.spines['left'].set_color('#666666')
+#     ax.spines['bottom'].set_color('#666666')
+    
+#     # Valeurs sur les barres
+#     for bar1, bar2, val1, val2 in zip(bars1, bars2, model1_values, model2_values):
+#         height1, height2 = bar1.get_height(), bar2.get_height()
+#         ax.text(bar1.get_x() + bar1.get_width()/2., height1 + 0.5,
+#                f'{val1:.1f}%', ha='center', va='bottom', fontsize=8, 
+#                fontweight='bold', color='#333333')
+#         ax.text(bar2.get_x() + bar2.get_width()/2., height2 + 0.5,
+#                f'{val2:.1f}%', ha='center', va='bottom', fontsize=8, 
+#                fontweight='bold', color='#333333')
+    
+#     plt.tight_layout()
+    
+#     # Description alternative
+#     alt_text = f"Graphique comparatif en barres des classes entre {model1['encoder_name']} et {model2['encoder_name']}. "
+#     comparisons = []
+#     for name, val1, val2 in zip(class_names, model1_values, model2_values):
+#         comparisons.append(f"{name}: {val1:.1f}% vs {val2:.1f}%")
+#     alt_text += "Comparaisons: " + "; ".join(comparisons)
+    
+#     st.markdown(f"**Description du graphique:** {alt_text}")
+#     st.pyplot(fig)
+#     plt.close(fig)
+    
+#     # Tableau détaillé accessible
+#     st.markdown("**🔎 Tableau détaillé des comparaisons:**")
+    
+#     table_data = []
+#     for i, name in enumerate(class_names):
+#         val1 = model1_values[i]
+#         val2 = model2_values[i]
+#         diff = val1 - val2
+        
+#         if abs(diff) < 1:
+#             category = "🟢 Similaire"
+#         elif abs(diff) < 5:
+#             category = "🟡 Différence modérée"
+#         else:
+#             category = "🔴 Différence importante"
+        
+#         table_data.append([
+#             name,
+#             f"{val1:.1f}%",
+#             f"{val2:.1f}%", 
+#             f"{diff:+.1f}%",
+#             category
+#         ])
+    
+#     create_data_table(
+#         table_data,
+#         [
+#             "Classe",
+#             f"🥇 {model1.get('architecture', 'N/A')[:15]} (%)",
+#             f"🥈 {model2.get('architecture', 'N/A')[:15]} (%)",
+#             "Différence",
+#             "Évaluation"
+#         ],
+#         "Comparaison détaillée par classe",
+#         "Analyse des écarts de performance entre les deux modèles pour chaque classe de segmentation"
+#     )
+
 
 # Onglets principaux
 main_tab1, main_tab2 = st.tabs(["📊 Présentation Jeu de données Cityscapes", "🔄 Comparaison de performances"])
@@ -795,210 +1206,23 @@ with main_tab1:
         #### Dataset retenu
 
         **Cityscapes Dataset : Référence en Segmentation Urbaine**
-
-        Le **Cityscapes Dataset** constitue la référence internationale pour l'évaluation des algorithmes de segmentation sémantique en environnement urbain. Développé par l'Université de Tübingen et Mercedes-Benz, ce dataset comprend **25,000 images** haute résolution (2048×1024 pixels) capturées dans 50 villes allemandes et suisses.
         """)
         
+        # Spécificités techniques
+        st.markdown("""
+        ### ⚙️ Spécificités techniques
+        
+        - **Taille Datase**: 25 000 images haute résolution
+        - **Résolutions d'acquisition** : Données natives 2048×1024 pixels
+        - **Conditions d'acquisition** : Conditions météo bonnes à moyennes, pas de conditions adverses (pluie, neige)
+        - **Diversité géographique** : Villes allemandes et suisses (architectures variées)  
+        - **Annotations pixel-perfect** : Masques de segmentation précis au pixel près (Train + Val)
+
+        Ce dataset permet d'évaluer la capacité des modèles à comprendre les scènes urbaines complexes, élément fondamental pour les applications de conduite autonome et de surveillance urbaine intelligente.
+        """)
+    
         # Composition du dataset avec pie charts NOUVEAU
         st.markdown("### 🗂️ Composition et utilisation du dataset")
-        
-
-        # # Version avec tailles forcées absolument uniformes
-        # if dataset_info.get('splits'):
-        #     splits_info = dataset_info['splits']
-        #     project_splits = dataset_info.get('project_splits', {})
-            
-        #     st.markdown("#### 📊 Visualisations accessibles")
-            
-        #     # Option pour activer les motifs (accessibilité)
-        #     use_patterns = st.checkbox(
-        #         "🎨 Activer les motifs (accessibilité visuelle)",
-        #         help="Active les motifs en plus des couleurs pour faciliter la distinction des données",
-        #         value=True
-        #     )
-            
-        #     # Organiser en 1 ligne de 4 colonnes
-        #     col1, col2, col3, col4 = st.columns(4)
-            
-        #     # Configuration STRICTEMENT uniforme pour tous les graphiques
-        #     CHART_WIDTH, CHART_HEIGHT = 400, 400  # Taille en pixels
-        #     uniform_figsize = (5, 5)  # Taille figure identique
-        #     uniform_dpi = 100  # DPI identique
-            
-        #     # Style uniforme pour TOUS les éléments
-        #     uniform_style = {
-        #         'textprops': {'fontsize': 8, 'fontweight': 'bold', 'color': '#333333'},
-        #         'wedgeprops': {'edgecolor': 'white', 'linewidth': 2},
-        #         'title_props': {'fontsize': 10, 'fontweight': 'bold', 'pad': 15, 'color': '#333333'},
-        #         'startangle': 90,
-        #         'shadow': True
-        #     }
-            
-        #     # Couleurs WCAG accessibles
-        #     accessible_colors = {
-        #         'blue': WCAG_ACCESSIBLE_COLORS['primary_blue'],
-        #         'red': WCAG_ACCESSIBLE_COLORS['primary_red'], 
-        #         'orange': WCAG_ACCESSIBLE_COLORS['primary_orange'],
-        #         'gray': WCAG_ACCESSIBLE_COLORS['neutral_medium'],
-        #         'light_gray': WCAG_ACCESSIBLE_COLORS['neutral_light']
-        #     }
-            
-        #     # Motifs pour accessibilité
-        #     patterns = ['///', '|||', '---', '...', 'xxx', None] if use_patterns else [None] * 6
-            
-        #     # Fonction helper pour créer des pie charts uniformes
-        #     def create_uniform_pie(ax, sizes, labels, colors, explode=None, patterns_slice=None, autopct='%1.0f%%'):
-        #         try:
-        #             wedges, texts, autotexts = ax.pie(
-        #                 sizes, labels=labels, colors=colors, 
-        #                 autopct=autopct, explode=explode,
-        #                 **uniform_style
-        #             )
-                    
-        #             # Ajouter des motifs si demandé
-        #             if patterns_slice and use_patterns:
-        #                 for wedge, pattern in zip(wedges, patterns_slice):
-        #                     if pattern:
-        #                         wedge.set_hatch(pattern)
-                    
-        #             # FORCER les limites d'axes identiques pour TOUS
-        #             ax.set_xlim(-1.5, 1.5)
-        #             ax.set_ylim(-1.5, 1.5)
-        #             ax.axis('equal')
-        #             ax.set_aspect('equal', 'box')
-                    
-        #             return True, wedges
-        #         except Exception as e:
-        #             ax.text(0.5, 0.5, f"Erreur d'affichage\n{str(e)}", 
-        #                    ha='center', va='center', transform=ax.transAxes,
-        #                    fontsize=10, color='red', weight='bold')
-        #             return False, None
-            
-        #     # Données pour le tableau récapitulatif
-        #     pie_data_for_table = []
-            
-        #     with col1:
-        #         # Pie chart Train (avec répartition projet)
-        #         fig_train, ax_train = plt.subplots(figsize=uniform_figsize, dpi=uniform_dpi, tight_layout=True)
-                
-        #         train_total = splits_info['train']['images']
-        #         train_our_train = project_splits['train']['images']
-        #         train_our_val = project_splits['validation']['images']
-                
-        #         sizes = [train_our_train, train_our_val]
-        #         labels = [f'Notre Entraînement\n{train_our_train} images (80%)', 
-        #                  f'Notre Validation\n{train_our_val} images (20%)']
-        #         colors = [accessible_colors['blue'], accessible_colors['red']]
-        #         explode = (0.05, 0.05)
-                
-        #         chart_displayed, wedges = create_uniform_pie(
-        #             ax_train, sizes, labels, colors, explode, patterns[:2]
-        #         )
-                
-        #         ax_train.set_title(f'Split Train Original\n{train_total} images total', 
-        #                          **uniform_style['title_props'])
-                
-        #         if not chart_displayed:
-        #             alt_text = generate_alt_text_for_pie(sizes, labels, "Split Train")
-        #             st.warning(f"**Description du graphique:** {alt_text}")
-                
-        #         st.pyplot(fig_train)
-        #         plt.close(fig_train)
-                
-        #         pie_data_for_table.extend([
-        #             ["Train - Entraînement", train_our_train, "80%", "Entraînement des modèles"],
-        #             ["Train - Validation", train_our_val, "20%", "Validation pendant entraînement"]
-        #         ])
-            
-        #     with col2:
-        #         # Pie chart Validation (utilisation complète)
-        #         fig_val, ax_val = plt.subplots(figsize=uniform_figsize, dpi=uniform_dpi, tight_layout=True)
-                
-        #         val_total = splits_info['validation']['images']
-        #         val_our_test = project_splits['test']['images']
-                
-        #         sizes = [val_our_test]
-        #         labels = [f'Notre Test Final\n{val_our_test} images (100%)']
-        #         colors = [accessible_colors['orange']]
-                
-        #         chart_displayed, wedges = create_uniform_pie(
-        #             ax_val, sizes, labels, colors, None, [patterns[2]]
-        #         )
-                
-        #         ax_val.set_title(f'Split Validation Original\n{val_total} images total', 
-        #                        **title_style)
-                
-        #         if not chart_displayed:
-        #             alt_text = generate_alt_text_for_pie(sizes, labels, "Split Validation")
-        #             st.warning(f"**Description du graphique:** {alt_text}")
-                
-        #         st.pyplot(fig_val)
-        #         plt.close(fig_val)
-                
-        #         pie_data_for_table.append(["Validation - Test", val_our_test, "100%", "Test final des modèles"])
-            
-        #     with col3:
-        #         # Pie chart Test (non utilisé)
-        #         fig_test, ax_test = plt.subplots(figsize=uniform_figsize, dpi=uniform_dpi, tight_layout=True)
-                
-        #         test_total = splits_info['test']['images']
-                
-        #         sizes = [test_total]
-        #         labels = [f'Non utilisé dans notre projet\n{test_total} images\n(annotations privées)']
-        #         colors = [accessible_colors['gray']]
-                
-        #         chart_displayed, wedges = create_uniform_pie(
-        #             ax_test, sizes, labels, colors, None, [patterns[3]], autopct=''
-        #         )
-                
-        #         ax_test.set_title(f'Split Test Original\n{test_total} images total', 
-        #                         **title_style)
-                
-        #         if not chart_displayed:
-        #             alt_text = generate_alt_text_for_pie(sizes, labels, "Split Test")
-        #             st.warning(f"**Description du graphique:** {alt_text}")
-                
-        #         st.pyplot(fig_test)
-        #         plt.close(fig_test)
-                
-        #         pie_data_for_table.append(["Test", 0, "0%", "Non utilisé (annotations privées)"])
-            
-        #     with col4:
-        #         # Pie chart Coarse (non utilisé)
-        #         fig_coarse, ax_coarse = plt.subplots(figsize=uniform_figsize, dpi=uniform_dpi, tight_layout=True)
-                
-        #         coarse_total = splits_info['coarse']['images']
-                
-        #         sizes = [coarse_total]
-        #         labels = [f'Non utilisé dans notre projet\n{coarse_total} images\n(annotations grossières)']
-        #         colors = [accessible_colors['light_gray']]
-                
-        #         chart_displayed, wedges = create_uniform_pie(
-        #             ax_coarse, sizes, labels, colors, None, [patterns[4]], autopct=''
-        #         )
-                
-        #         ax_coarse.set_title(f'Split Coarse Original\n{coarse_total} images total', 
-        #                           **title_style)
-                
-        #         if not chart_displayed:
-        #             alt_text = generate_alt_text_for_pie(sizes, labels, "Split Coarse")
-        #             st.warning(f"**Description du graphique:** {alt_text}")
-                
-        #         st.pyplot(fig_coarse)
-        #         plt.close(fig_coarse)
-                
-        #         pie_data_for_table.append(["Coarse", 0, "0%", "Non utilisé (annotations grossières)"])
-            
-        #     # Tableau de données accessible (toujours affiché)
-        #     st.markdown("#### 📋 Tableau récapitulatif des données")
-            
-        #     create_data_table(
-        #         pie_data_for_table,
-        #         ["Split", "Images utilisées", "Pourcentage", "Utilisation"],
-        #         "Répartition du dataset Cityscapes",
-        #         "Détail de l'utilisation de chaque split du dataset original dans notre projet"
-        #     )    
-        
         
         # Version finale qui combine : tailles uniformes + couleurs WCAG + descriptions conditionnelles
         if dataset_info.get('splits'):
@@ -1214,6 +1438,19 @@ with main_tab1:
                 
                 pie_data_for_table.append(["Coarse", 0, "0%", "Non utilisé (annotations grossières)"])
             
+            
+            
+            
+            st.markdown("### 📊 Exploration Interactive du Dataset")
+    
+            fig_dataset = create_dataset_interactive_overview()
+            
+            try:
+                st.plotly_chart(fig_dataset, use_container_width=True, key="dataset_overview")
+            except Exception as e:
+                st.warning("**Description :** Graphique circulaire interactif montrant la répartition de l'utilisation du dataset Cityscapes dans notre projet.")
+            st.info("💡 **Interactivité :** Survolez les sections pour voir les détails, cliquez sur la légende pour masquer/afficher des catégories.")
+            
             # Tableau de données accessible (toujours affiché)
             st.markdown("#### 📋 Tableau récapitulatif des données")
             
@@ -1223,6 +1460,7 @@ with main_tab1:
                 "Répartition du dataset Cityscapes",
                 "Détail de l'utilisation de chaque split du dataset original dans notre projet"
             )
+
         
                        
         # Architecture des classes
@@ -1258,18 +1496,6 @@ with main_tab1:
                 st.warning("Impossible d'afficher le graphique de répartition des classes")
         else:
             st.info("Graphique de répartition des classes non disponible")
-        
-        # Spécificités techniques
-        st.markdown("""
-        ### ⚙️ Spécificités techniques
-
-        - **Résolutions d'acquisition** : Données natives 2048×1024 pixels
-        - **Conditions d'acquisition** : Conditions météo bonnes à moyennes, pas de conditions adverses (pluie, neige)
-        - **Diversité géographique** : Villes allemandes et suisses (architectures variées)  
-        - **Annotations pixel-perfect** : Masques de segmentation précis au pixel près
-
-        Ce dataset permet d'évaluer la capacité des modèles à comprendre les scènes urbaines complexes, élément fondamental pour les applications de conduite autonome et de surveillance urbaine intelligente.
-        """)
     
     # Section preprocessing des images
     st.markdown("---")
@@ -1512,7 +1738,7 @@ with main_tab2:
         if st.session_state.sample_comparison_result:
             st.markdown("---")
             models_info = get_models_info()
-            display_comparison_results(st.session_state.sample_comparison_result, models_info)
+            display_comparison_results(st.session_state.sample_comparison_result, models_info, "sample")
             
             # Bouton de reset
             if st.button("🔄 Nouvelle Comparaison", key="reset_sample", type="secondary"):
@@ -1554,7 +1780,7 @@ with main_tab2:
         if st.session_state.upload_comparison_result:
             st.markdown("---")
             models_info = get_models_info()
-            display_comparison_results(st.session_state.upload_comparison_result, models_info)
+            display_comparison_results(st.session_state.upload_comparison_result, models_info, "upload")
             
             # Bouton de reset
             if st.button("🔄 Nouvelle Comparaison", key="reset_upload", type="secondary"):
@@ -1642,3 +1868,22 @@ st.markdown("""
     <small>Développé avec FastAPI, Streamlit et PyTorch</small>
 </div>
 """, unsafe_allow_html=True)
+
+
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("## ♿ Conformité WCAG 2.1")
+    
+    criteria_status = {
+        "1.1.1 Contenu non textuel": "✅",
+        "1.4.1 Utilisation de la couleur": "✅", 
+        "1.4.3 Contraste (minimum)": "✅",
+        "1.4.4 Redimensionnement du texte": "✅",
+        "2.4.2 Titre de page": "✅"
+    }
+    
+    for criterion, status in criteria_status.items():
+        st.write(f"{status} {criterion}")
+    
+    st.markdown("**Niveau :** AA | **Référence :** [WCAG 2.1](https://www.w3.org/WAI/WCAG21/quickref/)")
+

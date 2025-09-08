@@ -4,3 +4,4 @@
 **aws.json**
 **/.pytest_cache
 **/local.settings.json
+**/.vscode**
