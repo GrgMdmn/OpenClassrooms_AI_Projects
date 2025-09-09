@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.data_loader import load_embeddings, load_user_data
 from utils.content_based import get_recommendations
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="recommend")
 def recommend(req: func.HttpRequest) -> func.HttpResponse:
