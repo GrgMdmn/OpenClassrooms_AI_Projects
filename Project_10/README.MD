@@ -2,6 +2,13 @@
 
 Projet de développement d'un système de recommandation d'articles basé sur une architecture serverless Azure Functions avec interface utilisateur Streamlit.
 
+
+## Livrables du Projet
+1. **Application fonctionnelle** : Streamlit + Azure Functions déployée
+2. **Code source versionné** : Repository GitHub complet
+3. **Présentation technique** : Support PDF (docs/presentation.pdf)
+
+
 ## Vue d'ensemble
 
 Ce projet implémente un système de recommandation de contenu utilisant des algorithmes de filtrage collaboratif et basé sur le contenu. L'architecture serverless permet une mise à l'échelle automatique et un coût optimisé.
@@ -12,6 +19,17 @@ Ce projet implémente un système de recommandation de contenu utilisant des alg
 - **Interface utilisateur** : Application Streamlit pour tester et démontrer le système
 - **Algorithmes implémentés** : Content-Based Filtering avec embeddings pré-calculés
 - **Architecture serverless** : Déploiement sur Azure Functions avec plan Consumption
+
+
+## Analyse et Développement
+
+### Notebook Jupyter
+- **Exploration des données** : Analyse du dataset Kaggle Globo.com
+- **Implémentation des algorithmes** : Content-Based et Collaborative Filtering
+- **Comparaison des approches** : Évaluation et choix technique
+- **Optimisation ACP** : Réduction dimensionnelle 250D → 50D
+
+Localisation : `notebook/p10_notebook.ipynb`
 
 ## Architecture
 
@@ -28,7 +46,7 @@ Ce projet implémente un système de recommandation de contenu utilisant des alg
 - **Algorithme** : Content-Based Filtering avec similarité cosinus
 - **Données** : Embeddings articles (50D via PCA vs 250D embeddings originaux) + historique des clics
 
-## Structure du Projet
+## Structure synthétique du Projet
 
 ```
 Project_10/
@@ -43,6 +61,11 @@ Project_10/
 │   └── utils/
 │       ├── data_loader.py      # Chargement et cache des données
 │       └── content_based.py    # Algorithme de recommandation
+├── notebook/
+│   └── p10_notebook.ipynb     # Analyse données + développement modèles
+├── docs/
+│   ├── presentation.pdf       # Support de présentation (15-25 slides)
+│   └── illustrations/         # Schémas d'architecture et captures
 ├── streamlit_app.py           # Interface utilisateur
 ├── streamlit_requirements.txt # Dépendances Streamlit
 └── README.md
