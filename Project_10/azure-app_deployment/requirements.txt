@@ -1,4 +1,0 @@
-azure-functions
-numpy
-scikit-learn
-pandas

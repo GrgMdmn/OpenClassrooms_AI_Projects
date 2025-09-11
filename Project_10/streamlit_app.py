@@ -122,9 +122,28 @@ def main():
                     st.subheader("🎯 Articles recommandés")
                     recommendations = result['recommendations']
                     
-                    # Affichage sous forme de liste numérotée
-                    for i, article_id in enumerate(recommendations, 1):
-                        st.write(f"**{i}.** Article ID: `{article_id}`")
+                    # Vérifier si on a le format enrichi (avec scores et catégories)
+                    if recommendations and isinstance(recommendations[0], dict) and 'similarity_score_percent' in recommendations[0]:
+                        # Format enrichi - affichage en tableau
+                        import pandas as pd
+                        
+                        df_data = []
+                        for i, rec in enumerate(recommendations, 1):
+                            df_data.append({
+                                'Rang': i,
+                                'Article ID': rec['article_id'],
+                                'Similarité (%)': f"{rec['similarity_score_percent']:.1f}%",
+                                'Catégorie': rec.get('category_id', 'N/A')
+                            })
+                        
+                        df = pd.DataFrame(df_data)
+                        st.dataframe(df, hide_index=True, use_container_width=True)
+                    else:
+                        # Format simple - affichage basique pour compatibilité
+                        for i, article_id in enumerate(recommendations, 1):
+                            if isinstance(article_id, dict):
+                                article_id = article_id.get('article_id', article_id)
+                            st.write(f"**{i}.** Article ID: `{article_id}`")
                     
                     # JSON brut (collapsible)
                     with st.expander("📝 Réponse JSON complète"):

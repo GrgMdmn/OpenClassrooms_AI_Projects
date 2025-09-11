@@ -7,8 +7,8 @@ import sys
 # Ajouter le dossier utils au path pour les imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils.data_loader import load_embeddings, load_user_data
-from utils.content_based import get_recommendations
+from utils.data_loader import load_embeddings, load_user_data, get_articles_categories
+from utils.content_based import get_recommendations_with_scores
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -37,14 +37,26 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         # Convertir en entier
         user_id = int(user_id)
         
-        # Générer les recommandations
-        recommendations = get_recommendations(user_id)
+        # Générer les recommandations avec scores
+        recommendations = get_recommendations_with_scores(user_id)
         
         if recommendations:
+            # Enrichir avec les catégories
+            article_ids = [rec['article_id'] for rec in recommendations]
+            categories = get_articles_categories(article_ids)
+            
+            # Ajouter les catégories aux recommandations
+            enriched_recommendations = []
+            for rec in recommendations:
+                enriched_rec = rec.copy()
+                enriched_rec['category_id'] = categories.get(rec['article_id'])
+                enriched_rec['similarity_score_percent'] = round(rec['similarity_score'] * 100, 2)
+                enriched_recommendations.append(enriched_rec)
+            
             return func.HttpResponse(
                 json.dumps({
                     "user_id": user_id,
-                    "recommendations": recommendations
+                    "recommendations": enriched_recommendations
                 }),
                 status_code=200,
                 mimetype="application/json"

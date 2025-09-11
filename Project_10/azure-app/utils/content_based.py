@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 import logging
 
 from .data_loader import load_embeddings, get_user_articles
@@ -26,10 +26,16 @@ def _filter_candidates(similarities: np.ndarray, clicked_articles: List[int]) ->
             candidates.append((article_id, similarity))
     return candidates
 
-def _get_top_recommendations(candidates: List[Tuple[int, float]], n_recommendations: int) -> List[int]:
-    """Trie les candidats et retourne le top N."""
+def _get_top_recommendations_with_scores(candidates: List[Tuple[int, float]], n_recommendations: int) -> List[Dict[str, any]]:
+    """Trie les candidats et retourne le top N avec les scores."""
     candidates.sort(key=lambda x: x[1], reverse=True)
-    return [article_id for article_id, _ in candidates[:n_recommendations]]
+    recommendations = []
+    for article_id, score in candidates[:n_recommendations]:
+        recommendations.append({
+            'article_id': article_id,
+            'similarity_score': float(score)
+        })
+    return recommendations
 
 def _validate_user_articles(clicked_articles: List[int], embeddings: np.ndarray) -> List[int]:
     """Valide et filtre les articles dans les limites des embeddings."""
@@ -40,14 +46,24 @@ def _validate_user_articles(clicked_articles: List[int], embeddings: np.ndarray)
 
 def get_recommendations(user_id: int, n_recommendations: int = 5) -> Optional[List[int]]:
     """
-    Génère des recommandations pour un utilisateur donné.
+    Génère des recommandations pour un utilisateur donné (version compatibilité).
+    Retourne seulement les IDs pour maintenir la compatibilité.
+    """
+    recommendations_with_scores = get_recommendations_with_scores(user_id, n_recommendations)
+    if recommendations_with_scores:
+        return [rec['article_id'] for rec in recommendations_with_scores]
+    return None
+
+def get_recommendations_with_scores(user_id: int, n_recommendations: int = 5) -> Optional[List[Dict[str, any]]]:
+    """
+    Génère des recommandations avec scores pour un utilisateur donné.
     
     Args:
         user_id: ID de l'utilisateur
         n_recommendations: Nombre de recommandations à retourner
         
     Returns:
-        Liste des article_ids recommandés ou None si erreur
+        Liste des recommandations avec article_id et similarity_score ou None si erreur
     """
     try:
         # Charger les données
@@ -69,9 +85,9 @@ def get_recommendations(user_id: int, n_recommendations: int = 5) -> Optional[Li
         
         # Filtrer et trier
         candidates = _filter_candidates(similarities, clicked_articles)
-        recommendations = _get_top_recommendations(candidates, n_recommendations)
+        recommendations = _get_top_recommendations_with_scores(candidates, n_recommendations)
         
-        logging.info(f"Generated {len(recommendations)} recommendations for user {user_id}")
+        logging.info(f"Generated {len(recommendations)} recommendations with scores for user {user_id}")
         return recommendations
         
     except Exception as e:
