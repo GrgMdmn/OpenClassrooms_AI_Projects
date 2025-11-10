@@ -132,4 +132,4 @@ Date de réalisation : Mai 2025
 
 ---
 
-*Ce projet a été réalisé dans le cadre du parcours Data Scientist d'OpenClassrooms*
+*Ce projet a été réalisé dans le cadre du parcours AI Engineer d'OpenClassrooms*
