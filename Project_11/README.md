@@ -242,4 +242,4 @@ Date de réalisation : Octobre 2025
 
 ---
 
-*Ce projet a été réalisé dans le cadre du parcours Data Scientist / AI Engineer*
+*Ce projet a été réalisé dans le cadre du parcours AI Engineer*
