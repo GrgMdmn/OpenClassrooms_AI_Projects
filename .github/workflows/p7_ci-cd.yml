@@ -7,6 +7,14 @@ on:
     # 👇 Les jobs ne s'exécutent que si des fichiers dans /api et sous-dossiers changent
     paths:
       - Project_07/deployment/api/**
+  # 👇 Permet de lancer manuellement depuis GitHub
+  
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choisir l’environnement'
+        required: false
+        default: 'staging'
 
 jobs:
   test:
