@@ -30,42 +30,42 @@ Voici la liste des 11 projets réalisés, chacun avec ses propres objectifs et d
 ### Projet 2 : Analyse des Arbres Parisiens
 * **Description :** Analyse exploratoire et nettoyage d'un jeu de données sur le patrimoine arboré de Paris pour la Mairie.
 * **Compétences :** Analyse de données, Nettoyage (Pandas), Gestion des anomalies, Visualisation (Matplotlib, Seaborn, Folium).
-* **[Explorer le projet ➔](./Project_2)**
+* **[Explorer le projet ➔](./Project_02)**
 
 ### Projet 3 : Préparation de Données - OpenFoodFacts
 * **Description :** Nettoyage et préparation d'un dataset volumineux et imparfait pour une application de santé publique.
 * **Compétences :** Data cleaning (large dataset), Feature engineering, Analyses statistiques (ACP, ANOVA), RGPD.
-* **[Explorer le projet ➔](./Project_3)**
+* **[Explorer le projet ➔](./Project_03)**
 
 ### Projet 4 : Scoring Crédit - Prêt à dépenser
 * **Description :** Développement d'un modèle de scoring pour évaluer le risque de défaut de paiement, avec un focus sur l'interprétabilité et l'optimisation métier.
 * **Compétences :** Modélisation (LightGBM), Gestion des données déséquilibrées, Interprétabilité (SHAP, LIME), Métriques métier.
-* **[Explorer le projet ➔](./Project_4)**
+* **[Explorer le projet ➔](./Project_04)**
 
 ### Projet 5 : Segmentation Client - Olist
 * **Description :** Création d'une segmentation client (RFM) à l'aide de SQL et d'algorithmes de clustering non-supervisé pour l'équipe marketing.
 * **Compétences :** SQL, Clustering (K-means), Segmentation (RFM), Analyse de stabilité (ARI).
-* **[Explorer le projet ➔](./Project_5)**
+* **[Explorer le projet ➔](./Project_05)**
 
 ### Projet 6 : Classification Automatique de Produits
 * **Description :** Étude de faisabilité pour classifier des produits e-commerce en utilisant leurs descriptions (NLP) et leurs images (Vision).
 * **Compétences :** NLP (TF-IDF, BERT, USE), Computer Vision (SIFT, ORB, CNN, Transfer Learning), Classification multimodale.
-* **[Explorer le projet ➔](./Project_6)**
+* **[Explorer le projet ➔](./Project_06)**
 
 ### Projet 7 : Sentiment Analysis - Air Paradis
 * **Description :** Développement et déploiement MLOps complet (CI/CD, MLFlow) d'une API d'analyse de sentiments sur des tweets.
 * **Compétences :** NLP (LSTM, Word2Vec, DistilBERT), MLOps (MLFlow, CI/CD), API (FastAPI), Déploiement.
-* **[Explorer le projet ➔](./Project_7)**
+* **[Explorer le projet ➔](./Project_07)**
 
 ### Projet 8 : Segmentation pour Véhicules Autonomes
 * **Description :** Création d'un système de segmentation sémantique d'images de rue (U-Net, FPN) et déploiement via une API Dockerisée.
 * **Compétences :** Computer Vision, Deep Learning (U-Net, FPN), MLOps (MLFlow, MinIO), API (FastAPI), Docker, Nginx.
-* **[Explorer le projet ➔](./Project_8)**
+* **[Explorer le projet ➔](./Project_08)**
 
 ### Projet 9 : Street Vision PoC - Segmentation Urbaine
 * **Description :** Preuve de concept comparant les performances des CNN (FPN) et des Transformers (SegFormer) pour la segmentation urbaine.
 * **Compétences :** Deep Learning, Vision Transformers (SegFormer), Benchmarking de modèles, Computer Vision.
-* **[Explorer le projet ➔](./Project_9)**
+* **[Explorer le projet ➔](./Project_09)**
 
 ### Projet 10 : Système de Recommandation de Contenu
 * **Description :** Développement d'un système de recommandation de contenu (Content-Based) déployé sur une architecture serverless Azure Functions.
