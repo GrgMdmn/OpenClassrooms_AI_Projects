@@ -8,13 +8,8 @@ on:
     paths:
       - Project_07/deployment/api/**
   # 👇 Permet de lancer manuellement depuis GitHub
-  
+
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Choisir l’environnement'
-        required: false
-        default: 'staging'
 
 jobs:
   test:
