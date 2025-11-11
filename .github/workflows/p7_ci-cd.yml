@@ -6,7 +6,7 @@ on:
       - main
     # 👇 Les jobs ne s'exécutent que si des fichiers dans /api et sous-dossiers changent
     paths:
-      - Project_7/deployment/api/**
+      - Project_07/deployment/api/**
 
 jobs:
   test:
@@ -41,12 +41,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r Project_7/deployment/api/requirements.txt
+          pip install -r Project_07/deployment/api/requirements.txt
           pip install pytest
 
       - name: Run unit tests
         run: |
-          pytest Project_7/deployment/api/tests
+          pytest Project_07/deployment/api/tests
 
   build_and_push:
     needs: test
@@ -64,8 +64,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./Project_7/deployment/api
-          file: ./Project_7/deployment/api/Dockerfile
+          context: ./Project_07/deployment/api
+          file: ./Project_07/deployment/api/Dockerfile
           push: true
           tags: docker.io/${{ secrets.DOCKER_HUB_LOG }}/sentiment_api:latest
 

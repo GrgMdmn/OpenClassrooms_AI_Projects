@@ -6,14 +6,14 @@ on:
       - main
     # 👇 Jobs s'exécutent si des fichiers du Projet 8 changent
     paths:
-      - 'Project_8/app/**'
-      - 'Project_8/utils/**'
-      - 'Project_8/notebooks/content/data/**'
-      - 'Project_8/Dockerfile'
-      - 'Project_8/start.sh'
-      - 'Project_8/nginx.conf'
-      - 'Project_8/cityscapes_config.json'
-      - 'Project_8/docker-compose.yml*'
+      - 'Project_08/app/**'
+      - 'Project_08/utils/**'
+      - 'Project_08/notebooks/content/data/**'
+      - 'Project_08/Dockerfile'
+      - 'Project_08/start.sh'
+      - 'Project_08/nginx.conf'
+      - 'Project_08/cityscapes_config.json'
+      - 'Project_08/docker-compose.yml*'
 
 jobs:
   build_and_push:
@@ -53,8 +53,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./Project_8
-          file: ./Project_8/Dockerfile
+          context: ./Project_08
+          file: ./Project_08/Dockerfile
           push: true
           tags: docker.io/${{ secrets.DOCKER_HUB_LOG }}/street-vision_api:latest
           cache-from: type=gha
