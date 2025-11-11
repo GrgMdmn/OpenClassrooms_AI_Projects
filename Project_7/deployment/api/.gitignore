@@ -1,6 +1,0 @@
-# ssh .pem files
-*.pem
-
-*aws*
-
-sentiment-api-*.json
