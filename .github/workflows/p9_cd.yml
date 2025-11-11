@@ -14,6 +14,8 @@ on:
       - 'Project_09/nginx.conf'
       - 'Project_09/cityscapes_config.json'
       - 'Project_09/docker-compose.yml*'
+  workflow_dispatch:
+
 
 jobs:
   build_and_push:
